@@ -47,12 +47,11 @@ class Usuario(Base):
         unique=True,
         nullable=False
     )
+    senha_hash = Column(
+        String(255), 
+        nullable=False)
 
-    senha = Column(
-        String(255),
-        nullable=False
-    )
-
+    
     criado_em = Column(
         DateTime,
         server_default=text("CURRENT_TIMESTAMP")
