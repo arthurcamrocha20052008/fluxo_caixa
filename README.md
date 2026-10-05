@@ -1,62 +1,93 @@
-# 💰 Sistema de Fluxo de Caixa
+# 💰 Fluxo de Caixa
 
-API para controle de finanças domésticas desenvolvida em Python utilizando FastAPI, SQLAlchemy e MySQL.
+> API REST para gerenciamento de finanças domésticas, desenvolvida com Python, FastAPI, SQLAlchemy e MySQL.
 
-O projeto tem como objetivo criar um sistema capaz de cadastrar contas bancárias e registrar movimentações financeiras, servindo como base para um sistema completo de fluxo de caixa.
+![Python](https://img.shields.io/badge/Python-3.x-blue?logo=python)
+![FastAPI](https://img.shields.io/badge/FastAPI-API-009688?logo=fastapi)
+![MySQL](https://img.shields.io/badge/MySQL-Database-4479A1?logo=mysql)
+![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-ORM-D71F00)
+![Git](https://img.shields.io/badge/Git-Version_Control-F05032?logo=git)
+![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?logo=github)
 
 ---
 
 ## 📌 Sobre o projeto
 
-O Sistema de Fluxo de Caixa foi desenvolvido como um projeto prático para aplicar conceitos de:
+O **Fluxo de Caixa** é um projeto de backend desenvolvido para praticar e aplicar conceitos de desenvolvimento de APIs, banco de dados, ORM, arquitetura backend e versionamento de código.
 
-- Desenvolvimento de APIs
-- Python
-- Banco de dados
-- Programação orientada a objetos
-- ORM
-- Validação de dados
-- Versionamento com Git e GitHub
+A aplicação tem como objetivo centralizar o controle financeiro doméstico, permitindo trabalhar com contas bancárias, lançamentos, movimentações, contas fixas, contas variáveis, investimentos, categorias e fluxo financeiro mensal.
 
-Atualmente, o projeto já possui integração entre a API desenvolvida em Python e um banco de dados MySQL.
+O projeto está sendo desenvolvido de forma incremental, começando pela estrutura do banco de dados e avançando para a construção da API REST.
 
 ---
 
-## 🚀 Tecnologias utilizadas
+## 🎯 Objetivos
+
+O projeto foi desenvolvido com os seguintes objetivos:
+
+- Desenvolver uma API REST utilizando Python;
+- Aprender e aplicar o FastAPI;
+- Criar uma conexão entre Python e MySQL;
+- Utilizar SQLAlchemy como ORM;
+- Trabalhar com schemas e validação de dados;
+- Implementar operações CRUD;
+- Testar endpoints através do Swagger;
+- Organizar um projeto backend;
+- Utilizar variáveis de ambiente;
+- Aplicar boas práticas de versionamento com Git;
+- Publicar e manter o projeto no GitHub.
+
+---
+
+# 🛠️ Tecnologias
 
 | Tecnologia | Utilização |
 |---|---|
 | 🐍 Python | Linguagem principal |
-| ⚡ FastAPI | Framework para desenvolvimento da API |
+| ⚡ FastAPI | Desenvolvimento da API REST |
 | 🗄️ MySQL | Banco de dados |
 | 🔗 SQLAlchemy | ORM e comunicação com o banco |
-| ✅ Pydantic | Validação dos dados |
-| 🚀 Uvicorn | Servidor da aplicação |
+| 📋 Pydantic | Validação e schemas |
+| 📖 Swagger / OpenAPI | Documentação e testes da API |
 | 🔐 python-dotenv | Gerenciamento de variáveis de ambiente |
-| 📚 Swagger/OpenAPI | Documentação e testes da API |
-| 🔧 Git | Controle de versão |
-| ☁️ GitHub | Hospedagem do código |
+| 🌱 Git | Controle de versão |
+| 🐙 GitHub | Hospedagem do código |
 
 ---
 
-## 🏗️ Arquitetura
+# 🏗️ Arquitetura
 
-O projeto atualmente segue o seguinte fluxo:
+O projeto utiliza uma estrutura simples de backend separando responsabilidades:
 
 ```text
-                USUÁRIO
-                   │
-                   ▼
-              Swagger/API
-                   │
-                   ▼
-               FastAPI
-                   │
-                   ▼
-              Pydantic
-                   │
-                   ▼
-              SQLAlchemy
-                   │
-                   ▼
-                MySQL
+                    CLIENTE
+                       │
+                       ▼
+              ┌─────────────────┐
+              │     Swagger     │
+              │    /docs        │
+              └────────┬────────┘
+                       │
+                       ▼
+              ┌─────────────────┐
+              │     FastAPI     │
+              │     api.py      │
+              └────────┬────────┘
+                       │
+                       ▼
+              ┌─────────────────┐
+              │    Pydantic     │
+              │   esquema.py    │
+              └────────┬────────┘
+                       │
+                       ▼
+              ┌─────────────────┐
+              │   SQLAlchemy    │
+              │    models.py    │
+              └────────┬────────┘
+                       │
+                       ▼
+              ┌─────────────────┐
+              │      MySQL      │
+              │  fluxo_caixa    │
+              └─────────────────┘
