@@ -96,9 +96,9 @@ fluxo_caixas/
 │   │   ├── script.py.mako
 │   │   ├── versions/
 │   │       ├── README.md
-│   │       ├── 20261008_0001_initial_schema.py
-│   │       ├── 20261008_0002_transfer_movements.py
-│   │       ├── 20261008_0003_movement_categories.py
+│   │       ├── adicionar_ajustes_e_resumos.py
+│   │       ├── adicionar_tranferencia.py
+│   │       ├── criar_categorias_movimentacao.py
 │   │       ├── adicionar_ajustes_e_resumos.py
 │   │       └── limitar_tentativas_login.py
 │   ├── tests/
