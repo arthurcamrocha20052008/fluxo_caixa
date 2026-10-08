@@ -39,18 +39,14 @@ O backend tem como objetivo centralizar a regra de negócio do sistema financeir
 backend/
 ├── api.py
 ├── autenticacao.py
+├── configuracao.py
+├── dados_sensiveis.py
 ├── database.py
 ├── financeiro.py
 ├── esquema.py
 ├── models.py
 ├── readme.md
-├── alembic.ini
-├── migrations/
-│   ├── env.py
-│   └── versions/
 ├── tests/
-│   ├── conftest.py
-│   └── test_financeiro.py
 ├── seguranca/
 │   ├── __init__.py
 │   ├── seguranca.py
@@ -64,6 +60,9 @@ backend/
     ├── meta_financeira.py
     └── readme.md
 ```
+
+As migrações e a configuração Alembic ficam em `../banco de dados/`, junto
+com os demais arquivos do banco.
 
 ---
 
@@ -132,7 +131,7 @@ Configure `DATABASE_URL` e `JWT_SECRET_KEY` no `.env` da raiz. A chave JWT preci
 Para criar ou atualizar o esquema:
 
 ```bash
-python -m alembic -c backend/alembic.ini upgrade head
+python -m alembic -c "banco de dados/alembic.ini" upgrade head
 ```
 
 A API ficará disponível em:
@@ -215,7 +214,7 @@ O CORS aceita somente a origem `http://fluxocaixa`, com métodos de API e cabeç
 
 Execute os testes com `python -m pytest -q`. `pytest.ini` configura os imports do backend e os testes usam SQLite temporário. `backend/tests/conftest.py` compartilha as fixtures de banco e cliente HTTP. `test_fluxo_integracao.py` percorre cadastro, login/JWT, contas, entradas, saídas, saldo, isolamento entre dois usuários e limpeza sem conectar ao MySQL configurado. `test_metas_relatorios.py` valida CRUD e progresso de metas, os quatro períodos de relatório, consistência de saldo/relatório, valores decimais, limites de saldo, datas futuras, períodos vazios e isolamento de todos os recursos. `test_dados_sensiveis.py` valida cifragem, respostas sem CPF e rejeição de CPFs duplicados.
 
-O Alembic mantém o esquema versionado em `migrations/`. A revisão aplicada `proteger_cpf` amplia `usuarios.cpf`, cifra os registros legados e cria o índice HMAC único `cpf_indice`. O downgrade é intencionalmente bloqueado porque voltaria a armazenar CPFs em texto puro. Os dumps SQL em `banco de dados/` são legados e contêm `DROP TABLE`; não os execute em bancos com dados.
+O Alembic mantém o esquema versionado em `../banco de dados/migrations/`. A revisão aplicada `proteger_cpf` amplia `usuarios.cpf`, cifra os registros legados e cria o índice HMAC único `cpf_indice`. O downgrade é intencionalmente bloqueado porque voltaria a armazenar CPFs em texto puro. Os dumps SQL em `banco de dados/` são legados e contêm `DROP TABLE`; não os execute em bancos com dados.
 
 ---
 

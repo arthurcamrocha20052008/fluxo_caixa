@@ -224,6 +224,6 @@ tentativas_login (controle operacional do login)
 
 ## 🧩 Observação
 
-O esquema oficial é mantido por migrações Alembic em `backend/migrations/`. Os arquivos SQL desta pasta são dumps legados e podem conter `DROP TABLE`; não os execute em um banco com dados.
+O esquema oficial é mantido pelas migrações Alembic em `migrations/`, configuradas por `alembic.ini`. Os arquivos `.sql` desta pasta são dumps legados e podem conter `DROP TABLE`; não os execute em um banco com dados.
 
-Para um banco novo, aplique as migrações com `python -m alembic -c backend/alembic.ini upgrade head`. Para adotar Alembic em um banco existente, faça backup, confira se o esquema corresponde ao baseline e siga o procedimento descrito no README principal antes de marcar a revisão inicial.
+Execute os comandos a partir da raiz do repositório. Para um banco novo, aplique as migrações com `python -m alembic -c "banco de dados/alembic.ini" upgrade head`. Para adotar Alembic em um banco existente, faça backup, confira se o esquema corresponde ao baseline e siga o procedimento descrito no README principal antes de marcar a revisão inicial.

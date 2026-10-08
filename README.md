@@ -67,7 +67,7 @@ A aplicação está organizada em camadas:
 - `backend/financeiro.py` — regras de negócio e cálculos financeiros
 - `backend/seguranca/` — geração e validação de hashes de senha
 - `backend/autenticacao.py` — autenticação e tokens JWT
-- `backend/migrations/` — histórico de migrações Alembic
+- `banco de dados/migrations/` — configuração e histórico de migrações Alembic
 - `backend/models.py` — modelos do banco
 - `backend/esquema.py` — schemas e validações
 - `backend/database.py` — conexão com o banco
@@ -81,56 +81,41 @@ fluxo_caixas/
 ├── .env
 ├── .gitignore
 ├── pytest.ini
-├── explicaçao.txt
 ├── README.md
+├── ESTRUTURA.md
+├── requirements.txt
 ├── backend/
 │   ├── api.py
 │   ├── autenticacao.py
+│   ├── configuracao.py
+│   ├── dados_sensiveis.py
 │   ├── database.py
 │   ├── financeiro.py
 │   ├── esquema.py
 │   ├── models.py
 │   ├── readme.md
+│   ├── tests/
+│   ├── seguranca/
+│   ├── rotasdeapi/
+├── frontend/
+│   └── README.md
+├── banco de dados/
 │   ├── alembic.ini
 │   ├── migrations/
-│   │   ├── README.md
-│   │   ├── env.py
-│   │   ├── script.py.mako
-│   │   ├── versions/
-│   │       ├── README.md
-│   │       ├── criar_esquema_inicial.py
-│   │       ├── adicionar_tranferencia.py
-│   │       ├── criar_categorias_movimentacao.py
-│   │       ├── adicionar_ajustes_e_resumos.py
-│   │       ├── limitar_tentativas_login.py
-│   │       ├── normalizar_schema_mysql.py
-│   │       └── proteger_cpf_armazenado.py
-│   ├── tests/
-│   │   ├── README.md
-│   │   ├── conftest.py
-│   │   └── test_financeiro.py
-│   ├── seguranca/
-│   │   ├── __init__.py
-│   │   ├── seguranca.py
-│   │   └── readme.md
-│   ├── rotasdeapi/
-│       ├── __init__.py
-│       ├── usuario.py
-│       ├── conta_bancaria.py
-│       ├── fluxo_dinheiro.py
-│       ├── calculo_financeiro.py
-│       ├── meta_financeira.py
-│       └── readme.md
-├── banco de dados/
 │   ├── fluxo_caixa_usuarios.sql
 │   ├── fluxo_caixa_contas_bancarias.sql
 │   ├── fluxo_caixa_fluxo_dinheiro.sql
 │   ├── fluxo_caixa_calculos_financeiros.sql
 │   ├── fluxo_caixa_metas_financeiras.sql
 │   └── readme.md
-├── requirements.txt
 └── .venv/  (ambiente local, não versionado)
 ```
+
+O backend concentra a API, as regras, os modelos e os testes. `banco de dados/`
+concentra as migrações oficiais do Alembic e os dumps SQL antigos. A pasta
+`frontend/` é o ponto de entrada da aplicação web; por enquanto contém apenas
+instruções e ainda não tem uma aplicação implementada. Arquivos de configuração
+do projeto e documentação geral permanecem na raiz.
 
 ---
 
@@ -182,7 +167,7 @@ python -m pip install -r requirements.txt
 3. Para um banco novo, aplique as migrações:
 
 ```bash
-python -m alembic -c backend/alembic.ini upgrade head
+python -m alembic -c "banco de dados/alembic.ini" upgrade head
 ```
 
 4. Inicie a API:
@@ -207,7 +192,7 @@ http://127.0.0.1:8000/docs
 
 ## 🗄️ Banco de dados
 
-O projeto usa MySQL. A estrutura é mantida por migrações Alembic versionadas em `backend/migrations/`.
+O projeto usa MySQL. A estrutura é mantida por migrações Alembic versionadas em `banco de dados/migrations/`.
 
 As tabelas principais são:
 
@@ -230,8 +215,8 @@ Os arquivos SQL em `banco de dados/` são dumps legados e incluem comandos destr
 Para um banco legado já criado com o esquema original, faça backup e confira se as tabelas correspondem à revisão inicial antes de marcar essa revisão e aplicar as demais:
 
 ```bash
-python -m alembic -c backend/alembic.ini stamp esquema_inicial
-python -m alembic -c backend/alembic.ini upgrade head
+python -m alembic -c "banco de dados/alembic.ini" stamp esquema_inicial
+python -m alembic -c "banco de dados/alembic.ini" upgrade head
 ```
 
 Não marque a revisão inicial se o esquema existente não corresponder ao baseline.
@@ -240,7 +225,7 @@ Não marque a revisão inicial se o esquema existente não corresponder ao basel
 
 ## 📊 Status atual
 
-Os cálculos financeiros, validações de entrada, regras de saldo, transferências e casos extremos de metas/relatórios possuem testes com SQLite. Testes HTTP cobrem cadastro/login/JWT, contas, movimentações, metas, relatórios, centavos, períodos sem movimento, saldo negativo em conta corrente, datas futuras, proteção dos dados sensíveis e isolamento entre usuários; os testes automatizados usam SQLite em memória e não alteram o MySQL configurado. A integração da API com o MySQL também foi validada separadamente, com os dados criados para essa verificação removidos. O MySQL está na revisão `proteger_cpf`; `alembic check` não detecta diferenças em relação aos modelos. A suíte completa passou com 36 testes. Para comandos Alembic executados da raiz do repositório, informe sempre `-c backend/alembic.ini`.
+Os cálculos financeiros, validações de entrada, regras de saldo, transferências e casos extremos de metas/relatórios possuem testes com SQLite. Testes HTTP cobrem cadastro/login/JWT, contas, movimentações, metas, relatórios, CORS, proteção dos dados sensíveis e isolamento entre usuários; os testes automatizados usam SQLite em memória e não alteram o MySQL configurado. A integração da API com o MySQL também foi validada separadamente. O MySQL está na revisão `proteger_cpf`; `alembic check` não detecta diferenças em relação aos modelos. Execute os comandos Alembic da raiz usando `python -m alembic -c "banco de dados/alembic.ini" ...`.
 
 Para executar os testes:
 

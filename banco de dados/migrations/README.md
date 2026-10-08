@@ -1,6 +1,6 @@
 # Migrações do banco
 
-Esta pasta contém a configuração de execução das migrações Alembic do backend. As revisões versionadas ficam em `versions/`; elas são o histórico oficial de alterações no esquema do banco.
+Esta pasta contém a configuração e o histórico oficial das migrações Alembic do projeto. O código das revisões fica em `versions/`; os modelos e a conexão necessários para executá-las permanecem no `backend/`.
 
 ## Arquivos
 
@@ -14,13 +14,13 @@ Os três primeiros arquivos usam nomes em inglês com numeração (`20261008_000
 Execute na raiz do repositório:
 
 ```bash
-python -m alembic -c backend/alembic.ini upgrade head
+python -m alembic -c "banco de dados/alembic.ini" upgrade head
 ```
 
 Para consultar a revisão atualmente aplicada:
 
 ```bash
-python -m alembic -c backend/alembic.ini current
+python -m alembic -c "banco de dados/alembic.ini" current
 ```
 
 `DATABASE_URL` deve estar configurada antes da execução. Em um banco existente, faça backup e compare o esquema com a revisão inicial antes de usar `stamp` ou aplicar atualizações. Não execute as migrações contra um banco com dados sem verificar previamente o destino e o esquema.
