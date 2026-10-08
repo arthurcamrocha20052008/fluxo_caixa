@@ -1,4 +1,4 @@
-# 💰 Sistema de Fluxo de Caixa
+# 💰 Fluxo de Caixa
 
 API em Python para controle financeiro pessoal e empresarial, desenvolvida com FastAPI, SQLAlchemy e MySQL.
 
