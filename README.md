@@ -157,23 +157,43 @@ O CORS permite somente a origem local `http://fluxocaixa`, para a integração c
 
 ## ▶️ Como executar
 
-1. Instale as dependências:
+1. Instale as dependências na raiz do projeto:
 
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-2. Configure `DATABASE_URL`, `JWT_SECRET_KEY` e `CPF_ENCRYPTION_KEY` no ambiente ou em um arquivo de segredos local não sincronizado. No Windows, use `%LOCALAPPDATA%\fluxo_caixa\secrets.env`. `ACCESS_TOKEN_EXPIRE_MINUTES` é opcional (padrão: 60). Gere uma chave Fernet localmente com `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"` e guarde-a em um gestor de segredos/backup; não a publique nem a compartilhe.
+2. Configure as variáveis de ambiente antes de iniciar a API:
+
+```bash
+DATABASE_URL=sqlite:///./fluxo_caixa.db
+JWT_SECRET_KEY=sua_chave_segura_com_32_ou_mais_caracteres
+CPF_ENCRYPTION_KEY=sua_chave_fernet_gerada_localmente
+ACCESS_TOKEN_EXPIRE_MINUTES=60
+```
+
+No Windows, o projeto também aceita um arquivo local em `%LOCALAPPDATA%\fluxo_caixa\secrets.env` para segredos fora da pasta sincronizada. `ACCESS_TOKEN_EXPIRE_MINUTES` é opcional (padrão: 60). Gere uma chave Fernet localmente com:
+
+```bash
+python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+```
+
 3. Para um banco novo, aplique as migrações:
 
 ```bash
 python -m alembic -c "banco de dados/alembic.ini" upgrade head
 ```
 
-4. Inicie a API:
+4. Inicie a API a partir da raiz do projeto:
 
 ```bash
-python -m uvicorn api:app --app-dir backend --reload --host 0.0.0.0 --port 8000
+python main.py
+```
+
+Ou, se preferir rodar diretamente com Uvicorn:
+
+```bash
+python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 A API ficará disponível em:
