@@ -1,7 +1,3 @@
-# =========================================================
-# SCHEMAS DA API - SISTEMA DE FLUXO DE CAIXA
-# =========================================================
-
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -9,49 +5,145 @@ from pydantic import (
     Field,
     field_validator
 )
+from pydantic import model_validator
 
 from decimal import Decimal
 from datetime import date, datetime
 from typing import Optional, Literal
+import calendar
+import unicodedata
+
+
+class InputModel(BaseModel):
+    model_config = ConfigDict(extra="forbid")
 
 
 # =========================================================
-# 1. USUÁRIOS
-# =========================================================
-# Schema utilizado para criar um usuário.
-#
-# A senha será recebida pela API, mas NÃO deve ser salva
-# diretamente no banco de dados.
-#
-# O arquivo usuario.py será responsável por transformar
-# a senha em hash antes de salvar.
+# MODELOS DE ENTRADA
 # =========================================================
 
-class UsuarioCreate(BaseModel):
+CategoriaMovimentacaoInput = Literal[
+    "alimentacao",
+    "ajuste",
+    "compras",
+    "contas",
+    "educacao",
+    "freelance",
+    "impostos",
+    "investimento",
+    "lazer",
+    "moradia",
+    "outros",
+    "salario",
+    "saude",
+    "transporte",
+    "transferencia",
+    "vendas",
+]
 
-    nome: str = Field(
+
+def _normalizar_categoria(valor: str) -> str:
+    decomposicao = unicodedata.normalize("NFKD", valor.strip().casefold())
+    sem_acentos = "".join(
+        caractere
+        for caractere in decomposicao
+        if not unicodedata.combining(caractere)
+    )
+    return "investimento" if sem_acentos == "investimentos" else sem_acentos
+
+
+class UsuarioCreate(InputModel):
+    nome_completo: str = Field(
         min_length=3,
-        max_length=100
+        max_length=150
     )
 
+    cpf: str
     email: EmailStr
 
     senha: str = Field(
         min_length=8,
-        max_length=128
+        max_length=100
     )
 
-    @field_validator("nome")
+    @field_validator("email")
+    @classmethod
+    def normalizar_email(cls, valor: EmailStr) -> str:
+        return str(valor).strip().lower()
+
+    # -----------------------------------------------------
+    # VALIDAR NOME
+    # -----------------------------------------------------
+
+    @field_validator("nome_completo")
     @classmethod
     def validar_nome(cls, valor):
         valor = valor.strip()
 
-        if len(valor) < 3:
+        if not valor:
             raise ValueError(
-                "O nome deve possuir pelo menos 3 caracteres"
+                "O nome não pode ficar vazio."
             )
 
         return valor
+
+    # -----------------------------------------------------
+    # VALIDAR CPF
+    # -----------------------------------------------------
+
+    @field_validator("cpf")
+    @classmethod
+    def validar_cpf(cls, valor: str) -> str:
+
+        # Remove pontos e hífen
+        valor = (
+            valor
+            .replace(".", "")
+            .replace("-", "")
+            .strip()
+        )
+
+        if len(valor) != 11:
+            raise ValueError(
+                "O CPF deve possuir 11 números."
+            )
+
+        if not valor.isdigit():
+            raise ValueError(
+                "O CPF deve conter apenas números."
+            )
+
+        if len(set(valor)) == 1:
+            raise ValueError("O CPF informado é inválido.")
+
+        primeiro_digito = (
+            sum(
+                int(digito) * peso
+                for digito, peso in zip(valor[:9], range(10, 1, -1))
+            )
+            * 10
+        ) % 11
+        if primeiro_digito == 10:
+            primeiro_digito = 0
+
+        segundo_digito = (
+            sum(
+                int(digito) * peso
+                for digito, peso in zip(valor[:10], range(11, 1, -1))
+            )
+            * 10
+        ) % 11
+        if segundo_digito == 10:
+            segundo_digito = 0
+
+        if valor[-2:] != f"{primeiro_digito}{segundo_digito}":
+            raise ValueError("O CPF informado é inválido.")
+
+        return valor
+
+    # -----------------------------------------------------
+    # VALIDAR SENHA
+    # -----------------------------------------------------
 
     @field_validator("senha")
     @classmethod
@@ -59,40 +151,35 @@ class UsuarioCreate(BaseModel):
 
         if not any(c.isupper() for c in valor):
             raise ValueError(
-                "A senha deve possuir pelo menos uma letra maiúscula"
+                "A senha deve possuir pelo menos uma letra maiúscula."
             )
 
         if not any(c.islower() for c in valor):
             raise ValueError(
-                "A senha deve possuir pelo menos uma letra minúscula"
+                "A senha deve possuir pelo menos uma letra minúscula."
             )
 
         if not any(c.isdigit() for c in valor):
             raise ValueError(
-                "A senha deve possuir pelo menos um número"
+                "A senha deve possuir pelo menos um número."
             )
 
-        if not any(not c.isalnum() for c in valor):
+        if not any(
+            not c.isalnum()
+            for c in valor
+        ):
             raise ValueError(
-                "A senha deve possuir pelo menos um caractere especial"
+                "A senha deve possuir pelo menos um caractere especial."
             )
 
         return valor
 
 
-# =========================================================
-# RESPOSTA DO USUÁRIO
-# =========================================================
-# IMPORTANTE:
-# A senha nunca aparece na resposta da API.
-# =========================================================
-
 class UsuarioResponse(BaseModel):
-
     id: int
-    nome: str
-    email: str
-    criado_em: Optional[datetime] = None
+    nome_completo: str
+    email: EmailStr
+    criado_em: datetime
 
     model_config = ConfigDict(
         from_attributes=True
@@ -100,359 +187,12 @@ class UsuarioResponse(BaseModel):
 
 
 # =========================================================
-# 2. CATEGORIAS
+# CONTAS BANCÁRIAS
 # =========================================================
 
-class CategoriaCreate(BaseModel):
 
-    nome: str = Field(
-        min_length=2,
-        max_length=100
-    )
-
-    tipo: Literal["entrada", "saida"]
-
-    @field_validator("nome")
-    @classmethod
-    def validar_nome(cls, valor):
-        return valor.strip()
-
-
-class CategoriaResponse(BaseModel):
-
-    id: int
-    nome: str
-    tipo: str
-
-    model_config = ConfigDict(
-        from_attributes=True
-    )
-
-
-# =========================================================
-# 3. FLUXO MENSAL
-# =========================================================
-
-class FluxoMensalCreate(BaseModel):
-
-    mes: int = Field(
-        ge=1,
-        le=12
-    )
-
-    ano: int = Field(
-        ge=2000,
-        le=2100
-    )
-
-    valor_original: Decimal = Field(
-        default=Decimal("0.00"),
-        ge=0
-    )
-
-    total_entradas: Decimal = Field(
-        default=Decimal("0.00"),
-        ge=0
-    )
-
-    total_contas_fixas: Decimal = Field(
-        default=Decimal("0.00"),
-        ge=0
-    )
-
-    total_contas_variaveis: Decimal = Field(
-        default=Decimal("0.00"),
-        ge=0
-    )
-
-    total_investimentos: Decimal = Field(
-        default=Decimal("0.00"),
-        ge=0
-    )
-
-    valor_final: Decimal = Field(
-        default=Decimal("0.00")
-    )
-
-
-class FluxoMensalResponse(BaseModel):
-
-    id: int
-    mes: int
-    ano: int
-    valor_original: Decimal
-    total_entradas: Decimal
-    total_contas_fixas: Decimal
-    total_contas_variaveis: Decimal
-    total_investimentos: Decimal
-    valor_final: Decimal
-
-    model_config = ConfigDict(
-        from_attributes=True
-    )
-
-
-# =========================================================
-# 4. CONTAS FIXAS
-# =========================================================
-
-class ContaFixaCreate(BaseModel):
-
-    nome: str = Field(
-        min_length=2,
-        max_length=100
-    )
-
-    valor: Decimal = Field(
-        gt=0
-    )
-
-    dia_vencimento: int = Field(
-        ge=1,
-        le=31
-    )
-
-    categoria_id: Optional[int] = Field(
-        default=None,
-        gt=0
-    )
-
-    status: Literal[
-        "pendente",
-        "paga",
-        "atrasada"
-    ] = "pendente"
-
-    observacao: Optional[str] = Field(
-        default=None,
-        max_length=500
-    )
-
-    @field_validator("nome")
-    @classmethod
-    def validar_nome(cls, valor):
-        return valor.strip()
-
-
-class ContaFixaResponse(BaseModel):
-
-    id: int
-    nome: str
-    valor: Decimal
-    dia_vencimento: int
-    categoria_id: Optional[int] = None
-    status: str
-    observacao: Optional[str] = None
-
-    model_config = ConfigDict(
-        from_attributes=True
-    )
-
-
-# =========================================================
-# 5. CONTAS VARIÁVEIS
-# =========================================================
-
-class ContaVariavelCreate(BaseModel):
-
-    nome: str = Field(
-        min_length=2,
-        max_length=100
-    )
-
-    valor: Decimal = Field(
-        gt=0
-    )
-
-    data_conta: date
-
-    categoria_id: Optional[int] = Field(
-        default=None,
-        gt=0
-    )
-
-    observacao: Optional[str] = Field(
-        default=None,
-        max_length=500
-    )
-
-    @field_validator("nome")
-    @classmethod
-    def validar_nome(cls, valor):
-        return valor.strip()
-
-
-class ContaVariavelResponse(BaseModel):
-
-    id: int
-    nome: str
-    valor: Decimal
-    data_conta: date
-    categoria_id: Optional[int] = None
-    observacao: Optional[str] = None
-
-    model_config = ConfigDict(
-        from_attributes=True
-    )
-
-
-# =========================================================
-# 6. INVESTIMENTOS
-# =========================================================
-
-class InvestimentoCreate(BaseModel):
-
-    nome: str = Field(
-        min_length=2,
-        max_length=100
-    )
-
-    tipo: str = Field(
-        min_length=2,
-        max_length=50
-    )
-
-    valor: Decimal = Field(
-        gt=0
-    )
-
-    data_investimento: date
-
-    descricao: Optional[str] = Field(
-        default=None,
-        max_length=500
-    )
-
-    status: Literal[
-        "planejado",
-        "realizado"
-    ] = "realizado"
-
-    @field_validator("nome", "tipo")
-    @classmethod
-    def limpar_texto(cls, valor):
-        return valor.strip()
-
-
-class InvestimentoResponse(BaseModel):
-
-    id: int
-    nome: str
-    tipo: str
-    valor: Decimal
-    data_investimento: date
-    descricao: Optional[str] = None
-    status: str
-
-    model_config = ConfigDict(
-        from_attributes=True
-    )
-
-
-# =========================================================
-# 7. MOVIMENTAÇÕES
-# =========================================================
-
-class MovimentacaoCreate(BaseModel):
-
-    descricao: str = Field(
-        min_length=2,
-        max_length=200
-    )
-
-    valor: Decimal = Field(
-        gt=0
-    )
-
-    tipo: Literal[
-        "entrada",
-        "saida"
-    ]
-
-    data_movimentacao: date
-
-    categoria_id: Optional[int] = Field(
-        default=None,
-        gt=0
-    )
-
-    observacao: Optional[str] = Field(
-        default=None,
-        max_length=500
-    )
-
-    conta_bancaria_id: Optional[int] = Field(
-        default=None,
-        gt=0
-    )
-
-    @field_validator("descricao")
-    @classmethod
-    def validar_descricao(cls, valor):
-        return valor.strip()
-
-
-class MovimentacaoResponse(BaseModel):
-
-    id: int
-    descricao: str
-    valor: Decimal
-    tipo: str
-    data_movimentacao: date
-    categoria_id: Optional[int] = None
-    observacao: Optional[str] = None
-    conta_bancaria_id: Optional[int] = None
-
-    model_config = ConfigDict(
-        from_attributes=True
-    )
-
-
-# =========================================================
-# 8. CATEGORIAS DE INVESTIMENTO
-# =========================================================
-
-class CategoriaInvestimentoCreate(BaseModel):
-
-    nome: str = Field(
-        min_length=2,
-        max_length=100
-    )
-
-    descricao: Optional[str] = Field(
-        default=None,
-        max_length=500
-    )
-
-    @field_validator("nome")
-    @classmethod
-    def validar_nome(cls, valor):
-        return valor.strip()
-
-
-class CategoriaInvestimentoResponse(BaseModel):
-
-    id: int
-    nome: str
-    descricao: Optional[str] = None
-
-    model_config = ConfigDict(
-        from_attributes=True
-    )
-
-
-# =========================================================
-# 9. CONTAS BANCÁRIAS
-# =========================================================
-
-class ContaBancariaCreate(BaseModel):
-
+class ContaBancariaCreate(InputModel):
     nome_banco: str = Field(
-        min_length=2,
-        max_length=100
-    )
-
-    nome_conta: str = Field(
         min_length=2,
         max_length=100
     )
@@ -463,24 +203,167 @@ class ContaBancariaCreate(BaseModel):
         "investimento"
     ]
 
-    saldo_atual: Decimal = Decimal("0.00")
+    valor_conta_atual: Decimal = Field(
+        default=Decimal("0.00"),
+        ge=0,
+        max_digits=12,
+        decimal_places=2,
+    )
 
     ativa: bool = True
 
-    @field_validator("nome_banco", "nome_conta")
-    @classmethod
-    def limpar_texto(cls, valor):
-        return valor.strip()
-
 
 class ContaBancariaResponse(BaseModel):
-
     id: int
+    usuario_id: int
     nome_banco: str
-    nome_conta: str
-    tipo_conta: str
-    saldo_atual: Decimal
+    tipo_conta: Literal[
+        "corrente",
+        "poupanca",
+        "investimento"
+    ]
+    valor_conta_atual: Decimal
     ativa: bool
+    criado_em: datetime
+
+    model_config = ConfigDict(
+        from_attributes=True
+    )
+
+
+class ContaBancariaUpdate(InputModel):
+    nome_banco: str = Field(min_length=2, max_length=100)
+    tipo_conta: Literal["corrente", "poupanca", "investimento"]
+    ativa: bool
+
+
+# =========================================================
+# FLUXO DE DINHEIRO
+# =========================================================
+
+
+class FluxoDinheiroCreate(InputModel):
+    conta_bancaria_id: int
+    conta_destino_id: Optional[int] = None
+
+    descricao: str = Field(
+        min_length=1,
+        max_length=200
+    )
+
+    valor: Decimal = Field(max_digits=12, decimal_places=2)
+
+    tipo: Literal[
+        "entrada",
+        "saida",
+        "transferencia",
+        "ajuste",
+    ]
+
+    categoria: CategoriaMovimentacaoInput
+
+    data_movimentacao: date
+
+    observacao: Optional[str] = Field(
+        default=None,
+        max_length=255
+    )
+
+    @field_validator("categoria", mode="before")
+    @classmethod
+    def normalizar_categoria(cls, valor: str) -> str:
+        if not isinstance(valor, str):
+            return valor
+        return _normalizar_categoria(valor)
+
+    @model_validator(mode="after")
+    def validar_movimentacao(self):
+        if self.tipo == "transferencia":
+            if self.categoria != "transferencia":
+                raise ValueError(
+                    "Transferências devem usar a categoria transferencia."
+                )
+            if self.conta_destino_id is None:
+                raise ValueError(
+                    "conta_destino_id é obrigatória para transferências."
+                )
+            if self.conta_destino_id == self.conta_bancaria_id:
+                raise ValueError(
+                    "A conta de origem e destino devem ser diferentes."
+                )
+        elif self.conta_destino_id is not None:
+            raise ValueError(
+                "conta_destino_id só pode ser usada em transferências."
+            )
+        elif self.categoria == "transferencia":
+            raise ValueError(
+                "A categoria transferencia é reservada para transferências."
+            )
+
+        if self.tipo == "ajuste":
+            if self.categoria != "ajuste":
+                raise ValueError("Ajustes devem usar a categoria ajuste.")
+            if self.valor == 0:
+                raise ValueError("O valor do ajuste não pode ser zero.")
+        elif self.valor <= 0:
+            raise ValueError("O valor da movimentação deve ser maior que zero.")
+
+        if self.categoria == "ajuste" and self.tipo != "ajuste":
+            raise ValueError("A categoria ajuste é reservada para ajustes.")
+        return self
+
+
+class FluxoDinheiroUpdate(InputModel):
+    conta_bancaria_id: int
+    descricao: str = Field(min_length=1, max_length=200)
+    valor: Decimal = Field(max_digits=12, decimal_places=2)
+    tipo: Literal["entrada", "saida", "ajuste"]
+    categoria: CategoriaMovimentacaoInput
+    data_movimentacao: date
+    observacao: Optional[str] = Field(default=None, max_length=255)
+
+    @field_validator("categoria", mode="before")
+    @classmethod
+    def normalizar_categoria(cls, valor: str) -> str:
+        if not isinstance(valor, str):
+            return valor
+        return _normalizar_categoria(valor)
+
+    @model_validator(mode="after")
+    def validar_movimentacao(self):
+        if self.tipo == "ajuste":
+            if self.categoria != "ajuste":
+                raise ValueError("Ajustes devem usar a categoria ajuste.")
+            if self.valor == 0:
+                raise ValueError("O valor do ajuste não pode ser zero.")
+        else:
+            if self.valor <= 0:
+                raise ValueError("O valor da movimentação deve ser maior que zero.")
+            if self.categoria in {"transferencia", "ajuste"}:
+                raise ValueError(
+                    "A categoria informada é reservada para outro tipo "
+                    "de movimentação."
+                )
+        return self
+
+
+class FluxoDinheiroResponse(BaseModel):
+    id: int
+    conta_bancaria_id: int
+    descricao: str
+    valor: Decimal
+    tipo: Literal[
+        "entrada",
+        "saida",
+        "transferencia",
+        "ajuste",
+    ]
+    categoria: str
+    data_movimentacao: date
+    observacao: Optional[str]
+    transferencia_id: Optional[str]
+    transferencia_direcao: Optional[Literal["origem", "destino"]]
+    conta_destino_id: Optional[int]
 
     model_config = ConfigDict(
         from_attributes=True
@@ -488,46 +371,191 @@ class ContaBancariaResponse(BaseModel):
 
 
 # =========================================================
-# 10. LANÇAMENTOS
+# CÁLCULOS FINANCEIROS
 # =========================================================
 
-class LancamentoCreate(BaseModel):
 
-    descricao: str = Field(
-        min_length=2,
-        max_length=200
-    )
+class CalculoFinanceiroCreate(InputModel):
+    """
+    Dados informados pelo usuário para solicitar
+    um cálculo financeiro.
 
-    tipo: Literal[
-        "entrada",
-        "saida"
+    Os valores financeiros NÃO são informados aqui.
+    Eles são calculados automaticamente pelo sistema.
+    """
+
+    conta_bancaria_id: int
+
+    tipo_calculo: Literal[
+        "diario",
+        "semanal",
+        "mensal",
+        "anual"
     ]
 
-    categoria: str = Field(
-        min_length=2,
-        max_length=100
-    )
+    data_inicio: date
+    data_fim: date
 
-    valor: Decimal = Field(
-        gt=0
-    )
+    @model_validator(mode="after")
+    def validar_periodo_tipo(self):
+        if self.data_fim < self.data_inicio:
+            raise ValueError("A data final não pode ser anterior à inicial.")
 
-    data: date
+        dias = (self.data_fim - self.data_inicio).days + 1
 
-    @field_validator("descricao", "categoria")
-    @classmethod
-    def limpar_texto(cls, valor):
-        return valor.strip()
+        if self.tipo_calculo == "diario" and dias != 1:
+            raise ValueError("Um cálculo diário deve abranger exatamente um dia.")
+
+        if self.tipo_calculo == "semanal" and dias != 7:
+            raise ValueError("Um cálculo semanal deve abranger exatamente sete dias.")
+
+        if self.tipo_calculo == "mensal":
+            ultimo_dia = calendar.monthrange(
+                self.data_inicio.year,
+                self.data_inicio.month
+            )[1]
+            if (
+                self.data_inicio.day != 1
+                or self.data_fim.year != self.data_inicio.year
+                or self.data_fim.month != self.data_inicio.month
+                or self.data_fim.day != ultimo_dia
+            ):
+                raise ValueError(
+                    "Um cálculo mensal deve abranger um mês-calendário completo."
+                )
+
+        if self.tipo_calculo == "anual" and (
+            self.data_inicio.month != 1
+            or self.data_inicio.day != 1
+            or self.data_fim.year != self.data_inicio.year
+            or self.data_fim.month != 12
+            or self.data_fim.day != 31
+        ):
+            raise ValueError(
+                "Um cálculo anual deve abranger um ano-calendário completo."
+            )
+
+        return self
 
 
-class LancamentoResponse(BaseModel):
+class CalculoFinanceiroResponse(BaseModel):
+    """
+    Resultado calculado automaticamente pelo sistema.
+    """
 
     id: int
-    descricao: str
-    tipo: str
-    categoria: str
-    valor: Decimal
-    data: date
+    conta_bancaria_id: int
+
+    tipo_calculo: Literal[
+        "diario",
+        "semanal",
+        "mensal",
+        "anual"
+    ]
+
+    data_inicio: date
+    data_fim: date
+
+    # -----------------------------------------------------
+    # VALORES CALCULADOS PELO SISTEMA
+    # -----------------------------------------------------
+
+    valor_original: Decimal
+    total_entradas: Decimal
+    total_saidas: Decimal
+    total_investimentos: Decimal
+    total_transferencias_recebidas: Decimal
+    total_transferencias_enviadas: Decimal
+    total_ajustes: Decimal
+    valor_final: Decimal
+
+    criado_em: datetime
+
+    model_config = ConfigDict(
+        from_attributes=True
+    )
+
+
+# =========================================================
+# METAS FINANCEIRAS
+# =========================================================
+
+
+class MetaFinanceiraCreate(InputModel):
+
+    nome: str = Field(
+        min_length=1,
+        max_length=150
+    )
+
+    valor_meta: Decimal = Field(gt=0, max_digits=12, decimal_places=2)
+
+    valor_atual: Decimal = Field(
+        default=Decimal("0.00"),
+        ge=0,
+        max_digits=12,
+        decimal_places=2,
+    )
+
+    data_inicio: date
+    data_limite: Optional[date] = None
+
+    status: Literal[
+        "em_andamento",
+        "concluida",
+        "cancelada"
+    ] = "em_andamento"
+
+    descricao: Optional[str] = Field(
+        default=None,
+        max_length=255
+    )
+
+    # -----------------------------------------------------
+    # VALIDAR DATA LIMITE
+    # -----------------------------------------------------
+
+    @field_validator("data_limite")
+    @classmethod
+    def validar_data_limite(
+        cls,
+        data_limite,
+        info
+    ):
+
+        data_inicio = info.data.get(
+            "data_inicio"
+        )
+
+        if (
+            data_limite
+            and data_inicio
+            and data_limite < data_inicio
+        ):
+            raise ValueError(
+                "A data limite não pode ser anterior à data de início."
+            )
+
+        return data_limite
+
+
+class MetaFinanceiraResponse(BaseModel):
+    id: int
+    usuario_id: int
+    nome: str
+    valor_meta: Decimal
+    valor_atual: Decimal
+    data_inicio: date
+    data_limite: Optional[date]
+
+    status: Literal[
+        "em_andamento",
+        "concluida",
+        "cancelada"
+    ]
+
+    descricao: Optional[str]
+    criado_em: datetime
 
     model_config = ConfigDict(
         from_attributes=True

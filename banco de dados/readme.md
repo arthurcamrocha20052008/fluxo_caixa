@@ -1,100 +1,229 @@
-﻿# 🗄️ Banco de Dados — Fluxo de Caixa
+# 🗄️ Banco de Dados — Fluxo de Caixa
 
-Este diretório reúne o banco do sistema em **MySQL**. O objetivo é armazenar e relacionar dados financeiros do usuário, como contas, movimentações, investimentos e resumo mensal.
+Este módulo descreve a estrutura do banco de dados do sistema e a responsabilidade de cada tabela.
 
-## Banco
+O banco principal do projeto é `fluxo_caixa` e ele foi organizado para suportar usuários, contas, categorias fixas, movimentações, cálculos financeiros, metas e controle de tentativas de login.
 
-```sql
-financas_casa
-```
+---
 
-## Tecnologias
+## 📊 Visão geral
 
-- MySQL 8+
-- SQL
-- SQLAlchemy
-- Python
-- FastAPI
+O esquema atual possui 7 tabelas:
 
-## Tabelas principais
+1. `usuarios`
+2. `contas_bancarias`
+3. `categorias_movimentacao`
+4. `fluxo_dinheiro`
+5. `calculos_financeiros`
+6. `metas_financeiras`
+7. `tentativas_login`
 
-| Tabela | Finalidade |
-| --- | --- |
-| `usuarios` | Usuários do sistema |
-| `categorias` | Categorias de entrada/saída |
-| `contas_bancarias` | Contas do usuário |
-| `movimentacoes` | Receitas e despesas |
-| `contas_fixas` | Despesas recorrentes |
-| `contas_variaveis` | Despesas variáveis |
-| `investimentos` | Investimentos realizados/planejados |
-| `categorias_investimento` | Tipos de investimento |
-| `fluxo_mensal` | Resumo mensal de caixa |
-| `lancamentos` | Lançamentos gerais |
+---
 
-## Fluxo principal
+## 1. Tabela `usuarios`
+
+Armazena os dados pessoais e de autenticação dos usuários.
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `id` | INT | Identificador único do usuário |
+| `nome_completo` | VARCHAR(150) | Nome completo |
+| `cpf` | VARCHAR(11) | CPF do usuário |
+| `email` | VARCHAR(100) | E-mail principal |
+| `senha_hash` | VARCHAR(255) | Senha em formato seguro |
+| `criado_em` | TIMESTAMP | Data de criação |
+
+### Função
+
+Essa tabela identifica quem usa o sistema e guarda os dados essenciais para cadastro e autenticação.
+
+O CPF é dado pessoal: embora seja omitido nas respostas da API, atualmente é
+armazenado sem criptografia. Antes de usar dados reais em produção, implemente
+proteção apropriada e controles de acesso e retenção.
+
+---
+
+## 2. Tabela `contas_bancarias`
+
+Armazena as contas financeiras vinculadas a cada usuário.
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `id` | INT | Identificador da conta |
+| `usuario_id` | INT | Usuário proprietário |
+| `nome_banco` | VARCHAR(100) | Nome do banco |
+| `tipo_conta` | ENUM | Corrente, poupança ou investimento |
+| `valor_conta_atual` | DECIMAL(12,2) | Saldo atual |
+| `ativa` | BOOLEAN | Conta ativa/inativa |
+| `criado_em` | TIMESTAMP | Data de criação |
+
+### Relacionamento
 
 ```text
 usuarios
-  ↓
-contas_bancarias
-  ↓
-movimentacoes
-  ↓
-categorias
-  ↓
-fluxo_mensal
+   │
+   └── contas_bancarias
+         └── vários registros por usuário
 ```
 
-Para investimentos:
+---
+
+## 3. Tabela `fluxo_dinheiro`
+
+Registra todas as movimentações financeiras registradas na conta.
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `id` | INT | Identificador da movimentação |
+| `conta_bancaria_id` | INT | Conta relacionada |
+| `descricao` | VARCHAR(200) | Descrição da operação |
+| `valor` | DECIMAL(12,2) | Valor movimentado |
+| `tipo` | ENUM | Entrada, saída, transferência ou ajuste |
+| `categoria` | VARCHAR(100) | Categoria permitida na tabela de categorias |
+| `data_movimentacao` | DATE | Data da operação |
+| `observacao` | VARCHAR(255) | Informações adicionais |
+| `transferencia_id` | VARCHAR(36), NULL | Identificador compartilhado pelas pontas da transferência |
+| `transferencia_direcao` | ENUM, NULL | Indica `origem` ou `destino` |
+| `conta_destino_id` | INT, NULL | Conta contraparte da transferência |
+
+Para `entrada` e `saida`, `valor` é positivo. Para `ajuste`, o valor é
+assinado: positivo aumenta o saldo e negativo o reduz. A categoria deve ser
+`ajuste`. Uma transferência é armazenada como duas movimentações vinculadas;
+transferências não contam como renda ou gasto nos totais comuns.
+
+### Exemplos
+
+- salário → entrada
+- aluguel → saída
+- investimento → saída
+- transferência entre contas → dois lançamentos vinculados (origem e destino)
+
+---
+
+## 4. Tabela `categorias_movimentacao`
+
+Mantém as categorias fixas aceitas pela API. A tabela `fluxo_dinheiro`
+referencia uma delas; não são criadas categorias livres durante uma requisição.
+Os nomes são convertidos para minúsculas e sem acentos, `investimentos` vira
+`investimento`, e valores legados desconhecidos ou vazios são convertidos em
+`outros`.
+
+Categorias disponíveis: `alimentacao`, `ajuste`, `compras`, `contas`,
+`educacao`, `freelance`, `impostos`, `investimento`, `lazer`, `moradia`,
+`outros`, `salario`, `saude`, `transporte`, `transferencia` e `vendas`.
+`ajuste` e `transferencia` são reservadas para seus respectivos tipos.
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `nome` | VARCHAR(100) | Nome normalizado e chave primária |
+
+---
+
+## 5. Tabela `calculos_financeiros`
+
+Armazena os resultados gerados pelos cálculos financeiros por período.
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `id` | INT | Identificador do cálculo |
+| `conta_bancaria_id` | INT | Conta analisada |
+| `tipo_calculo` | ENUM | Diário, semanal, mensal ou anual |
+| `data_inicio` | DATE | Início do período |
+| `data_fim` | DATE | Fim do período |
+| `valor_original` | DECIMAL(12,2) | Saldo no início |
+| `total_entradas` | DECIMAL(12,2) | Soma das entradas |
+| `total_saidas` | DECIMAL(12,2) | Soma das saídas |
+| `total_investimentos` | DECIMAL(12,2) | Soma dos investimentos |
+| `total_transferencias_recebidas` | DECIMAL(12,2) | Transferências recebidas no período |
+| `total_transferencias_enviadas` | DECIMAL(12,2) | Transferências enviadas no período |
+| `total_ajustes` | DECIMAL(12,2) | Soma assinada dos ajustes do período |
+| `valor_final` | DECIMAL(12,2) | Saldo final |
+| `criado_em` | TIMESTAMP | Data de registro |
+
+### Fórmula utilizada
 
 ```text
-usuarios
-  ↓
-categorias_investimento
-  ↓
-investimentos
-  ↓
-fluxo_mensal
+valor_final = valor_original + total_entradas - total_saidas
+              + total_transferencias_recebidas
+              - total_transferencias_enviadas + total_ajustes
 ```
 
-## Regras e segurança
+Os investimentos já fazem parte do total de saídas; `total_investimentos` é um detalhamento e não deve ser subtraído uma segunda vez.
 
-- Senhas armazenadas com hash
-- Campos obrigatórios e validações
-- Chaves primárias e estrangeiras
-- E-mail único
-- Separação entre frontend, backend e banco
+---
 
-## Estrutura do diretório
+## 6. Tabela `metas_financeiras`
+
+Armazena os objetivos financeiros definidos pelos usuários.
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `id` | INT | Identificador da meta |
+| `usuario_id` | INT | Usuário responsável |
+| `nome` | VARCHAR(150) | Nome da meta |
+| `valor_meta` | DECIMAL(12,2) | Valor desejado |
+| `valor_atual` | DECIMAL(12,2) | Valor acumulado |
+| `data_inicio` | DATE | Data de início |
+| `data_limite` | DATE | Prazo da meta |
+| `status` | ENUM | Em andamento, concluída ou cancelada |
+| `descricao` | VARCHAR(255) | Observações |
+| `criado_em` | TIMESTAMP | Data de criação |
+
+### Exemplo
+
+- meta: reserva de emergência
+- valor_meta: R$ 10.000,00
+- valor_atual: R$ 6.500,00
+- status: em_andamento
+
+---
+
+## 7. Tabela `tentativas_login`
+
+Mantém a janela de falhas de autenticação por endereço cliente para aplicar o
+limite de cinco falhas em 15 minutos. O IP não é armazenado em texto:
+`chave_cliente` guarda seu hash SHA-256.
+
+| Campo | Tipo | Descrição |
+|---|---|---|
+| `chave_cliente` | VARCHAR(64) | Hash SHA-256 do endereço cliente, chave primária |
+| `tentativas` | INT | Número de falhas na janela atual |
+| `inicio_janela` | DATETIME | Início da janela de 15 minutos |
+| `bloqueado_ate` | DATETIME, NULL | Momento em que termina o bloqueio |
+
+---
+
+## 🔗 Relacionamento entre as tabelas
 
 ```text
-banco de dados/
-├── README.md
-└── banco.sql
+usuarios ──┬── contas_bancarias
+           └── metas_financeiras
+
+contas_bancarias ──> fluxo_dinheiro ──> calculos_financeiros
+                           │
+                           └── categorias_movimentacao
+
+tentativas_login (controle operacional do login)
 ```
 
-## Objetivo
+---
 
-O banco permite registrar, consultar e controlar:
+## ✅ Resumo das tabelas
 
-- usuários
-- contas bancárias
-- receitas e despesas
-- despesas fixas e variáveis
-- investimentos
-- categorias
-- fluxo financeiro mensal
+| Tabela | Responsabilidade |
+|---|---|
+| `usuarios` | dados do usuário e credenciais |
+| `contas_bancarias` | contas financeiras do usuário |
+| `categorias_movimentacao` | categorias normalizadas dos lançamentos |
+| `fluxo_dinheiro` | movimentações financeiras |
+| `calculos_financeiros` | resultados por período |
+| `metas_financeiras` | objetivos financeiros |
+| `tentativas_login` | contagem temporária de falhas de login por endereço |
 
-Essa estrutura suporta relatórios e dashboards do sistema.
+---
 
-## 🚧 Próximas etapas
+## 🧩 Observação
 
-- [ ] Revisar e padronizar os relacionamentos entre as tabelas
-- [ ] Criar/ajustar as chaves estrangeiras
-- [ ] Criar índices necessários
-- [ ] Definir regras de integridade dos dados
-- [ ] Criar dados iniciais para testes
-- [ ] Testar todas as tabelas através do Back-End
-- [ ] Fazer backup e restauração do banco
-- [ ] Documentar completamente o banco de dados
-- [ ] Preparar o banco para produção
+O esquema oficial é mantido por migrações Alembic em `backend/migrations/`. Os arquivos SQL desta pasta são dumps legados e podem conter `DROP TABLE`; não os execute em um banco com dados.
+
+Para um banco novo, aplique as migrações com `python -m alembic -c backend/alembic.ini upgrade head`. Para adotar Alembic em um banco existente, faça backup, confira se o esquema corresponde ao baseline e siga o procedimento descrito no README principal antes de marcar a revisão inicial.

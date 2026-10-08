@@ -13,6 +13,11 @@ password_hash = PasswordHash.recommended()
 # =========================================================
 
 def gerar_hash_senha(senha: str) -> str:
+    """
+    Transforma a senha original em um hash seguro
+    para ser armazenado no banco de dados.
+    """
+
     return password_hash.hash(senha)
 
 
@@ -21,4 +26,12 @@ def gerar_hash_senha(senha: str) -> str:
 # =========================================================
 
 def verificar_senha(senha: str, senha_hash: str) -> bool:
-    return password_hash.verify(senha, senha_hash)
+    """
+    Verifica se a senha informada corresponde
+    ao hash armazenado no banco.
+    """
+
+    return password_hash.verify(
+        senha,
+        senha_hash
+    )
