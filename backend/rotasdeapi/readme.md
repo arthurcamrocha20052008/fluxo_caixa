@@ -19,7 +19,7 @@ Prefixo: `/usuarios`
 - `GET /usuarios/{usuario_id}` — consulta o próprio cadastro.
 - `DELETE /usuarios/{usuario_id}` — exclui o próprio cadastro.
 
-O CPF é validado no cadastro e não é incluído nas respostas, mas ainda fica sem criptografia no banco. Implemente proteção para esse dado pessoal antes de usar informações reais em produção.
+O CPF é validado no cadastro, cifrado com Fernet usando `CPF_ENCRYPTION_KEY` e não é incluído nas respostas. Duplicatas são detectadas por uma impressão HMAC com chave derivada, sem consulta pelo CPF em texto puro. A chave CPF é independente da chave JWT; mantenha-a em segredo e com backup protegido.
 
 ## 🏦 Contas bancárias — `conta_bancaria.py`
 

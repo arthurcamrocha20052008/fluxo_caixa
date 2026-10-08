@@ -9,6 +9,7 @@ from sqlalchemy import (
     ForeignKey,
     Enum,
     Index,
+    UniqueConstraint,
     text,
 )
 from decimal import Decimal
@@ -26,6 +27,9 @@ from database import Base
 
 class Usuario(Base):
     __tablename__ = "usuarios"
+    __table_args__ = (
+        UniqueConstraint("cpf_indice", name="uq_usuarios_cpf_indice"),
+    )
 
     id = Column(
         Integer,
@@ -38,9 +42,14 @@ class Usuario(Base):
     )
 
     cpf = Column(
-        String(11),
+        String(255),
         unique=True,
         nullable=False
+    )
+
+    cpf_indice = Column(
+        String(64),
+        nullable=False,
     )
 
     email = Column(
@@ -265,6 +274,9 @@ class FluxoDinheiro(Base):
 
 class CalculoFinanceiro(Base):
     __tablename__ = "calculos_financeiros"
+    __table_args__ = (
+        Index("idx_calculo_conta", "conta_bancaria_id"),
+    )
 
     id = Column(
         Integer,
@@ -365,6 +377,9 @@ class CalculoFinanceiro(Base):
 
 class MetaFinanceira(Base):
     __tablename__ = "metas_financeiras"
+    __table_args__ = (
+        Index("idx_metas_usuario", "usuario_id"),
+    )
 
     id = Column(
         Integer,

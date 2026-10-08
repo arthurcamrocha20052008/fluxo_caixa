@@ -3,11 +3,12 @@ from pydantic import (
     ConfigDict,
     EmailStr,
     Field,
+    computed_field,
     field_validator
 )
 from pydantic import model_validator
 
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from datetime import date, datetime
 from typing import Optional, Literal
 import calendar
@@ -556,6 +557,20 @@ class MetaFinanceiraResponse(BaseModel):
 
     descricao: Optional[str]
     criado_em: datetime
+
+    @computed_field
+    @property
+    def progresso_percentual(self) -> Decimal:
+        return (
+            self.valor_atual
+            * Decimal("100")
+            / self.valor_meta
+        ).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    @computed_field
+    @property
+    def valor_restante(self) -> Decimal:
+        return max(Decimal("0.00"), self.valor_meta - self.valor_atual)
 
     model_config = ConfigDict(
         from_attributes=True

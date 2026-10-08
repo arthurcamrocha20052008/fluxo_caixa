@@ -183,13 +183,21 @@ http://127.0.0.1:8000/docs
 ### Metas financeiras
 - criação de metas;
 - acompanhamento de progresso;
+- respostas incluem percentual atingido e valor restante;
 - atualização e exclusão.
+
+### Relatórios financeiros
+- relatórios por conta em períodos diário, semanal, mensal ou anual;
+- saldo inicial e final, entradas, saídas, investimentos, transferências e ajustes;
+- criação, listagem, consulta e exclusão de cálculos salvos pela API.
 
 ---
 
 ## 🔐 Segurança
 
-O módulo `seguranca` protege as senhas antes do armazenamento. O login emite JWT; as respostas de usuário omitem o CPF; e as rotas filtram as consultas pelo usuário autenticado. O CPF ainda é armazenado sem criptografia no banco; implemente proteção para esse dado pessoal antes de usar dados reais em produção.
+O módulo `seguranca` protege as senhas antes do armazenamento. O login emite JWT; as respostas de usuário omitem o CPF; e as rotas filtram as consultas pelo usuário autenticado. O CPF é cifrado com Fernet usando `CPF_ENCRYPTION_KEY`, separada da chave JWT. Um HMAC com chave derivada permite detectar CPFs duplicados sem armazená-los em texto puro. Mantenha a chave CPF em um gestor de segredos e em backup protegido: sem ela, os CPFs existentes não podem ser recuperados. Não troque essa chave sem um procedimento de recifragem. No Windows, `configuracao.py` carrega primeiro `%LOCALAPPDATA%\fluxo_caixa\secrets.env`; evite guardar credenciais no `.env` da pasta do projeto se ela for sincronizada.
+
+O CORS aceita somente a origem `http://fluxocaixa`, com métodos de API e cabeçalhos `Authorization` e `Content-Type`. Para usar essa URL sem número de porta, configure `fluxocaixa` para `127.0.0.1` no arquivo `hosts` do Windows e sirva o frontend pela porta 80. A API pode permanecer em `http://fluxocaixa:8000`.
 
 ## 💳 Regras de saldo e transferências
 
@@ -205,20 +213,21 @@ O módulo `seguranca` protege as senhas antes do armazenamento. O login emite JW
 
 ## 🧪 Testes e migrações
 
-Execute os testes com `python -m pytest -q`. `pytest.ini` configura os imports do backend e os testes usam SQLite temporário. `backend/tests/conftest.py` compartilha as fixtures de banco e cliente HTTP.
+Execute os testes com `python -m pytest -q`. `pytest.ini` configura os imports do backend e os testes usam SQLite temporário. `backend/tests/conftest.py` compartilha as fixtures de banco e cliente HTTP. `test_fluxo_integracao.py` percorre cadastro, login/JWT, contas, entradas, saídas, saldo, isolamento entre dois usuários e limpeza sem conectar ao MySQL configurado. `test_metas_relatorios.py` valida CRUD e progresso de metas, os quatro períodos de relatório, consistência de saldo/relatório, valores decimais, limites de saldo, datas futuras, períodos vazios e isolamento de todos os recursos. `test_dados_sensiveis.py` valida cifragem, respostas sem CPF e rejeição de CPFs duplicados.
 
-O Alembic mantém o esquema versionado em `migrations/`. Os dumps SQL em `banco de dados/` são legados e contêm `DROP TABLE`; não os execute em bancos com dados.
+O Alembic mantém o esquema versionado em `migrations/`. A revisão aplicada `proteger_cpf` amplia `usuarios.cpf`, cifra os registros legados e cria o índice HMAC único `cpf_indice`. O downgrade é intencionalmente bloqueado porque voltaria a armazenar CPFs em texto puro. Os dumps SQL em `banco de dados/` são legados e contêm `DROP TABLE`; não os execute em bancos com dados.
 
 ---
 
 ## ✅ Status atual
 
-Os testes das regras financeiras e a cadeia Alembic foram validados com SQLite temporário. A atualização do MySQL existente ainda deve ser executada após backup e verificação do esquema.
+Os testes das regras financeiras e da cadeia Alembic foram validados com SQLite temporário. Os testes de integração HTTP também cobrem casos extremos do fluxo financeiro, metas e relatórios, além do isolamento entre usuários, sem alterar dados MySQL.
 
 ---
 
 ## 🚀 Próximas etapas
 
-- [ ] ampliar testes de integração com MySQL e cenários de borda
+- [ ] ampliar cenários de borda para metas e relatórios
+- [ ] quando necessário, criar testes de integração MySQL separados e explicitamente configurados
 - [ ] configurar CORS ao conectar um frontend
 - [ ] preparação para produção

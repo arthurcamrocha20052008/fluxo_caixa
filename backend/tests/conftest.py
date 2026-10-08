@@ -8,6 +8,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
 os.environ["DATABASE_URL"] = "sqlite:///:memory:"
+os.environ.setdefault(
+    "CPF_ENCRYPTION_KEY",
+    "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=",
+)
 
 from database import Base, get_db  # noqa: E402
 from models import CategoriaMovimentacao  # noqa: E402

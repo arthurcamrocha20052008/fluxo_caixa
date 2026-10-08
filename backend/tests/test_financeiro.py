@@ -19,6 +19,7 @@ from models import (  # noqa: E402
     Usuario,
 )
 from seguranca.seguranca import gerar_hash_senha  # noqa: E402
+from dados_sensiveis import criptografar_cpf, indice_cpf  # noqa: E402
 from rotasdeapi.fluxo_dinheiro import (  # noqa: E402
     criar_movimentacao,
     excluir_movimentacao,
@@ -41,7 +42,8 @@ def _criar_usuario(
 ) -> Usuario:
     usuario = Usuario(
         nome_completo="Pessoa de Teste",
-        cpf=cpf,
+        cpf=criptografar_cpf(cpf),
+        cpf_indice=indice_cpf(cpf),
         email=email,
         senha_hash="hash",
     )

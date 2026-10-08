@@ -12,6 +12,7 @@ from models import TentativaLogin, Usuario
 from esquema import UsuarioCreate, UsuarioResponse
 from seguranca.seguranca import gerar_hash_senha, verificar_senha
 from autenticacao import criar_token, obter_usuario_logado
+from dados_sensiveis import criptografar_cpf, indice_cpf
 
 
 router = APIRouter(
@@ -132,7 +133,7 @@ def criar_usuario(
         db.query(Usuario)
         .filter(
             (Usuario.email == usuario.email) |
-            (Usuario.cpf == usuario.cpf)
+            (Usuario.cpf_indice == indice_cpf(usuario.cpf))
         )
         .first()
     )
@@ -145,13 +146,21 @@ def criar_usuario(
 
     novo_usuario = Usuario(
         nome_completo=usuario.nome_completo,
-        cpf=usuario.cpf,
+        cpf=criptografar_cpf(usuario.cpf),
+        cpf_indice=indice_cpf(usuario.cpf),
         email=usuario.email,
         senha_hash=gerar_hash_senha(usuario.senha)
     )
 
     db.add(novo_usuario)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=400,
+            detail="E-mail ou CPF já cadastrado.",
+        ) from None
     db.refresh(novo_usuario)
 
     return novo_usuario

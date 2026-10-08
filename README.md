@@ -17,6 +17,8 @@ Este sistema permite:
 - calcular saldos por período;
 - gerar resumos financeiros;
 - manter metas financeiras por usuário;
+- acompanhar o percentual atingido e o valor restante de cada meta;
+- consultar relatórios diários, semanais, mensais e anuais por conta;
 - manter a API organizada em módulos funcionais.
 
 ---
@@ -96,11 +98,13 @@ fluxo_caixas/
 │   │   ├── script.py.mako
 │   │   ├── versions/
 │   │       ├── README.md
-│   │       ├── 20261008_0001_initial_schema.py
-│   │       ├── 20261008_0002_transfer_movements.py
-│   │       ├── 20261008_0003_movement_categories.py
+│   │       ├── criar_esquema_inicial.py
+│   │       ├── adicionar_tranferencia.py
+│   │       ├── criar_categorias_movimentacao.py
 │   │       ├── adicionar_ajustes_e_resumos.py
-│   │       └── limitar_tentativas_login.py
+│   │       ├── limitar_tentativas_login.py
+│   │       ├── normalizar_schema_mysql.py
+│   │       └── proteger_cpf_armazenado.py
 │   ├── tests/
 │   │   ├── README.md
 │   │   ├── conftest.py
@@ -158,7 +162,11 @@ A aplicação utiliza hashing para evitar o armazenamento de senhas em texto pur
 
 A senha do usuário é transformada em hash antes de ser persistida. O endpoint `POST /login` verifica credenciais e emite JWT; a chave `JWT_SECRET_KEY` deve ter pelo menos 32 caracteres e nunca deve ser commitada. Após cinco falhas de login do mesmo IP em 15 minutos, o banco bloqueia novas tentativas temporariamente e guarda apenas o hash do IP. As rotas financeiras exigem autenticação e limitam consultas aos recursos do usuário autenticado.
 
-O CPF é validado no cadastro e omitido das respostas, mas ainda é armazenado sem criptografia no banco. Antes de usar dados reais em produção, implemente proteção adequada para esse dado pessoal e defina controles de acesso, retenção e backup.
+O CPF é validado no cadastro, cifrado com Fernet antes de ser salvo e omitido das respostas. Uma impressão HMAC com chave derivada da chave CPF permite detectar duplicatas sem armazenar o CPF em texto puro. Configure uma `CPF_ENCRYPTION_KEY` Fernet separada da chave JWT. Guarde uma cópia segura dessa chave: perdê-la impede descriptografar CPFs existentes; não a troque sem um procedimento de recifragem. A migração `proteger_cpf` converte registros legados e seu downgrade é bloqueado para evitar voltar a armazenar CPFs em texto puro.
+
+No Windows, as credenciais locais são carregadas primeiro de `%LOCALAPPDATA%\fluxo_caixa\secrets.env`, fora da pasta sincronizada do projeto. O arquivo `.env` da raiz continua sendo aceito como fallback; não guarde nele credenciais se o projeto estiver em uma pasta sincronizada, como OneDrive.
+
+O CORS permite somente a origem local `http://fluxocaixa`, para a integração com o frontend. O nome `fluxocaixa` precisa apontar para `127.0.0.1` no arquivo `hosts` do Windows, e o frontend deve ser servido pela porta HTTP padrão 80 para que a URL não mostre uma porta. A API pode continuar em `http://fluxocaixa:8000`. Atualize a allowlist quando definir a origem de produção.
 
 ---
 
@@ -170,7 +178,7 @@ O CPF é validado no cadastro e omitido das respostas, mas ainda é armazenado s
 python -m pip install -r requirements.txt
 ```
 
-2. Configure um arquivo `.env` na raiz com `DATABASE_URL` e `JWT_SECRET_KEY`. `ACCESS_TOKEN_EXPIRE_MINUTES` é opcional (padrão: 60). Gere uma chave aleatória forte localmente; não reutilize a chave de exemplo nem a publique.
+2. Configure `DATABASE_URL`, `JWT_SECRET_KEY` e `CPF_ENCRYPTION_KEY` no ambiente ou em um arquivo de segredos local não sincronizado. No Windows, use `%LOCALAPPDATA%\fluxo_caixa\secrets.env`. `ACCESS_TOKEN_EXPIRE_MINUTES` é opcional (padrão: 60). Gere uma chave Fernet localmente com `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"` e guarde-a em um gestor de segredos/backup; não a publique nem a compartilhe.
 3. Para um banco novo, aplique as migrações:
 
 ```bash
@@ -215,12 +223,14 @@ As categorias aceitas são fixas: `alimentacao`, `ajuste`, `compras`, `contas`, 
 
 Os resumos mostram transferências recebidas/enviadas e ajustes em campos próprios, sem classificá-los como entradas ou saídas comuns. O saldo final considera todos esses movimentos. Um ajuste usa valor positivo para aumentar o saldo e negativo para reduzi-lo.
 
+As respostas de metas incluem `progresso_percentual` (com duas casas decimais) e `valor_restante` (nunca negativo). Metas atingidas são marcadas como concluídas, exceto quando foram explicitamente canceladas. Os relatórios são criados em `POST /calculos-financeiros/` para períodos diário, semanal, mensal ou anual e retornam saldos inicial/final, entradas, saídas e totais financeiros associados.
+
 Os arquivos SQL em `banco de dados/` são dumps legados e incluem comandos destrutivos como `DROP TABLE`. Não os execute em bancos com dados; use Alembic para criar ou atualizar o esquema.
 
 Para um banco legado já criado com o esquema original, faça backup e confira se as tabelas correspondem à revisão inicial antes de marcar essa revisão e aplicar as demais:
 
 ```bash
-python -m alembic -c backend/alembic.ini stamp 20261008_0001
+python -m alembic -c backend/alembic.ini stamp esquema_inicial
 python -m alembic -c backend/alembic.ini upgrade head
 ```
 
@@ -230,7 +240,7 @@ Não marque a revisão inicial se o esquema existente não corresponder ao basel
 
 ## 📊 Status atual
 
-Os cálculos financeiros, validações de entrada, regras de saldo e transferências possuem testes com SQLite. A cadeia completa de migrações também foi executada em um banco SQLite temporário. A migração do banco MySQL existente deve ser aplicada separadamente após backup e verificação do esquema.
+Os cálculos financeiros, validações de entrada, regras de saldo, transferências e casos extremos de metas/relatórios possuem testes com SQLite. Testes HTTP cobrem cadastro/login/JWT, contas, movimentações, metas, relatórios, centavos, períodos sem movimento, saldo negativo em conta corrente, datas futuras, proteção dos dados sensíveis e isolamento entre usuários; os testes automatizados usam SQLite em memória e não alteram o MySQL configurado. A integração da API com o MySQL também foi validada separadamente, com os dados criados para essa verificação removidos. O MySQL está na revisão `proteger_cpf`; `alembic check` não detecta diferenças em relação aos modelos. A suíte completa passou com 36 testes. Para comandos Alembic executados da raiz do repositório, informe sempre `-c backend/alembic.ini`.
 
 Para executar os testes:
 
@@ -238,13 +248,15 @@ Para executar os testes:
 python -m pytest -q
 ```
 
+Os testes de integração HTTP usam um banco SQLite em memória isolado; o fluxo completo de autenticação, contas, movimentações, saldo, isolamento entre usuários e limpeza não altera o MySQL configurado em `.env`.
+
 ---
 
 ## 🚀 Próximos passos
 
 - refinamento de mensagens e tratamento de erros;
 - configurar CORS ao integrar um frontend, restringindo as origens permitidas;
-- ampliar testes de integração com MySQL;
+- ampliar cenários de borda para metas e relatórios;
 - proteger o CPF armazenado e preparar os controles operacionais para produção;
 - preparação para ambiente de produção.
 
