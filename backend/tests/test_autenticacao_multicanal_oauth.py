@@ -519,6 +519,37 @@ def test_google_assistido_funciona_sem_client_id_e_protege_contra_takeover(
     assert r_cpf_correto.json()["email_verificado"] is True
 
 
+def test_reenvio_codigo_telefone_invalido_retorna_422(
+    client: TestClient,
+    db: Session,
+) -> None:
+    email_usr = f"reenvio-invalido-{uuid4().hex}@gmail.com"
+    r_cad = client.post(
+        "/usuarios/",
+        json={
+            "nome_completo": "Arthur Teste Reenvio",
+            "cpf": _gerar_cpf_valido(909),
+            "email": email_usr,
+            "senha": "SenhaForte@2026",
+            "canal_verificacao": "email",
+            "aceite_termos": True,
+            "aceite_privacidade": True,
+        },
+    )
+    assert r_cad.status_code == 201
+
+    r_reenvio = client.post(
+        "/usuarios/enviar-codigo",
+        json={
+            "email": email_usr,
+            "canal_verificacao": "telefone",
+            "telefone": "(00) 98765-4321",
+        },
+    )
+    assert r_reenvio.status_code == 422
+    assert "DDD" in r_reenvio.text
+
+
 def test_verificar_access_token_google_consulta_tokeninfo_e_userinfo(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -555,6 +586,7 @@ def test_integridade_frontend_multicanal_contingencia_e_google_oauth() -> None:
     cadastro_html = (raiz / "cadastro.html").read_text(encoding="utf-8")
     login_html = (raiz / "login.html").read_text(encoding="utf-8")
     legal_js = (raiz / "js" / "legal.js").read_text(encoding="utf-8")
+    api_js = (raiz / "js" / "api.js").read_text(encoding="utf-8")
     cadastro_js = (raiz / "js" / "cadastro.js").read_text(encoding="utf-8")
     login_js = (raiz / "js" / "login.js").read_text(encoding="utf-8")
     style_css = (raiz / "css" / "style.css").read_text(encoding="utf-8")
@@ -570,6 +602,7 @@ def test_integridade_frontend_multicanal_contingencia_e_google_oauth() -> None:
 
     for seletor in (
         'id="login-verify-dialog"',
+        'id="login-verify-skip-btn"',
         'id="reset-channel-email"',
         'id="reset-channel-phone"',
         'id="reset-contingency-banner"',
@@ -580,7 +613,21 @@ def test_integridade_frontend_multicanal_contingencia_e_google_oauth() -> None:
     for simbolo in (
         "formatarMascaraTelefone",
         "validarTelefoneBrasileiro",
+        "vincularValidacaoTelefoneTempoReal",
         "detectarErroDominioEmail",
+        "validarEmailFormato",
+        "vincularValidacaoEmailTempoReal",
+        "validarCpfMatematico",
+        "vincularValidacaoCpfTempoReal",
+        "vincularChecklistSenha",
+        "obterMensagemErroSenha",
+        "mascararEmailCliente",
+        "mascararTelefoneCliente",
+    ):
+        assert simbolo in api_js
+        assert simbolo in legal_js
+
+    for simbolo in (
         "abrirModalGoogleAssistido",
         "abrirModalCompletarCadastroGoogle",
         "initTokenClient",
@@ -589,6 +636,7 @@ def test_integridade_frontend_multicanal_contingencia_e_google_oauth() -> None:
 
     assert "/usuarios/enviar-codigo" in cadastro_js
     assert "/usuarios/enviar-codigo" in login_js
+    assert "login-verify-skip-btn" in login_js
     assert ".channel-selector-grid" in style_css
     assert ".otp-contingency-banner" in style_css
     assert ".email-typo-fix-btn" in style_css

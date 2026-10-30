@@ -150,6 +150,22 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             api.setToken(data.access_token);
+
+            if (data.email_verificado === false && loginVerifyDialog) {
+                if (loginVerifyEmail) {
+                    loginVerifyEmail.value = email;
+                }
+                if (loginVerifyMessage) {
+                    loginVerifyMessage.textContent =
+                        "Sua conta possui confirmação pendente de código. Digite o código OTP recebido para validar sua conta ou continue para o painel.";
+                    loginVerifyMessage.className = "form-message info";
+                }
+                if (typeof loginVerifyDialog.showModal === "function") {
+                    loginVerifyDialog.showModal();
+                    return;
+                }
+            }
+
             window.location.assign("index.html");
         } catch (error) {
             message.textContent = error.message;
@@ -333,6 +349,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    const loginVerifySkipBtn = document.querySelector("#login-verify-skip-btn");
+    loginVerifySkipBtn?.addEventListener("click", () => {
+        if (api.getToken()) {
+            window.location.assign("index.html");
+        } else if (loginVerifyDialog && typeof loginVerifyDialog.close === "function") {
+            loginVerifyDialog.close();
+        } else {
+            loginVerifyDialog?.removeAttribute("open");
+        }
+    });
+
     loginVerifyClose?.addEventListener("click", () => {
         if (timerLoginVerifyId) {
             clearInterval(timerLoginVerifyId);
@@ -342,6 +369,9 @@ document.addEventListener("DOMContentLoaded", () => {
             loginVerifyDialog.close();
         } else {
             loginVerifyDialog?.removeAttribute("open");
+        }
+        if (api.getToken()) {
+            window.location.assign("index.html");
         }
     });
 

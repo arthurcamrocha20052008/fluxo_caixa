@@ -381,7 +381,7 @@ class ConfirmarEmailRequest(InputModel):
     @field_validator("email")
     @classmethod
     def normalizar_email(cls, valor: EmailStr) -> str:
-        return str(valor).strip().lower()
+        return validar_email_normalizado_e_dominio(str(valor))
 
     @field_validator("codigo_otp")
     @classmethod
@@ -486,7 +486,7 @@ class RedefinirSenhaRequest(InputModel):
     @field_validator("email")
     @classmethod
     def normalizar_email(cls, valor: EmailStr) -> str:
-        return str(valor).strip().lower()
+        return validar_email_normalizado_e_dominio(str(valor))
 
     @field_validator("codigo_otp")
     @classmethod

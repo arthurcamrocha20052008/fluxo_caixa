@@ -316,7 +316,7 @@ def criar_usuario(
 
     if usuario.telefone:
         try:
-            usuario.telefone = normalizar_telefone_e164(usuario.telefone)
+            normalizar_telefone_e164(usuario.telefone)
         except ValueError as erro:
             raise HTTPException(
                 status_code=422,
@@ -494,11 +494,18 @@ def _processar_envio_codigo_verificacao(
         telefone_efetivo = telefone_armazenado
 
         if dados.telefone:
+            try:
+                dados_tel_norm = normalizar_telefone_e164(dados.telefone)
+            except ValueError as erro:
+                raise HTTPException(
+                    status_code=422,
+                    detail=str(erro),
+                ) from None
             if telefone_armazenado is None:
                 usuario.telefone = criptografar_telefone(dados.telefone)
                 telefone_efetivo = dados.telefone
             elif (
-                normalizar_telefone_e164(dados.telefone)
+                dados_tel_norm
                 != normalizar_telefone_e164(telefone_armazenado)
             ):
                 raise HTTPException(
@@ -508,7 +515,7 @@ def _processar_envio_codigo_verificacao(
 
         if dados.canal_verificacao in ("telefone", "sms", "whatsapp") and not telefone_efetivo:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
+                status_code=422,
                 detail="Informe um telefone válido com DDD para receber o código por SMS ou WhatsApp.",
             )
 
