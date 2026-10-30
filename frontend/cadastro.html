@@ -5,157 +5,318 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta
         name="description"
-        content="Crie uma conta no Fluxo de Caixa."
+        content="Abra sua conta no Fluxo de Caixa. Controle financeiro institucional com precisão, validação de CPF, conformidade LGPD e verificação de e-mail."
     >
-    <title>Fluxo de Caixa | Criar conta</title>
-    <link rel="stylesheet" href="css/style.css">
-    <script src="js/api.js" defer></script>
-    <script src="js/cadastro.js" defer></script>
+    <title>Fluxo de Caixa | Criar Nova Conta</title>
+    <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="css/style.css?v=18">
+    <script src="js/api.js?v=18" defer></script>
+    <script src="js/legal.js?v=18" defer></script>
+    <script src="js/cadastro.js?v=18" defer></script>
 </head>
 <body class="login-page">
-    <main class="login-shell">
+    <main class="login-shell register-shell">
         <section class="login-card register-card" aria-labelledby="register-title">
-            <div class="brand login-brand">
-                <div class="brand-icon" aria-hidden="true">FC</div>
-                <div>
-                    <h1>Fluxo de Caixa</h1>
-                    <span>Controle financeiro</span>
+            <div class="login-card-header">
+                <a href="inicio.html" class="brand center-brand" title="Voltar à página inicial">
+                    <span class="brand-logo" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" role="img" aria-label="Fluxo de Caixa">
+                            <defs>
+                                <linearGradient id="fc_logo_register" x1="2" y1="2" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+                                    <stop offset="0" stop-color="#10B981"/>
+                                    <stop offset="1" stop-color="#047857"/>
+                                </linearGradient>
+                            </defs>
+                            <rect width="40" height="40" rx="10" fill="url(#fc_logo_register)"/>
+                            <rect x="0.75" y="0.75" width="38.5" height="38.5" rx="9.25" fill="none" stroke="#FFFFFF" stroke-opacity="0.22" stroke-width="1.2"/>
+                            <rect x="9" y="24" width="5" height="8" rx="1.5" fill="#ffffff" fill-opacity="0.62"/>
+                            <rect x="17.5" y="19.5" width="5" height="12.5" rx="1.5" fill="#ffffff" fill-opacity="0.85"/>
+                            <rect x="26" y="15" width="5" height="17" rx="1.5" fill="#ffffff"/>
+                            <path d="M9 17.5 L16.5 11.5 L21.5 14 L31 7.5" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M26.2 7.5 H31 V12.3" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                    <div>
+                        <span class="brand-title">Fluxo de Caixa</span>
+                        <span class="brand-subtitle">Gestão Patrimonial &amp; Financeira</span>
+                    </div>
+                </a>
+
+                <div class="register-header-meta">
+                    <h1 id="register-title">Crie sua conta institucional</h1>
+                    <p class="login-description">
+                        Inicie o gerenciamento profissional do seu patrimônio com máxima privacidade, conformidade LGPD e precisão.
+                    </p>
                 </div>
             </div>
 
-            <h2 id="register-title">Crie sua conta</h2>
-            <p class="login-description">
-                Cadastre-se com seu e-mail. Enviaremos uma confirmação de boas-vindas assim que sua conta for criada.
-            </p>
+            <!-- Cadastro Rápido com Google OAuth 2.0 -->
+            <div class="oauth-section">
+                <div id="google-gsi-button" class="google-gsi-container" hidden></div>
+                <button type="button" id="google-oauth-btn" class="btn-google-oauth">
+                    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                        <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
+                        <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.7z"/>
+                        <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.8-.4-2.8s.2-2 .4-2.8L1.6 6.4C.6 8.3 0 10.1 0 12s.6 3.7 1.6 5.6l3.7-2.8z"/>
+                        <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5l-3.7 2.8C3.5 20.4 7.4 23 12 23z"/>
+                    </svg>
+                    <span>Cadastrar / Continuar com o Google</span>
+                </button>
+                <div class="auth-divider"><span>ou cadastre-se com e-mail verificado</span></div>
+            </div>
 
-            <form id="register-form" class="login-form">
+            <form id="register-form" class="login-form register-form" novalidate>
                 <div class="form-field">
                     <label for="register-name">Nome completo</label>
-                    <input
-                        id="register-name"
-                        name="nome_completo"
-                        type="text"
-                        autocomplete="name"
-                        minlength="3"
-                        maxlength="150"
-                        required
-                    >
-                </div>
-
-                <div class="form-field">
-                    <label for="register-cpf">CPF</label>
-                    <input
-                        id="register-cpf"
-                        name="cpf"
-                        type="text"
-                        inputmode="numeric"
-                        autocomplete="off"
-                        maxlength="14"
-                        aria-describedby="cpf-help"
-                        required
-                    >
-                    <span class="field-help" id="cpf-help">
-                        Necessário para criar a conta. Será armazenado cifrado.
-                    </span>
-                </div>
-
-                <div class="form-field">
-                    <label for="register-email">E-mail</label>
-                    <input
-                        id="register-email"
-                        name="email"
-                        type="email"
-                        autocomplete="email"
-                        maxlength="100"
-                        required
-                    >
-                </div>
-
-                <div class="form-field">
-                    <label for="register-phone">
-                        Telefone <span class="field-optional">(opcional)</span>
-                    </label>
-                    <input
-                        id="register-phone"
-                        name="telefone"
-                        type="tel"
-                        inputmode="tel"
-                        autocomplete="tel"
-                        maxlength="32"
-                        placeholder="+55 (11) 98765-4321"
-                    >
-                    <span class="field-help">
-                        Se informado, use entre 10 e 15 dígitos.
-                    </span>
-                </div>
-
-                <div class="form-field">
-                    <label for="register-password">Senha</label>
-                    <div class="password-input-wrapper">
+                    <div class="input-icon-wrapper">
+                        <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
                         <input
-                            id="register-password"
-                            name="senha"
-                            type="password"
-                            autocomplete="new-password"
-                            minlength="8"
-                            maxlength="100"
+                            id="register-name"
+                            name="nome_completo"
+                            type="text"
+                            autocomplete="name"
+                            placeholder="Seu nome completo"
+                            minlength="3"
+                            maxlength="150"
                             required
                         >
-                        <button
-                            type="button"
-                            class="password-toggle-btn"
-                            data-toggle-password="register-password"
-                            aria-label="Mostrar senha"
-                            aria-pressed="false"
-                            title="Mostrar ou ocultar senha"
-                        >
-                            <svg class="icon-eye icon-eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                <circle cx="12" cy="12" r="3"></circle>
-                            </svg>
-                            <svg class="icon-eye icon-eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                                <line x1="1" y1="1" x2="23" y2="23"></line>
-                            </svg>
-                        </button>
                     </div>
-                    <span class="field-help">
-                        Use letras maiúsculas, minúsculas, números e símbolo.
-                    </span>
+                </div>
+
+                <div class="form-row-2col">
+                    <div class="form-field">
+                        <label for="register-cpf">CPF do titular</label>
+                        <div class="input-icon-wrapper">
+                            <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                                <line x1="2" y1="10" x2="22" y2="10"></line>
+                            </svg>
+                            <input
+                                id="register-cpf"
+                                name="cpf"
+                                type="text"
+                                inputmode="numeric"
+                                autocomplete="off"
+                                maxlength="14"
+                                placeholder="000.000.000-00"
+                                required
+                            >
+                        </div>
+                        <small class="field-error" id="cpf-error" role="alert" hidden></small>
+                        <span class="field-help" id="cpf-feedback">
+                            Criptografado em repouso (Fernet AES + HMAC-SHA256).
+                        </span>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="register-phone">
+                            Telefone <span class="field-optional" id="register-phone-optional">(opcional)</span>
+                        </label>
+                        <div class="input-icon-wrapper">
+                            <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                            </svg>
+                            <input
+                                id="register-phone"
+                                name="telefone"
+                                type="tel"
+                                inputmode="tel"
+                                autocomplete="tel"
+                                maxlength="20"
+                                placeholder="(11) 98765-4321"
+                            >
+                        </div>
+                        <small class="field-error" id="phone-error" role="alert" hidden></small>
+                        <span class="field-help">DDD válido (11 a 99) · Criptografia simétrica LGPD.</span>
+                    </div>
                 </div>
 
                 <div class="form-field">
-                    <label for="register-password-confirm">
-                        Confirme a senha
-                    </label>
-                    <div class="password-input-wrapper">
+                    <label for="register-email">E-mail corporativo ou pessoal</label>
+                    <div class="input-icon-wrapper">
+                        <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
                         <input
-                            id="register-password-confirm"
-                            name="confirmar-senha"
-                            type="password"
-                            autocomplete="new-password"
-                            minlength="8"
+                            id="register-email"
+                            name="email"
+                            type="email"
+                            autocomplete="email"
                             maxlength="100"
+                            placeholder="seu-email@gmail.com"
                             required
                         >
-                        <button
-                            type="button"
-                            class="password-toggle-btn"
-                            data-toggle-password="register-password-confirm"
-                            aria-label="Mostrar senha"
-                            aria-pressed="false"
-                            title="Mostrar ou ocultar senha"
-                        >
-                            <svg class="icon-eye icon-eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                <circle cx="12" cy="12" r="3"></circle>
-                            </svg>
-                            <svg class="icon-eye icon-eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                                <line x1="1" y1="1" x2="23" y2="23"></line>
-                            </svg>
-                        </button>
                     </div>
+                    <small class="field-error" id="email-error" role="alert" hidden></small>
+                    <span class="field-help">Validamos erros de digitação de domínio em tempo real.</span>
+                </div>
+
+                <!-- Seletor Elegante de Canal de Verificação (E-mail Gmail ou Telefone SMS/WhatsApp) -->
+                <div class="form-field verification-channel-group" role="radiogroup" aria-labelledby="register-channel-label">
+                    <label id="register-channel-label">Onde deseja receber seu código de verificação (6 dígitos)?</label>
+                    <div class="channel-selector-grid">
+                        <label class="channel-option-card is-selected" for="channel-email">
+                            <input
+                                type="radio"
+                                id="channel-email"
+                                name="canal_verificacao"
+                                value="email"
+                                checked
+                            >
+                            <span class="channel-option-content">
+                                <span class="channel-option-title">Receber código por E-mail (Gmail)</span>
+                                <span class="channel-option-desc">Envio imediato para sua caixa de entrada</span>
+                            </span>
+                        </label>
+
+                        <label class="channel-option-card" for="channel-phone">
+                            <input
+                                type="radio"
+                                id="channel-phone"
+                                name="canal_verificacao"
+                                value="telefone"
+                            >
+                            <span class="channel-option-content">
+                                <span class="channel-option-title">Receber código no Telefone (SMS / WhatsApp)</span>
+                                <span class="channel-option-desc">Código direto no celular com DDD</span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-row-2col">
+                    <div class="form-field">
+                        <label for="register-password">Senha forte de acesso</label>
+                        <div class="password-input-wrapper">
+                            <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            <input
+                                id="register-password"
+                                name="senha"
+                                type="password"
+                                autocomplete="new-password"
+                                minlength="8"
+                                maxlength="100"
+                                placeholder="Mínimo 8 caracteres"
+                                required
+                            >
+                            <button
+                                type="button"
+                                class="password-toggle-btn"
+                                data-toggle-password="register-password"
+                                aria-label="Mostrar senha"
+                                aria-pressed="false"
+                                title="Mostrar ou ocultar senha"
+                            >
+                                <svg class="icon-eye icon-eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                                <svg class="icon-eye icon-eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="register-password-confirm">Confirme a senha</label>
+                        <div class="password-input-wrapper">
+                            <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            <input
+                                id="register-password-confirm"
+                                name="confirmar-senha"
+                                type="password"
+                                autocomplete="new-password"
+                                minlength="8"
+                                maxlength="100"
+                                placeholder="Repita a senha"
+                                required
+                            >
+                            <button
+                                type="button"
+                                class="password-toggle-btn"
+                                data-toggle-password="register-password-confirm"
+                                aria-label="Mostrar senha"
+                                aria-pressed="false"
+                                title="Mostrar ou ocultar senha"
+                            >
+                                <svg class="icon-eye icon-eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                                <svg class="icon-eye icon-eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        <small class="field-error" id="password-confirm-error" role="alert" hidden></small>
+                        <span class="field-help" id="password-confirm-feedback"></span>
+                    </div>
+                </div>
+
+                <!-- Checklist Visual Interativo de Força de Senha -->
+                <div class="password-checklist" id="register-password-checklist" aria-live="polite">
+                    <div class="password-checklist-title">
+                        <span>Critérios de segurança da senha</span>
+                        <span data-password-status>0/5 requisitos</span>
+                    </div>
+                    <div class="password-strength-meter">
+                        <div class="password-strength-bar"></div>
+                    </div>
+                    <ul class="password-checklist-grid">
+                        <li class="password-req" data-req="tamanho">
+                            <span class="password-req-dot" aria-hidden="true"></span>
+                            Mínimo de 8 caracteres
+                        </li>
+                        <li class="password-req" data-req="maiuscula">
+                            <span class="password-req-dot" aria-hidden="true"></span>
+                            Pelo menos uma letra maiúscula (A-Z)
+                        </li>
+                        <li class="password-req" data-req="minuscula">
+                            <span class="password-req-dot" aria-hidden="true"></span>
+                            Pelo menos uma letra minúscula (a-z)
+                        </li>
+                        <li class="password-req" data-req="numero">
+                            <span class="password-req-dot" aria-hidden="true"></span>
+                            Pelo menos um número (0-9)
+                        </li>
+                        <li class="password-req" data-req="especial">
+                            <span class="password-req-dot" aria-hidden="true"></span>
+                            Pelo menos um caractere especial (!@#$%^&amp;*(),.?&quot;:{}|&lt;&gt;_-)
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Aceite Obrigatório dos Termos de Serviço e Política de Privacidade (LGPD) -->
+                <div class="legal-consent-box" role="group" aria-label="Consentimento legal e LGPD">
+                    <label class="legal-checkbox-item" for="accept-terms">
+                        <input type="checkbox" id="accept-terms" name="aceite_termos" required>
+                        <span>
+                            Li e concordo integralmente com os
+                            <button type="button" class="legal-inline-link" data-open-legal="termos">Termos de Serviço</button>
+                            do Fluxo de Caixa.
+                        </span>
+                    </label>
+
+                    <label class="legal-checkbox-item" for="accept-privacy">
+                        <input type="checkbox" id="accept-privacy" name="aceite_privacidade" required>
+                        <span>
+                            Estou ciente e autorizo o tratamento criptografado dos meus dados pessoais conforme a
+                            <button type="button" class="legal-inline-link" data-open-legal="privacidade">Política de Privacidade e Conformidade LGPD</button>.
+                        </span>
+                    </label>
                 </div>
 
                 <p
@@ -165,16 +326,135 @@
                     aria-live="polite"
                 ></p>
 
-                <button class="button-primary login-submit" type="submit">
-                    Criar conta
+                <button class="button-primary login-submit" type="submit" id="register-submit-btn">
+                    <span id="register-submit-label">Criar conta e receber código</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
                 </button>
             </form>
 
-            <p class="login-footer">
-                Já tem cadastro?
-                <a href="login.html">Entrar</a>
-            </p>
+            <footer class="login-footer">
+                <span>Já possui cadastro?</span>
+                <a href="login.html" class="link-cadastro">Acessar minha conta</a>
+            </footer>
+
+            <nav class="auth-legal-bar" aria-label="Links institucionais e jurídicos">
+                <a href="inicio.html">Apresentação</a>
+                <span>·</span>
+                <a href="termos.html" data-open-legal="termos">Termos de Serviço</a>
+                <span>·</span>
+                <a href="privacidade.html" data-open-legal="privacidade">Privacidade &amp; LGPD</a>
+            </nav>
         </section>
     </main>
+
+    <!-- Modal Multi-Canal Anti-Bot: Verificação com Código OTP de 6 Dígitos (E-mail ou Telefone) -->
+    <dialog class="form-dialog" id="verify-email-dialog" aria-labelledby="verify-email-title">
+        <form id="verify-email-form" class="dialog-form" novalidate>
+            <div class="dialog-header">
+                <div>
+                    <h2 id="verify-email-title">Verifique seu código de acesso</h2>
+                    <p id="verify-email-subtitle">
+                        Enviamos um código de 6 dígitos para
+                        <strong id="verify-email-display">—</strong>. Digite-o abaixo para ativar seu acesso definitivo.
+                    </p>
+                </div>
+                <button
+                    type="button"
+                    class="dialog-close"
+                    id="verify-email-close"
+                    aria-label="Fechar janela"
+                >&times;</button>
+            </div>
+
+            <!-- Aviso Visual Amigável de Contingência (quando servidor Render ainda não possui SMTP/SMS ativo) -->
+            <div class="otp-contingency-banner" id="verify-contingency-banner" role="status" aria-live="polite" hidden>
+                <div class="otp-contingency-text">
+                    <strong>Modo de Contingência Ativo:</strong> o provedor externo de envio ainda não está ativo neste servidor. Utilize o código de verificação gerado abaixo para concluir agora:
+                </div>
+                <div class="otp-contingency-code-row">
+                    <code class="otp-contingency-code" id="verify-contingency-code">000000</code>
+                    <button type="button" class="button-secondary button-small" id="verify-fill-contingency-btn">
+                        Preencher código
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-field">
+                <label for="verify-otp-input">Código de verificação (6 dígitos)</label>
+                <input
+                    id="verify-otp-input"
+                    name="codigo_otp"
+                    class="otp-code-input"
+                    type="text"
+                    inputmode="numeric"
+                    autocomplete="one-time-code"
+                    maxlength="6"
+                    placeholder="000000"
+                    required
+                >
+                <span class="field-help" id="verify-otp-help">
+                    Código temporário e de uso único, válido por 15 minutos. Verifique também a pasta de spam ou SMS/WhatsApp.
+                </span>
+            </div>
+
+            <!-- Campo rápido de telefone caso o usuário troque de Gmail para Telefone sem ter preenchido antes -->
+            <div class="otp-inline-phone-box" id="verify-inline-phone-box" hidden>
+                <div class="form-field">
+                    <label for="verify-inline-phone">Informe seu celular com DDD para receber via SMS / WhatsApp</label>
+                    <div class="otp-email-row">
+                        <input
+                            id="verify-inline-phone"
+                            type="tel"
+                            inputmode="tel"
+                            maxlength="20"
+                            placeholder="(11) 98765-4321"
+                        >
+                        <button type="button" class="button-secondary otp-send-btn" id="verify-inline-phone-send">
+                            Enviar SMS
+                        </button>
+                    </div>
+                    <small class="field-error" id="verify-inline-phone-error" role="alert" hidden></small>
+                </div>
+            </div>
+
+            <!-- Ações rápidas: Reenviar com contador de 60s e Trocar Canal (Gmail <-> Telefone) -->
+            <div class="otp-quick-actions">
+                <button
+                    type="button"
+                    class="button-secondary otp-resend-btn"
+                    id="resend-verification-btn"
+                >
+                    Reenviar código
+                </button>
+                <button
+                    type="button"
+                    class="otp-switch-channel-btn"
+                    id="switch-verification-channel-btn"
+                >
+                    Não recebeu no Gmail? Enviar código para o meu Telefone
+                </button>
+            </div>
+
+            <p
+                id="verify-email-message"
+                class="form-message"
+                role="status"
+                aria-live="polite"
+            ></p>
+
+            <div class="dialog-actions">
+                <button
+                    type="submit"
+                    class="button-primary"
+                    id="verify-email-submit"
+                >
+                    Confirmar código e acessar painel
+                </button>
+            </div>
+        </form>
+    </dialog>
 </body>
 </html>

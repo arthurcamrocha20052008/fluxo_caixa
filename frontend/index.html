@@ -9,12 +9,20 @@
         content="Painel de controle financeiro pessoal do Fluxo de Caixa."
     >
 
-    <title>Fluxo de Caixa | Dashboard</title>
+    <title>Fluxo de Caixa | Painel Financeiro</title>
+    <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
 
-    <link rel="stylesheet" href="css/style.css?v=12">
+    <script>
+        if (!sessionStorage.getItem("fluxo_caixa_token")) {
+            window.location.replace("login.html");
+        }
+    </script>
+
+    <link rel="stylesheet" href="css/style.css?v=18">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>
-    <script src="js/api.js?v=12" defer></script>
-    <script src="js/dashboard.js?v=12" defer></script>
+    <script src="js/api.js?v=18" defer></script>
+    <script src="js/legal.js?v=18" defer></script>
+    <script src="js/dashboard.js?v=18" defer></script>
 </head>
 
 <body>
@@ -23,7 +31,23 @@
         <!-- Menu lateral -->
         <aside class="sidebar">
             <div class="brand">
-                <div class="brand-icon">FC</div>
+                <span class="brand-logo" aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" role="img" aria-label="Fluxo de Caixa">
+                        <defs>
+                            <linearGradient id="fc_sidebar_bg" x1="2" y1="2" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+                                <stop offset="0" stop-color="#10B981"/>
+                                <stop offset="1" stop-color="#047857"/>
+                            </linearGradient>
+                        </defs>
+                        <rect width="40" height="40" rx="10" fill="url(#fc_sidebar_bg)"/>
+                        <rect x="0.75" y="0.75" width="38.5" height="38.5" rx="9.25" fill="none" stroke="#FFFFFF" stroke-opacity="0.22" stroke-width="1.2"/>
+                        <rect x="9" y="24" width="5" height="8" rx="1.5" fill="#FFFFFF" fill-opacity="0.62"/>
+                        <rect x="17.5" y="19.5" width="5" height="12.5" rx="1.5" fill="#FFFFFF" fill-opacity="0.85"/>
+                        <rect x="26" y="15" width="5" height="17" rx="1.5" fill="#FFFFFF"/>
+                        <path d="M9 17.5 L16.5 11.5 L21.5 14 L31 7.5" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M26.2 7.5 H31 V12.3" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
 
                 <div>
                     <h1>Fluxo de Caixa</h1>
@@ -36,7 +60,7 @@
 
                 <a href="#dashboard" class="nav-link active">
                     <span class="nav-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span>
-                    Dashboard
+                    Painel principal
                 </a>
 
                 <a href="#contas" class="nav-link">
@@ -64,24 +88,41 @@
                     Relatórios
                 </a>
 
-                <a href="#configuracoes" class="nav-link">
-                    <span class="nav-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span>
-                    Configurações
-                </a>
             </nav>
 
-            <div class="sidebar-user" id="user-profile-badge" hidden>
-                <div class="sidebar-user-avatar" id="user-avatar">U</div>
-                <div class="sidebar-user-info">
-                    <strong id="user-name">Usuário</strong>
-                    <span id="user-email">—</span>
-                </div>
-            </div>
-
             <div class="sidebar-footer">
-                <span class="status-dot"></span>
-                API do projeto
-                <span class="status-text">A conectar</span>
+                <a
+                    href="#configuracoes"
+                    class="sidebar-user nav-link"
+                    id="user-profile-badge"
+                    aria-label="Abrir configurações da conta"
+                    title="Abrir configurações da conta e preferências de tema"
+                >
+                    <div class="sidebar-user-avatar" id="user-avatar">U</div>
+                    <div class="sidebar-user-info">
+                        <strong id="user-name">Titular da Conta</strong>
+                        <span id="user-email">Configurações e perfil</span>
+                        <span class="sidebar-user-action">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                            </svg>
+                            Configurações
+                        </span>
+                    </div>
+                    <span class="sidebar-user-gear" aria-hidden="true">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                        </svg>
+                    </span>
+                </a>
+
+                <div class="sidebar-legal-links">
+                    <a href="inicio.html" title="Página de apresentação do Fluxo de Caixa">Apresentação</a>
+                    <span aria-hidden="true">·</span>
+                    <a href="privacidade.html" data-open-legal="privacidade" title="Política de Privacidade e LGPD">Privacidade (LGPD)</a>
+                </div>
             </div>
         </aside>
 
@@ -92,7 +133,7 @@
                 <div>
                     <p class="eyebrow" id="user-greeting">Olá, bem-vindo(a)</p>
                     <div class="topbar-title-row">
-                        <h2 id="view-title">Dashboard financeiro</h2>
+                        <h2 id="view-title">Painel financeiro</h2>
                         <div class="topbar-metrics" id="topbar-dashboard-metrics">
                             <span class="topbar-metric-pill" title="Saldo total nas contas cadastradas">
                                 Saldo: <strong id="topbar-total-balance">—</strong>
@@ -119,7 +160,20 @@
 
                     <button
                         type="button"
-                        class="button-secondary"
+                        class="button-primary btn-abrir-nova-movimentacao"
+                        id="new-movement"
+                        data-action="movement"
+                    >
+                        <svg class="button-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Nova movimentação
+                    </button>
+
+                    <button
+                        type="button"
+                        class="button-danger btn-logout"
                         id="logout"
                     >
                         Sair
@@ -129,12 +183,39 @@
             </header>
 
             <!-- View: Dashboard Principal -->
-            <div id="view-dashboard" class="app-view"><section class="panel" aria-labelledby="alertas-titulo">
-  <div class="panel-header"><div><h3 id="alertas-titulo">Alertas</h3><p>Saídas futuras são lançamentos cadastrados; não indicam se uma conta está paga.</p></div></div>
-  <label><input type="checkbox" id="alerta-orcamento"> Limites excedidos</label>
-  <label><input type="checkbox" id="alerta-vencimento"> Saídas nos próximos 7 dias</label>
-  <p id="alertas-mensagem" role="status"></p><ul id="alertas-lista"></ul>
-</section>
+            <div id="view-dashboard" class="app-view">
+
+                <!-- Centro de Alertas e Vencimentos -->
+                <section class="alerts-panel" aria-labelledby="alertas-titulo">
+                    <div class="alerts-header">
+                        <div class="alerts-header-info">
+                            <div class="alerts-icon-badge" aria-hidden="true">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 id="alertas-titulo">Alertas e Notificações</h3>
+                                <p>Acompanhe orçamentos que atingiram o limite e saídas programadas para os próximos 7 dias.</p>
+                            </div>
+                        </div>
+
+                        <div class="alerts-preferences" role="group" aria-label="Preferências de notificação">
+                            <label class="preference-toggle" title="Receber alertas quando gastos excederem o limite orçado">
+                                <input type="checkbox" id="alerta-orcamento" checked>
+                                <span>Limites orçamentários</span>
+                            </label>
+                            <label class="preference-toggle" title="Receber alertas de contas que vencem nos próximos 7 dias">
+                                <input type="checkbox" id="alerta-vencimento" checked>
+                                <span>Saídas nos próximos 7 dias</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="alertas-mensagem" class="alert-empty-state" role="status" aria-live="polite"></div>
+                    <ul id="alertas-lista" class="alerts-list"></ul>
+                </section>
 
 
             <!-- Indicadores financeiros -->
@@ -143,7 +224,12 @@
                 <article class="summary-card">
                     <div class="card-heading">
                         <span>Saldo total</span>
-                        <span class="card-icon">R$</span>
+                        <span class="card-icon balance-icon" aria-hidden="true">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                            </svg>
+                        </span>
                     </div>
 
                     <p class="card-value" id="total-balance">
@@ -158,7 +244,12 @@
                 <article class="summary-card">
                     <div class="card-heading">
                         <span>Receitas do mês</span>
-                        <span class="card-icon income-icon">↑</span>
+                        <span class="card-icon income-icon" aria-hidden="true">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="19" x2="12" y2="5"></line>
+                                <polyline points="5 12 12 5 19 12"></polyline>
+                            </svg>
+                        </span>
                     </div>
 
                     <p class="card-value" id="total-income">
@@ -173,7 +264,12 @@
                 <article class="summary-card">
                     <div class="card-heading">
                         <span>Despesas do mês</span>
-                        <span class="card-icon expense-icon">↓</span>
+                        <span class="card-icon expense-icon" aria-hidden="true">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <polyline points="19 12 12 19 5 12"></polyline>
+                            </svg>
+                        </span>
                     </div>
 
                     <p class="card-value" id="total-expenses">
@@ -188,7 +284,12 @@
                 <article class="summary-card">
                     <div class="card-heading">
                         <span>Resultado do mês</span>
-                        <span class="card-icon">=</span>
+                        <span class="card-icon result-icon" aria-hidden="true">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                                <polyline points="17 6 23 6 23 12"></polyline>
+                            </svg>
+                        </span>
                     </div>
 
                     <p class="card-value" id="monthly-result">
@@ -250,7 +351,7 @@
                         </div>
                         <button
                             type="button"
-                            class="button-secondary"
+                            class="button-primary"
                             id="new-account"
                         >
                             + Nova conta
@@ -281,7 +382,7 @@
                     <div class="panel-header-actions">
                         <button
                             type="button"
-                            class="button-secondary btn-exportar-csv"
+                            class="button-primary btn-exportar-csv"
                             title="Exportar movimentações para CSV"
                         >
                             <svg class="button-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>Exportar CSV
@@ -352,7 +453,7 @@
                         <div class="panel-header-actions">
                             <button
                                 type="button"
-                                class="button-secondary btn-exportar-csv"
+                                class="button-primary btn-exportar-csv"
                                 id="export-movements-csv"
                             >
                                 <svg class="button-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>Exportar CSV
@@ -367,15 +468,15 @@
                     </div>
 
                     <!-- Barra de filtros do extrato -->
-                    <form class="filter-bar" id="movements-filter-form">
-                        <div class="form-field">
+                    <form class="filter-bar movements-filter-bar" id="movements-filter-form">
+                        <div class="form-field filter-group">
                             <label for="filter-account">Conta</label>
                             <select id="filter-account" name="conta_bancaria_id">
                                 <option value="">Todas as contas</option>
                             </select>
                         </div>
 
-                        <div class="form-field">
+                        <div class="form-field filter-group">
                             <label for="filter-category">Categoria</label>
                             <select id="filter-category" name="categoria">
                                 <option value="">Todas as categorias</option>
@@ -398,19 +499,19 @@
                             </select>
                         </div>
 
-                        <div class="form-field">
+                        <div class="form-field filter-group">
                             <label for="filter-start-date">Data inicial</label>
                             <input type="date" id="filter-start-date" name="data_inicio">
                         </div>
 
-                        <div class="form-field">
+                        <div class="form-field filter-group">
                             <label for="filter-end-date">Data final</label>
                             <input type="date" id="filter-end-date" name="data_fim">
                         </div>
 
                         <div class="filter-actions">
                             <button type="submit" class="button-primary">Filtrar</button>
-                            <button type="button" class="button-secondary" id="clear-movements-filter">Limpar</button>
+                            <button type="button" class="button-primary" id="clear-movements-filter">Limpar</button>
                         </div>
                     </form>
 
@@ -439,17 +540,52 @@
                 </article>
             </div>
 
-            <!-- View: Categorias -->
-            <div id="view-categorias" class="app-view" hidden><section class="panel" aria-labelledby="orcamentos-titulo">
-  <div class="panel-header"><div><h3 id="orcamentos-titulo">Orçamentos mensais</h3><p>O gasto inclui saídas e investimentos até hoje, sem transferências internas e ajustes.</p></div></div>
-  <form id="orcamento-form">
-    <label for="orcamento-mes">Mês</label> <input id="orcamento-mes" type="month" required>
-    <label for="orcamento-categoria">Categoria</label> <select id="orcamento-categoria" required></select>
-    <label for="orcamento-limite">Limite (R$)</label> <input id="orcamento-limite" type="number" min="0" max="9999999999.99" step="0.01" required>
-    <button type="submit">Salvar orçamento</button>
-  </form>
-  <p id="orcamento-mensagem" role="status"></p><ul id="orcamento-lista"></ul>
-</section>
+            <!-- View: Categorias e Orçamentos -->
+            <div id="view-categorias" class="app-view" hidden>
+                <!-- Painel de Orçamentos Mensais -->
+                <section class="budget-panel" aria-labelledby="orcamentos-titulo">
+                    <div class="panel-header" style="margin-bottom: 20px;">
+                        <div>
+                            <h3 id="orcamentos-titulo">Orçamentos mensais por categoria</h3>
+                            <p>Defina limites de gastos para cada categoria e acompanhe o percentual consumido em tempo real.</p>
+                        </div>
+                    </div>
+
+                    <form id="orcamento-form" class="budget-form">
+                        <div class="form-field filter-group">
+                            <label for="orcamento-mes">Mês de referência</label>
+                            <input id="orcamento-mes" name="mes" type="month" required>
+                        </div>
+
+                        <div class="form-field filter-group">
+                            <label for="orcamento-categoria">Categoria</label>
+                            <select id="orcamento-categoria" name="categoria" required></select>
+                        </div>
+
+                        <div class="form-field filter-group">
+                            <label for="orcamento-limite">Limite orçado (R$)</label>
+                            <input
+                                id="orcamento-limite"
+                                name="limite"
+                                type="number"
+                                min="0"
+                                max="9999999999.99"
+                                step="0.01"
+                                placeholder="0,00"
+                                required
+                            >
+                        </div>
+
+                        <div class="filter-actions">
+                            <button type="submit" class="button-primary" id="orcamento-submit-btn">
+                                Salvar orçamento
+                            </button>
+                        </div>
+                    </form>
+
+                    <div id="orcamento-mensagem" class="form-message" role="status" aria-live="polite" style="margin-bottom: 16px;"></div>
+                    <ul id="orcamento-lista" class="budget-grid"></ul>
+                </section>
 
                 <div class="panel-header" style="margin-bottom: 16px;">
                     <div>
@@ -643,7 +779,7 @@
                         <div class="panel-header-actions">
                             <button
                                 type="button"
-                                class="button-secondary btn-exportar-csv"
+                                class="button-primary btn-exportar-csv"
                                 id="export-report-csv"
                             >
                                 <svg class="button-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>Exportar CSV do período
@@ -657,25 +793,25 @@
                         </div>
                     </div>
 
-                    <form class="filter-bar" id="custom-report-form">
-                        <div class="form-field">
+                    <form class="filter-bar report-filter-bar" id="custom-report-form">
+                        <div class="form-field filter-group">
                             <label for="report-account">Conta bancária</label>
                             <select id="report-account" name="conta_bancaria_id">
                                 <option value="">Todas as contas (Consolidado)</option>
                             </select>
                         </div>
 
-                        <div class="form-field">
+                        <div class="form-field filter-group">
                             <label for="report-start-date">Data inicial</label>
                             <input type="date" id="report-start-date" name="data_inicio" required>
                         </div>
 
-                        <div class="form-field">
+                        <div class="form-field filter-group">
                             <label for="report-end-date">Data final</label>
                             <input type="date" id="report-end-date" name="data_fim" required>
                         </div>
 
-                        <div class="form-field">
+                        <div class="form-field filter-group">
                             <label for="report-save-type">Salvar cálculo oficial (opcional)</label>
                             <select id="report-save-type" name="tipo_calculo">
                                 <option value="">Apenas visualizar resumo</option>
@@ -686,7 +822,7 @@
                             </select>
                         </div>
 
-                        <div class="filter-actions">
+                        <div class="filter-actions report-filter-actions">
                             <button type="submit" class="button-primary" id="generate-report-btn">
                                 Gerar relatório
                             </button>
@@ -824,8 +960,8 @@
                     </div>
 
                     <form id="settings-profile-form" class="dialog-form settings-form" novalidate>
-                        <div class="form-grid">
-                            <div class="form-field">
+                        <div class="form-grid settings-grid-3col">
+                            <div class="form-field form-group">
                                 <label for="settings-name">Nome completo</label>
                                 <input
                                     id="settings-name"
@@ -838,7 +974,7 @@
                                 >
                             </div>
 
-                            <div class="form-field">
+                            <div class="form-field form-group">
                                 <label for="settings-email">E-mail de acesso</label>
                                 <input
                                     id="settings-email"
@@ -850,7 +986,7 @@
                                 >
                             </div>
 
-                            <div class="form-field">
+                            <div class="form-field form-group">
                                 <label for="settings-phone">
                                     Telefone <span class="field-optional">(opcional)</span>
                                 </label>
@@ -875,8 +1011,8 @@
                             <h4 class="settings-section-subtitle">Alterar senha <span class="field-optional">(preencha apenas se desejar trocar a senha)</span></h4>
                         </div>
 
-                        <div class="form-grid">
-                            <div class="form-field">
+                        <div class="form-grid settings-grid-3col">
+                            <div class="form-field form-group">
                                 <label for="settings-current-password">Senha atual</label>
                                 <div class="password-input-wrapper">
                                     <input
@@ -906,7 +1042,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-field">
+                            <div class="form-field form-group">
                                 <label for="settings-new-password">Nova senha</label>
                                 <div class="password-input-wrapper">
                                     <input
@@ -935,12 +1071,13 @@
                                         </svg>
                                     </button>
                                 </div>
+                                <div id="settings-password-checklist"></div>
                                 <span class="field-help">
                                     Mínimo de 8 caracteres com maiúscula, minúscula, número e símbolo.
                                 </span>
                             </div>
 
-                            <div class="form-field">
+                            <div class="form-field form-group">
                                 <label for="settings-confirm-password">Confirmar nova senha</label>
                                 <div class="password-input-wrapper">
                                     <input
@@ -1001,8 +1138,12 @@
             </div>
 
             <footer class="footer">
-                <p>Fluxo de Caixa · Controle financeiro pessoal</p>
-                <p>API FastAPI + Chart.js conectados em tempo real</p>
+                <p>Fluxo de Caixa · Controle financeiro pessoal com criptografia e conformidade LGPD</p>
+                <p>
+                    <a href="inicio.html" class="auth-link">Apresentação</a> ·
+                    <a href="termos.html" data-open-legal="termos" class="auth-link">Termos de Serviço</a> ·
+                    <a href="privacidade.html" data-open-legal="privacidade" class="auth-link">Política de Privacidade (LGPD)</a>
+                </p>
             </footer>
 
         </main>
@@ -1524,7 +1665,7 @@
                     >
                         Cancelar
                     </button>
-                    <button type="button" class="button-danger" id="logout-confirm-btn">
+                    <button type="button" class="button-danger btn-logout" id="logout-confirm-btn">
                         Sim, sair
                     </button>
                 </div>

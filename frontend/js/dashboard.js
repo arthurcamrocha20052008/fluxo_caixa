@@ -1,4 +1,4 @@
-﻿/*
+/*
  * FLUXO DE CAIXA
  * Inicialização, navegação SPA, gráficos Chart.js, metas, relatórios e exportação CSV.
  */
@@ -6,9 +6,11 @@
 let todasContas = [];
 let contasCarregadas = [];
 let todasMovimentacoesCache = [];
+let movimentacoesMesCache = [];
 let movimentacoesFiltradasCache = [];
 let metasCarregadas = [];
 let calculosCarregados = [];
+let ultimoResumoRelatorioCache = null;
 let usuarioAtual = null;
 
 // Instâncias ativas do Chart.js para destruição segura antes de recriar
@@ -64,7 +66,7 @@ function obterSaudacaoUsuario(usuario = usuarioAtual) {
 const titulosViews = {
     dashboard: {
         eyebrow: "Olá, bem-vindo(a)",
-        title: "Dashboard financeiro",
+        title: "Painel financeiro",
         subtitle: "Acompanhe suas finanças em um só lugar."
     },
     contas: {
@@ -165,10 +167,50 @@ function formatarIso(data) {
     return `${ano}-${mes}-${dia}`;
 }
 
+const NOMES_TIPOS_CONTA = {
+    corrente: "Conta Corrente",
+    poupanca: "Poupança",
+    investimento: "Investimento"
+};
+
+const NOMES_TIPOS_MOVIMENTO = {
+    entrada: "Entrada",
+    saida: "Saída",
+    transferencia: "Transferência",
+    transferencia_externa: "Transferência Externa",
+    investimento: "Investimento",
+    ajuste: "Ajuste"
+};
+
+const NOMES_TIPOS_CALCULO = {
+    diario: "Diário",
+    semanal: "Semanal",
+    mensal: "Mensal",
+    anual: "Anual"
+};
+
 function formatarCategoria(slug) {
     if (!slug) return "Outros";
     const chave = String(slug).toLowerCase();
     return NOMES_CATEGORIAS[chave] || slug;
+}
+
+function formatarTipoConta(tipo) {
+    if (!tipo) return "Conta";
+    const chave = String(tipo).toLowerCase();
+    return NOMES_TIPOS_CONTA[chave] || tipo;
+}
+
+function formatarTipoMovimento(tipo) {
+    if (!tipo) return "Movimentação";
+    const chave = String(tipo).toLowerCase();
+    return NOMES_TIPOS_MOVIMENTO[chave] || tipo;
+}
+
+function formatarTipoCalculo(tipo) {
+    if (!tipo) return "Período";
+    const chave = String(tipo).toLowerCase();
+    return NOMES_TIPOS_CALCULO[chave] || tipo;
 }
 
 function criarElemento(tag, texto, classe) {
@@ -193,7 +235,7 @@ function obterNomeConta(contaId) {
 ========================================================= */
 
 function configurarNavegacao() {
-    const navLinks = document.querySelectorAll(".navigation .nav-link");
+    const navLinks = document.querySelectorAll(".sidebar .nav-link");
 
     function ativarSecao(hash) {
         let viewName = (hash || window.location.hash || "#dashboard")
@@ -308,7 +350,21 @@ function verificarSessao() {
 
 document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("pageshow", verificarSessao);
-    if (!api.getToken()) return;
+    if (!api.getToken()) {
+        verificarSessao();
+        return;
+    }
+
+    const nomeSessao = (sessionStorage.getItem("fluxo_caixa_nome_usuario") || "").trim();
+    if (nomeSessao) {
+        const iniciaisSessao = nomeSessao
+            .split(/\s+/)
+            .slice(0, 2)
+            .map((parte) => parte[0]?.toUpperCase() || "")
+            .join("");
+        definirTexto("#user-avatar", iniciaisSessao || "U");
+        definirTexto("#user-name", nomeSessao);
+    }
 
     atualizarData();
     inicializarDatasPadraoRelatorio();
@@ -385,7 +441,45 @@ function aplicarScrollLock(ativo) {
     }
 }
 
+// Interceptador global para garantir scroll lock em todos os modais (<dialog>)
+if (typeof HTMLDialogElement !== "undefined" && !HTMLDialogElement.prototype.__scrollLockHooked) {
+    HTMLDialogElement.prototype.__scrollLockHooked = true;
+    const showModalOriginal = HTMLDialogElement.prototype.showModal;
+    HTMLDialogElement.prototype.showModal = function(...args) {
+        document.body.classList.add("modal-open");
+        return showModalOriginal.apply(this, args);
+    };
+    const closeOriginal = HTMLDialogElement.prototype.close;
+    HTMLDialogElement.prototype.close = function(...args) {
+        const res = closeOriginal.apply(this, args);
+        setTimeout(() => {
+            const abertos = document.querySelectorAll("dialog[open]");
+            if (abertos.length === 0) {
+                document.body.classList.remove("modal-open");
+            }
+        }, 0);
+        return res;
+    };
+}
+
 function configurarDialogos() {
+    // Configura fechamento automático ao clicar fora (backdrop) para todos os modais
+    document.querySelectorAll("dialog").forEach((dialog) => {
+        dialog.addEventListener("click", (event) => {
+            if (event.target !== dialog) return;
+            const rect = dialog.getBoundingClientRect();
+            const clicouFora = (
+                event.clientX < rect.left ||
+                event.clientX > rect.right ||
+                event.clientY < rect.top ||
+                event.clientY > rect.bottom
+            );
+            if (clicouFora && typeof dialog.close === "function") {
+                dialog.close();
+            }
+        });
+    });
+
     const formularioConta = document.querySelector("#account-form");
     const formularioMovimentacao = document.querySelector("#movement-form");
     const formularioInvestimento = document.querySelector("#investment-form");
@@ -396,7 +490,7 @@ function configurarDialogos() {
     document.querySelectorAll(".btn-abrir-nova-conta, #new-account").forEach((botao) => {
         botao.addEventListener("click", () => abrirDialogoConta());
     });
-    document.querySelectorAll(".btn-abrir-nova-movimentacao").forEach((botao) => {
+    document.querySelectorAll(".btn-abrir-nova-movimentacao:not(#new-movement)").forEach((botao) => {
         botao.addEventListener("click", abrirDialogoMovimentacao);
     });
     botaoTopo?.addEventListener("click", () => {
@@ -435,6 +529,10 @@ function configurarDialogos() {
     });
 
     seletorTipoMovimento?.addEventListener("change", atualizarCamposTipoMovimentacao);
+
+    const inputDiaRepeticao = document.querySelector("#movement-repeat-day");
+    inputDiaRepeticao?.addEventListener("input", atualizarAjudaDiaRepeticao);
+    inputDiaRepeticao?.addEventListener("change", atualizarAjudaDiaRepeticao);
 
     formularioConta?.addEventListener("submit", salvarConta);
     formularioMovimentacao?.addEventListener("submit", salvarMovimentacao);
@@ -500,6 +598,35 @@ function popularSelectOpcoesMovimentacao(selectEl, listaOpcoes) {
     });
     const existeAnterior = listaOpcoes.some((item) => item.value === valorAnterior);
     selectEl.value = existeAnterior ? valorAnterior : listaOpcoes[0]?.value || "";
+}
+
+function atualizarAjudaDiaRepeticao() {
+    const input = document.querySelector("#movement-repeat-day");
+    const help = document.querySelector("#movement-repeat-day-help");
+    const tipo = document.querySelector("#movement-type")?.value || "entrada";
+    if (!input || !help) return;
+    const dia = parseInt(input.value, 10);
+    const termo = tipo === "entrada" ? "este ganho fixo" : "esta conta fixa";
+    if (isNaN(dia) || dia < 1 || dia > 31) {
+        help.textContent = `Dia do mês (1 a 31) em que ${termo} se repetirá automaticamente.`;
+        return;
+    }
+    const hoje = new Date();
+    const diaAtual = hoje.getDate();
+    const meses = [
+        "janeiro", "fevereiro", "março", "abril", "maio", "junho",
+        "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"
+    ];
+    if (dia < diaAtual) {
+        const prox = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1);
+        const mesNome = meses[prox.getMonth()];
+        const ano = prox.getFullYear();
+        help.textContent = `Como o dia ${dia} já passou no mês atual (hoje é dia ${diaAtual}), a recorrência iniciará no próximo mês em ${dia} de ${mesNome} de ${ano}.`;
+    } else {
+        const mesNome = meses[hoje.getMonth()];
+        const ano = hoje.getFullYear();
+        help.textContent = `Como o dia ${dia} é hoje ou posterior (hoje é dia ${diaAtual}), a movimentação será processada neste mês em ${dia} de ${mesNome} de ${ano} e repetirá nos meses seguintes.`;
+    }
 }
 
 function atualizarCamposTipoMovimentacao() {
@@ -584,6 +711,20 @@ function atualizarCamposTipoMovimentacao() {
     if (inputValor) {
         inputValor.setAttribute("min", "0.01");
     }
+
+    const labelConta = document.querySelector("#movement-account-label");
+    const btnSubmit = document.querySelector("#movement-form button[type='submit']");
+    if (ehInvestimento) {
+        if (labelConta) labelConta.textContent = "Conta bancária para débito do aporte";
+        if (btnSubmit) btnSubmit.textContent = "Registrar investimento";
+    } else {
+        if (labelConta) labelConta.textContent = tipo === "transferencia" ? "Conta de origem" : "Conta bancária";
+        if (btnSubmit) btnSubmit.textContent = "Salvar movimentação";
+    }
+
+    if (ehFixa) {
+        atualizarAjudaDiaRepeticao();
+    }
 }
 
 function abrirDialogoConta(contaParaEditar = null) {
@@ -641,7 +782,7 @@ function abrirDialogoMovimentacao() {
         contasCarregadas.forEach((conta) => {
             const opcao = document.createElement("option");
             opcao.value = String(conta.id);
-            opcao.textContent = `${conta.nome_banco} (${conta.tipo_conta}) — ${formatarMoeda(conta.valor_conta_atual)}`;
+            opcao.textContent = `${conta.nome_banco} (${formatarTipoConta(conta.tipo_conta)}) — ${formatarMoeda(conta.valor_conta_atual)}`;
             seletor.append(opcao);
         });
     }
@@ -651,7 +792,7 @@ function abrirDialogoMovimentacao() {
         contasCarregadas.forEach((conta) => {
             const opcao = document.createElement("option");
             opcao.value = String(conta.id);
-            opcao.textContent = `${conta.nome_banco} (${conta.tipo_conta})`;
+            opcao.textContent = `${conta.nome_banco} (${formatarTipoConta(conta.tipo_conta)})`;
             seletorDestino.append(opcao);
         });
         if (contasCarregadas.length > 1) {
@@ -664,7 +805,7 @@ function abrirDialogoMovimentacao() {
         const idSelecionado = Number(seletor.value);
         const conta = contasCarregadas.find((c) => c.id === idSelecionado);
         if (ajuda && conta) {
-            ajuda.textContent = `Saldo atual: ${formatarMoeda(conta.valor_conta_atual)} (${conta.tipo_conta})`;
+            ajuda.textContent = `Saldo atual: ${formatarMoeda(conta.valor_conta_atual)} (${formatarTipoConta(conta.tipo_conta)})`;
         }
     };
 
@@ -706,7 +847,7 @@ function abrirDialogoInvestimento() {
         contasCarregadas.forEach((conta) => {
             const opcao = document.createElement("option");
             opcao.value = String(conta.id);
-            opcao.textContent = `${conta.nome_banco} (${conta.tipo_conta}) — ${formatarMoeda(conta.valor_conta_atual)}`;
+            opcao.textContent = `${conta.nome_banco} (${formatarTipoConta(conta.tipo_conta)}) — ${formatarMoeda(conta.valor_conta_atual)}`;
             seletorConta.append(opcao);
         });
     }
@@ -716,7 +857,7 @@ function abrirDialogoInvestimento() {
         const idSelecionado = Number(seletorConta.value);
         const conta = contasCarregadas.find((c) => c.id === idSelecionado);
         if (ajudaConta && conta) {
-            ajudaConta.textContent = `Saldo disponível para débito: ${formatarMoeda(conta.valor_conta_atual)} (${conta.tipo_conta})`;
+            ajudaConta.textContent = `Saldo disponível para débito: ${formatarMoeda(conta.valor_conta_atual)} (${formatarTipoConta(conta.tipo_conta)})`;
         }
     };
 
@@ -916,7 +1057,7 @@ async function salvarMovimentacao(event) {
         });
         atualizarCamposTipoMovimentacao();
         document.querySelector("#movement-dialog").close();
-        mostrarToast("Movimentação registrada com sucesso!");
+        mostrarToast(ehInvestimento ? `Investimento em ${payload.tipo_investimento} registrado com sucesso!` : "Movimentação registrada com sucesso!");
         await carregarDashboard();
     } catch (error) {
         definirMensagem("#movement-message", error.message, "error");
@@ -1240,7 +1381,7 @@ function popularSeletoresContas(contas) {
         contas.forEach((conta) => {
             const opt = document.createElement("option");
             opt.value = String(conta.id);
-            opt.textContent = `${conta.nome_banco} (${conta.tipo_conta})`;
+            opt.textContent = `${conta.nome_banco} (${formatarTipoConta(conta.tipo_conta)})`;
             seletorFiltro.append(opt);
         });
         seletorFiltro.value = valorAtual;
@@ -1255,7 +1396,7 @@ function popularSeletoresContas(contas) {
         contas.forEach((conta) => {
             const opt = document.createElement("option");
             opt.value = String(conta.id);
-            opt.textContent = `${conta.nome_banco} (${conta.tipo_conta})`;
+            opt.textContent = `${conta.nome_banco} (${formatarTipoConta(conta.tipo_conta)})`;
             seletorRelatorio.append(opt);
         });
         seletorRelatorio.value = valorAtual;
@@ -1362,7 +1503,7 @@ function atualizarContas(contas) {
                 criarElemento("strong", conta.nome_banco),
                 criarElemento(
                     "span",
-                    `${conta.tipo_conta} · ${formatarMoeda(conta.valor_conta_atual)}`
+                    `${formatarTipoConta(conta.tipo_conta)} · ${formatarMoeda(conta.valor_conta_atual)}`
                 )
             );
             elemento.append(linha);
@@ -1383,7 +1524,7 @@ function atualizarContas(contas) {
             const info = document.createElement("div");
             const statusTexto = conta.ativa ? "Ativa" : "Inativa";
             info.append(
-                criarElemento("strong", `${conta.nome_banco} (${conta.tipo_conta})`),
+                criarElemento("strong", `${conta.nome_banco} (${formatarTipoConta(conta.tipo_conta)})`),
                 document.createElement("br"),
                 criarElemento(
                     "span",
@@ -1556,6 +1697,9 @@ function atualizarTabelaVazia(seletorTabela, mensagem, colunas = 5) {
 }
 
 function obterRotuloCategoriaMovimento(movimento) {
+    if (movimento.tipo === "investimento" || movimento.categoria === "investimento") {
+        return movimento.tipo_investimento ? `Investimento · ${movimento.tipo_investimento}` : "Investimento";
+    }
     const baseCat = formatarCategoria(movimento.categoria);
     if (movimento.tipo_investimento) {
         return `${baseCat} · ${movimento.tipo_investimento}`;
@@ -1596,7 +1740,7 @@ function renderizarTabelaCompacta(seletorTabela, lista) {
         celulaTipo.append(
             criarElemento(
                 "span",
-                movimento.tipo,
+                formatarTipoMovimento(movimento.tipo),
                 `badge-type badge-${movimento.tipo}`
             )
         );
@@ -1606,6 +1750,8 @@ function renderizarTabelaCompacta(seletorTabela, lista) {
                 ? "align-right transaction-income"
                 : movimento.tipo === "saida"
                 ? "align-right transaction-expense"
+                : movimento.tipo === "investimento"
+                ? "align-right transaction-investimento"
                 : "align-right";
         const celulaValor = criarElemento(
             "td",
@@ -1642,7 +1788,7 @@ function renderizarTabelaDetalhada(seletorTabela, lista) {
         celulaTipo.append(
             criarElemento(
                 "span",
-                movimento.tipo,
+                formatarTipoMovimento(movimento.tipo),
                 `badge-type badge-${movimento.tipo}`
             )
         );
@@ -1652,6 +1798,8 @@ function renderizarTabelaDetalhada(seletorTabela, lista) {
                 ? "align-right transaction-income"
                 : movimento.tipo === "saida"
                 ? "align-right transaction-expense"
+                : movimento.tipo === "investimento"
+                ? "align-right transaction-investimento"
                 : "align-right";
         const celulaValor = criarElemento(
             "td",
@@ -1767,7 +1915,21 @@ function alternarVisibilidadeGrafico(seletorContainer, seletorVazio, possuiDados
     if (vazio) vazio.hidden = possuiDados;
 }
 
+function obterCoresTemaGrafico() {
+    const escuro =
+        document.documentElement.getAttribute("data-theme") === "dark" ||
+        document.body.classList.contains("dark-theme");
+    return {
+        texto: escuro ? "#cbd5e1" : "#475569",
+        grade: escuro ? "rgba(148, 163, 184, 0.14)" : "rgba(15, 23, 42, 0.07)",
+        bordaRosca: escuro ? "#0f172a" : "#ffffff"
+    };
+}
+
 function atualizarGraficosDashboard(contas, movimentacoesMes, todasMovimentacoes, metas) {
+    if (Array.isArray(movimentacoesMes)) {
+        movimentacoesMesCache = movimentacoesMes;
+    }
     if (typeof window.Chart === "undefined") {
         return;
     }
@@ -1827,6 +1989,8 @@ function renderizarGraficosVisaoGeral(movimentacoes) {
         serieSaidas.push(Number(porData[dataIso].saidas.toFixed(2)));
     });
 
+    const coresTema = obterCoresTemaGrafico();
+
     const canvasEvolucao = document.querySelector("#chart-dashboard-evolution");
     if (canvasEvolucao) {
         graficosAtivos.dashboardEvolucao = new window.Chart(canvasEvolucao, {
@@ -1867,14 +2031,20 @@ function renderizarGraficosVisaoGeral(movimentacoes) {
                 plugins: {
                     legend: {
                         position: "bottom",
-                        labels: { boxWidth: 12, font: { size: 11 } }
+                        labels: { color: coresTema.texto, boxWidth: 12, font: { size: 11 } }
                     }
                 },
                 scales: {
+                    x: {
+                        ticks: { color: coresTema.texto },
+                        grid: { color: coresTema.grade }
+                    },
                     y: {
                         ticks: {
+                            color: coresTema.texto,
                             callback: (val) => formatarMoeda(val)
-                        }
+                        },
+                        grid: { color: coresTema.grade }
                     }
                 }
             }
@@ -1914,7 +2084,8 @@ function renderizarGraficosVisaoGeral(movimentacoes) {
                     {
                         data: categoriasValores,
                         backgroundColor: CORES_GRAFICOS.slice(0, categoriasLabels.length),
-                        borderWidth: 1
+                        borderColor: coresTema.bordaRosca,
+                        borderWidth: 2
                     }
                 ]
             },
@@ -1924,7 +2095,7 @@ function renderizarGraficosVisaoGeral(movimentacoes) {
                 plugins: {
                     legend: {
                         position: "bottom",
-                        labels: { boxWidth: 12, font: { size: 11 } }
+                        labels: { color: coresTema.texto, boxWidth: 12, font: { size: 11 } }
                     }
                 }
             }
@@ -1961,6 +2132,7 @@ function renderizarGraficoCategorias(movimentacoes) {
     const receitas = labels.map((c) => Number(mapa[c].receitas.toFixed(2)));
     const despesas = labels.map((c) => Number(mapa[c].despesas.toFixed(2)));
 
+    const coresTema = obterCoresTemaGrafico();
     const canvas = document.querySelector("#chart-categories-distribution");
     if (canvas && labels.length > 0) {
         graficosAtivos.categoriasDistribuicao = new window.Chart(canvas, {
@@ -1986,12 +2158,23 @@ function renderizarGraficoCategorias(movimentacoes) {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { position: "bottom" }
+                    legend: {
+                        position: "bottom",
+                        labels: { color: coresTema.texto }
+                    }
                 },
                 scales: {
+                    x: {
+                        ticks: { color: coresTema.texto },
+                        grid: { color: coresTema.grade }
+                    },
                     y: {
                         beginAtZero: true,
-                        ticks: { callback: (v) => formatarMoeda(v) }
+                        ticks: {
+                            color: coresTema.texto,
+                            callback: (v) => formatarMoeda(v)
+                        },
+                        grid: { color: coresTema.grade }
                     }
                 }
             }
@@ -2062,6 +2245,7 @@ function renderizarGraficoInvestimentos(contas, movimentacoes, metas) {
         cores.push(CORES_GRAFICOS[(idx + 4) % CORES_GRAFICOS.length]);
     });
 
+    const coresTema = obterCoresTemaGrafico();
     const canvas = document.querySelector("#chart-investments-evolution");
     if (canvas) {
         graficosAtivos.investimentosEvolucao = new window.Chart(canvas, {
@@ -2081,12 +2265,23 @@ function renderizarGraficoInvestimentos(contas, movimentacoes, metas) {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { position: "bottom" }
+                    legend: {
+                        position: "bottom",
+                        labels: { color: coresTema.texto }
+                    }
                 },
                 scales: {
+                    x: {
+                        ticks: { color: coresTema.texto },
+                        grid: { color: coresTema.grade }
+                    },
                     y: {
                         beginAtZero: true,
-                        ticks: { callback: (v) => formatarMoeda(v) }
+                        ticks: {
+                            color: coresTema.texto,
+                            callback: (v) => formatarMoeda(v)
+                        },
+                        grid: { color: coresTema.grade }
                     }
                 }
             }
@@ -2095,6 +2290,7 @@ function renderizarGraficoInvestimentos(contas, movimentacoes, metas) {
 }
 
 function renderizarGraficoRelatorioConsolidado(resumo) {
+    ultimoResumoRelatorioCache = resumo || null;
     const possuiDados =
         resumo &&
         (Number(resumo.total_entradas) > 0 ||
@@ -2155,11 +2351,22 @@ function renderizarGraficoRelatorioConsolidado(resumo) {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { position: "bottom" }
+                legend: {
+                    position: "bottom",
+                    labels: { color: obterCoresTemaGrafico().texto }
+                }
             },
             scales: {
+                x: {
+                    ticks: { color: obterCoresTemaGrafico().texto },
+                    grid: { color: obterCoresTemaGrafico().grade }
+                },
                 y: {
-                    ticks: { callback: (v) => formatarMoeda(v) }
+                    ticks: {
+                        color: obterCoresTemaGrafico().texto,
+                        callback: (v) => formatarMoeda(v)
+                    },
+                    grid: { color: obterCoresTemaGrafico().grade }
                 }
             }
         }
@@ -2428,7 +2635,7 @@ function renderizarHistoricoCalculos(calculos) {
         const linha = document.createElement("tr");
         linha.append(
             criarElemento("td", obterNomeConta(calc.conta_bancaria_id)),
-            criarElemento("td", calc.tipo_calculo),
+            criarElemento("td", formatarTipoCalculo(calc.tipo_calculo)),
             criarElemento(
                 "td",
                 `${formatarData(calc.data_inicio)} a ${formatarData(calc.data_fim)}`
@@ -2492,19 +2699,19 @@ function exportarMovimentacoesCsv(listaMovimentacoes) {
     const cabecalho = [
         "ID",
         "Data",
-        "Conta Bancaria",
+        "Conta Bancária",
         "Tipo",
         "Categoria",
-        "Descricao",
+        "Descrição",
         "Valor (R$)",
-        "Observacao"
+        "Observação"
     ];
 
     const linhas = dados.map((mov) => [
         mov.id,
         mov.data_movimentacao,
         obterNomeConta(mov.conta_bancaria_id),
-        mov.tipo,
+        formatarTipoMovimento(mov.tipo),
         formatarCategoria(mov.categoria),
         mov.descricao,
         Number(mov.valor || 0).toFixed(2).replace(".", ","),
@@ -2563,12 +2770,17 @@ function atualizarInterfaceTema(tema) {
 
     document.documentElement.setAttribute("data-theme", escuro ? "dark" : "light");
     document.body.classList.toggle("dark-theme", escuro);
+    document.body.classList.toggle("light-theme", !escuro);
 
     if (botao) {
         botao.setAttribute("aria-pressed", String(escuro));
     }
     if (icone) {
-        icone.textContent = escuro ? "☀️" : "🌙";
+        if (escuro) {
+            icone.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>';
+        } else {
+            icone.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
+        }
     }
     if (rotulo) {
         rotulo.textContent = escuro ? "Ativar tema claro" : "Ativar tema escuro";
@@ -2585,6 +2797,17 @@ function atualizarInterfaceTema(tema) {
 function configurarConfiguracoes() {
     inicializarBotoesVerSenhaDashboard();
 
+    const inputNovaSenhaChecklist = document.querySelector("#settings-new-password");
+    const containerChecklistSenha = document.querySelector("#settings-password-checklist");
+    const inputConfirmarSenhaChecklist = document.querySelector("#settings-confirm-password");
+    if (typeof vincularChecklistSenha === "function" && inputNovaSenhaChecklist && containerChecklistSenha) {
+        vincularChecklistSenha({
+            inputSenha: inputNovaSenhaChecklist,
+            containerChecklist: containerChecklistSenha,
+            inputConfirmacao: inputConfirmarSenhaChecklist
+        });
+    }
+
     const temaInicial = localStorage.getItem("fluxo_caixa_tema") || "light";
     atualizarInterfaceTema(temaInicial);
 
@@ -2594,6 +2817,15 @@ function configurarConfiguracoes() {
         const proximo = atual === "dark" ? "light" : "dark";
         localStorage.setItem("fluxo_caixa_tema", proximo);
         atualizarInterfaceTema(proximo);
+        atualizarGraficosDashboard(
+            todasContas,
+            movimentacoesMesCache,
+            todasMovimentacoesCache,
+            metasCarregadas
+        );
+        if (ultimoResumoRelatorioCache) {
+            renderizarGraficoRelatorioConsolidado(ultimoResumoRelatorioCache);
+        }
         mostrarToast(
             proximo === "dark" ? "Tema escuro ativado!" : "Tema claro ativado!",
             "info"
@@ -2671,6 +2903,15 @@ async function salvarAlteracoesPerfil(event) {
             inputConfirmarSenha?.focus();
             return;
         }
+        const erroSenhaForte =
+            typeof obterMensagemErroSenha === "function"
+                ? obterMensagemErroSenha(novaSenha)
+                : "";
+        if (erroSenhaForte) {
+            definirMensagem("#settings-profile-message", erroSenhaForte, "error");
+            inputNovaSenha?.focus();
+            return;
+        }
     }
 
     const payload = {
@@ -2686,7 +2927,10 @@ async function salvarAlteracoesPerfil(event) {
         payload.nova_senha = novaSenha;
     }
 
-    if (btnSalvar) btnSalvar.disabled = true;
+    if (btnSalvar) {
+        btnSalvar.disabled = true;
+        btnSalvar.classList.add("is-loading");
+    }
     definirMensagem("#settings-profile-message", "Salvando alterações...", "info");
 
     try {
@@ -2707,7 +2951,10 @@ async function salvarAlteracoesPerfil(event) {
     } catch (error) {
         definirMensagem("#settings-profile-message", error.message, "error");
     } finally {
-        if (btnSalvar) btnSalvar.disabled = false;
+        if (btnSalvar) {
+            btnSalvar.disabled = false;
+            btnSalvar.classList.remove("is-loading");
+        }
     }
 }
 
@@ -2729,7 +2976,10 @@ async function confirmarExclusaoConta(event) {
         return;
     }
 
-    if (btnExcluir) btnExcluir.disabled = true;
+    if (btnExcluir) {
+        btnExcluir.disabled = true;
+        btnExcluir.classList.add("is-loading");
+    }
     definirMensagem(
         "#delete-account-message",
         "Excluindo sua conta permanentemente...",
@@ -2744,7 +2994,10 @@ async function confirmarExclusaoConta(event) {
     } catch (error) {
         definirMensagem("#delete-account-message", error.message, "error");
     } finally {
-        if (btnExcluir) btnExcluir.disabled = false;
+        if (btnExcluir) {
+            btnExcluir.disabled = false;
+            btnExcluir.classList.remove("is-loading");
+        }
     }
 }
 
@@ -2887,36 +3140,93 @@ function inicializarSelectsArredondados(root = document) {
 
 
 function inicializarOrcamentosAlertas() {
-    const mes = document.querySelector('#orcamento-mes');
+    const inputMes = document.querySelector("#orcamento-mes");
     const agora = new Date();
-    mes.value = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}`;
-    const select = document.querySelector('#orcamento-categoria');
-    document.querySelectorAll('#categories-cards-grid [data-category]').forEach(card => {
-        const option = document.createElement('option');
-        option.value = card.dataset.category;
-        option.textContent = card.querySelector('strong').textContent;
-        select.append(option);
-    });
-    mes.addEventListener('change', atualizarOrcamentos);
-    document.querySelector('#orcamento-form').addEventListener('submit', async event => {
+    if (inputMes) {
+        inputMes.value = `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, "0")}`;
+    }
+
+    const selectCategoria = document.querySelector("#orcamento-categoria");
+    if (selectCategoria && selectCategoria.options.length === 0) {
+        document.querySelectorAll("#categories-cards-grid [data-category]").forEach((card) => {
+            const cat = card.dataset.category;
+            const nome = card.querySelector("strong")?.textContent || formatarCategoria(cat);
+            const option = document.createElement("option");
+            option.value = cat;
+            option.textContent = nome;
+            selectCategoria.append(option);
+        });
+        if (typeof inicializarSelectsArredondados === "function") {
+            inicializarSelectsArredondados(selectCategoria.parentElement || document);
+        }
+    }
+
+    inputMes?.addEventListener("change", atualizarOrcamentos);
+
+    const formOrcamento = document.querySelector("#orcamento-form");
+    formOrcamento?.addEventListener("submit", async (event) => {
         event.preventDefault();
-        const msg = document.querySelector('#orcamento-mensagem');
+        const msg = document.querySelector("#orcamento-mensagem");
+        const btnSalvar = document.querySelector("#orcamento-submit-btn");
+        const mesValor = inputMes?.value;
+        const categoriaValor = selectCategoria?.value;
+        const limiteValor = document.querySelector("#orcamento-limite")?.value;
+
+        if (!mesValor || !categoriaValor || !limiteValor) {
+            if (msg) definirMensagem("#orcamento-mensagem", "Preencha todos os campos do orçamento.", "error");
+            return;
+        }
+
+        if (btnSalvar) btnSalvar.disabled = true;
+        if (msg) definirMensagem("#orcamento-mensagem", "Salvando orçamento...", "info");
+
         try {
-            const lista = await api.get(`/orcamentos?mes=${mes.value}-01`);
-            const existente = lista.find(o => o.categoria === select.value);
-            const dados = {mes: `${mes.value}-01`, categoria: select.value, limite: document.querySelector('#orcamento-limite').value};
-            if (existente) await api.put(`/orcamentos/${existente.id}`, dados);
-            else await api.post('/orcamentos', dados);
-            msg.textContent = 'Orçamento salvo.';
+            const dataPrimeiroDia = `${mesValor}-01`;
+            const lista = await api.get(`/orcamentos?mes=${dataPrimeiroDia}`);
+            const existente = lista.find((o) => o.categoria === categoriaValor);
+            const payload = {
+                mes: dataPrimeiroDia,
+                categoria: categoriaValor,
+                limite: limiteValor
+            };
+
+            if (existente) {
+                await api.put(`/orcamentos/${existente.id}`, payload);
+                mostrarToast(`Orçamento de ${formatarCategoria(categoriaValor)} atualizado com sucesso!`);
+            } else {
+                await api.post("/orcamentos", payload);
+                mostrarToast(`Orçamento de ${formatarCategoria(categoriaValor)} cadastrado com sucesso!`);
+            }
+
+            if (msg) limparMensagem("#orcamento-mensagem");
+            const inputLimite = document.querySelector("#orcamento-limite");
+            if (inputLimite) inputLimite.value = "";
             await atualizarOrcamentosAlertas();
-        } catch (e) { msg.textContent = e.message; }
+        } catch (error) {
+            if (msg) definirMensagem("#orcamento-mensagem", error.message, "error");
+            mostrarToast(error.message, "error");
+        } finally {
+            if (btnSalvar) btnSalvar.disabled = false;
+        }
     });
-    ['orcamento', 'vencimento'].forEach(tipo => document.querySelector(`#alerta-${tipo}`).addEventListener('change', async () => {
-        try {
-            await api.put('/alertas/preferencias', {orcamento: document.querySelector('#alerta-orcamento').checked, vencimento: document.querySelector('#alerta-vencimento').checked});
-            await atualizarAlertas();
-        } catch (e) { document.querySelector('#alertas-mensagem').textContent = e.message; }
-    }));
+
+    ["orcamento", "vencimento"].forEach((tipo) => {
+        document.querySelector(`#alerta-${tipo}`)?.addEventListener("change", async () => {
+            const orcamentoAtivo = Boolean(document.querySelector("#alerta-orcamento")?.checked);
+            const vencimentoAtivo = Boolean(document.querySelector("#alerta-vencimento")?.checked);
+            try {
+                await api.put("/alertas/preferencias", {
+                    orcamento: orcamentoAtivo,
+                    vencimento: vencimentoAtivo
+                });
+                mostrarToast("Preferências de notificação atualizadas!", "info");
+                await atualizarAlertas();
+            } catch (error) {
+                mostrarToast(error.message, "error");
+            }
+        });
+    });
+
     atualizarOrcamentosAlertas();
 }
 
@@ -2925,62 +3235,213 @@ async function atualizarOrcamentosAlertas() {
 }
 
 async function atualizarOrcamentos() {
-    const msg = document.querySelector('#orcamento-mensagem');
-    const lista = document.querySelector('#orcamento-lista');
+    const msg = document.querySelector("#orcamento-mensagem");
+    const lista = document.querySelector("#orcamento-lista");
+    const inputMes = document.querySelector("#orcamento-mes");
+    if (!lista || !inputMes) return;
+
     try {
-        const mes = document.querySelector('#orcamento-mes').value;
-        if (!mes) return;
-        const dados = await api.get(`/orcamentos?mes=${mes}-01`);
+        const mesValor = inputMes.value;
+        if (!mesValor) return;
+        const dados = await api.get(`/orcamentos?mes=${mesValor}-01`);
         lista.replaceChildren();
-        dados.forEach(o => {
-            const li = document.createElement('li');
-            const texto = document.createElement('span');
-            texto.textContent = `${formatarCategoria(o.categoria)}: gasto ${formatarMoeda(Number(o.gasto))} / ${formatarMoeda(Number(o.limite))} · restante ${formatarMoeda(Number(o.restante))} `;
-            const editar = document.createElement('button');
-            editar.type = 'button'; editar.textContent = 'Editar';
-            editar.addEventListener('click', () => {
-                document.querySelector('#orcamento-categoria').value = o.categoria;
-                document.querySelector('#orcamento-limite').value = o.limite;
-                document.querySelector('#orcamento-limite').focus();
+
+        if (!dados || dados.length === 0) {
+            if (msg) definirMensagem("#orcamento-mensagem", "Nenhum orçamento cadastrado para este mês de referência.", "info");
+            return;
+        }
+
+        if (msg) limparMensagem("#orcamento-mensagem");
+
+        const fragmento = document.createDocumentFragment();
+        dados.forEach((o) => {
+            const card = document.createElement("li");
+            card.className = "budget-card";
+
+            const gastoNum = Number(o.gasto || 0);
+            const limiteNum = Number(o.limite || 0);
+            const restanteNum = Number(o.restante || 0);
+            const percentual = limiteNum > 0 ? (gastoNum / limiteNum) * 100 : 0;
+            const percentualFormatado = percentual.toFixed(1);
+
+            let statusClasse = "";
+            if (percentual >= 100) {
+                statusClasse = "danger";
+            } else if (percentual >= 80) {
+                statusClasse = "warning";
+            }
+
+            const header = document.createElement("div");
+            header.className = "budget-card-header";
+
+            const title = document.createElement("div");
+            title.className = "budget-card-title";
+            title.innerHTML = `<span>${formatarCategoria(o.categoria)}</span>`;
+
+            const percentBadge = document.createElement("span");
+            percentBadge.className = `budget-card-percent ${statusClasse}`.trim();
+            percentBadge.textContent = `${percentualFormatado}% consumido`;
+            header.append(title, percentBadge);
+
+            const progressTrack = document.createElement("div");
+            progressTrack.className = "budget-progress-track";
+            const progressFill = document.createElement("div");
+            progressFill.className = `budget-progress-fill ${statusClasse}`.trim();
+            progressFill.style.width = `${Math.min(percentual, 100)}%`;
+            progressTrack.append(progressFill);
+
+            const metrics = document.createElement("div");
+            metrics.className = "budget-card-metrics";
+
+            const colGasto = document.createElement("div");
+            colGasto.innerHTML = `Gasto: <strong>${formatarMoeda(gastoNum)}</strong> de ${formatarMoeda(limiteNum)}`;
+
+            const colRestante = document.createElement("div");
+            const restanteClasse = restanteNum >= 0 ? "positive" : "negative";
+            colRestante.className = `budget-card-remaining ${restanteClasse}`;
+            colRestante.innerHTML = `${restanteNum >= 0 ? "Restam" : "Excedeu"}: <strong>${formatarMoeda(Math.abs(restanteNum))}</strong>`;
+            metrics.append(colGasto, colRestante);
+
+            const actions = document.createElement("div");
+            actions.className = "budget-card-actions";
+
+            const btnEditar = document.createElement("button");
+            btnEditar.type = "button";
+            btnEditar.className = "button-small button-secondary";
+            btnEditar.textContent = "Editar";
+            btnEditar.addEventListener("click", () => {
+                const selectCat = document.querySelector("#orcamento-categoria");
+                const inputLim = document.querySelector("#orcamento-limite");
+                if (selectCat) selectCat.value = o.categoria;
+                if (inputLim) {
+                    inputLim.value = o.limite;
+                    inputLim.focus();
+                }
             });
-            const excluir = document.createElement('button');
-            excluir.type = 'button'; excluir.textContent = 'Excluir';
-            excluir.addEventListener('click', async () => {
-                if (!window.confirm('Excluir este orçamento?')) return;
-                try { await api.delete(`/orcamentos/${o.id}`); await atualizarOrcamentosAlertas(); }
-                catch (e) { msg.textContent = e.message; }
+
+            const btnExcluir = document.createElement("button");
+            btnExcluir.type = "button";
+            btnExcluir.className = "button-small button-danger";
+            btnExcluir.textContent = "Excluir";
+            btnExcluir.addEventListener("click", async () => {
+                if (!window.confirm(`Deseja excluir o orçamento de ${formatarCategoria(o.categoria)}?`)) return;
+                try {
+                    await api.delete(`/orcamentos/${o.id}`);
+                    mostrarToast("Orçamento excluído com sucesso!");
+                    await atualizarOrcamentosAlertas();
+                } catch (err) {
+                    mostrarToast(err.message, "error");
+                }
             });
-            li.append(texto, editar, excluir); lista.append(li);
+
+            actions.append(btnEditar, btnExcluir);
+            card.append(header, progressTrack, metrics, actions);
+            fragmento.append(card);
         });
-        if (!dados.length) msg.textContent = 'Nenhum orçamento neste mês.';
-        else msg.textContent = '';
-    } catch (e) { msg.textContent = e.message; }
+
+        lista.append(fragmento);
+    } catch (error) {
+        if (msg) definirMensagem("#orcamento-mensagem", error.message, "error");
+    }
 }
 
 async function atualizarAlertas() {
-    const msg = document.querySelector('#alertas-mensagem');
-    const lista = document.querySelector('#alertas-lista');
+    const msg = document.querySelector("#alertas-mensagem");
+    const lista = document.querySelector("#alertas-lista");
+    if (!lista) return;
+
     try {
-        const [prefs, dados] = await Promise.all([api.get('/alertas/preferencias'), api.get('/alertas')]);
-        document.querySelector('#alerta-orcamento').checked = prefs.orcamento;
-        document.querySelector('#alerta-vencimento').checked = prefs.vencimento;
+        const [prefs, dados] = await Promise.all([
+            api.get("/alertas/preferencias"),
+            api.get("/alertas")
+        ]);
+
+        const chkOrcamento = document.querySelector("#alerta-orcamento");
+        const chkVencimento = document.querySelector("#alerta-vencimento");
+        if (chkOrcamento) chkOrcamento.checked = prefs.orcamento;
+        if (chkVencimento) chkVencimento.checked = prefs.vencimento;
+
         lista.replaceChildren();
-        dados.forEach(a => {
-            const li = document.createElement('li');
-            const texto = document.createElement('span');
-            texto.textContent = `${a.mensagem} ${a.lido ? '(lido)' : ''} `;
-            li.append(texto);
-            if (!a.lido) {
-                const botao = document.createElement('button');
-                botao.type = 'button'; botao.textContent = 'Marcar como lido';
-                botao.addEventListener('click', async () => {
-                    try { await api.put(`/alertas/lido?chave=${encodeURIComponent(a.chave)}`, {}); await atualizarAlertas(); }
-                    catch (e) { msg.textContent = e.message; }
-                });
-                li.append(botao);
+
+        if (!dados || dados.length === 0) {
+            if (msg) {
+                msg.innerHTML = `
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    <span>Nenhum alerta pendente no momento. Suas finanças estão sob controle!</span>
+                `;
+                msg.hidden = false;
             }
-            lista.append(li);
+            return;
+        }
+
+        if (msg) msg.hidden = true;
+
+        const fragmento = document.createDocumentFragment();
+        dados.forEach((a) => {
+            const card = document.createElement("li");
+            const tipoClasse = a.chave.startsWith("orcamento:") ? "type-orcamento" : "type-vencimento";
+            card.className = `alert-card ${tipoClasse} ${a.lido ? "is-read" : ""}`.trim();
+
+            const body = document.createElement("div");
+            body.className = "alert-card-body";
+
+            const iconWrap = document.createElement("div");
+            iconWrap.className = "alert-card-icon";
+            iconWrap.setAttribute("aria-hidden", "true");
+
+            if (tipoClasse === "type-orcamento") {
+                iconWrap.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+            } else {
+                iconWrap.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`;
+            }
+
+            const content = document.createElement("div");
+            content.className = "alert-card-content";
+            content.textContent = a.mensagem;
+
+            if (a.lido) {
+                const badge = document.createElement("span");
+                badge.className = "alert-card-badge";
+                badge.textContent = "Lido";
+                content.append(badge);
+            }
+
+            body.append(iconWrap, content);
+            card.append(body);
+
+            if (!a.lido) {
+                const actionWrap = document.createElement("div");
+                actionWrap.className = "alert-card-action";
+
+                const btnLido = document.createElement("button");
+                btnLido.type = "button";
+                btnLido.className = "button-small button-secondary";
+                btnLido.textContent = "Marcar como lido";
+                btnLido.addEventListener("click", async () => {
+                    try {
+                        await api.put(`/alertas/lido?chave=${encodeURIComponent(a.chave)}`, {});
+                        mostrarToast("Alerta marcado como lido.", "info");
+                        await atualizarAlertas();
+                    } catch (err) {
+                        mostrarToast(err.message, "error");
+                    }
+                });
+
+                actionWrap.append(btnLido);
+                card.append(actionWrap);
+            }
+
+            fragmento.append(card);
         });
-        msg.textContent = dados.length ? '' : 'Nenhum alerta no momento.';
-    } catch (e) { msg.textContent = e.message; }
+
+        lista.append(fragmento);
+    } catch (error) {
+        if (msg) {
+            msg.textContent = error.message;
+            msg.hidden = false;
+        }
+    }
 }

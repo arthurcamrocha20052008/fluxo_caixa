@@ -8,16 +8,99 @@ from pydantic import (
     model_validator,
 )
 from dados_sensiveis import descriptografar_telefone
+from servicos.notificacao_otp import normalizar_telefone_e164
 
 from decimal import Decimal, ROUND_HALF_UP
 from datetime import date, datetime
-from typing import Optional, Literal
+from typing import Any, Optional, Literal
 import calendar
 import unicodedata
 
 
 class InputModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
+
+
+# =========================================================
+# VALIDADORES DE SEGURANÇA COMPARTILHADOS (CPF E SENHA)
+# =========================================================
+
+
+def validar_cpf_brasileiro(valor: str) -> str:
+    """Valida estritamente um CPF brasileiro (formato, dígitos repetidos e módulo 11)."""
+    if not isinstance(valor, str):
+        raise ValueError("O CPF informado é inválido.")
+
+    limpo = (
+        valor
+        .replace(".", "")
+        .replace("-", "")
+        .strip()
+    )
+
+    if len(limpo) != 11:
+        if limpo and (not limpo.isascii() or not limpo.isdigit()):
+            raise ValueError("O CPF deve conter apenas números.")
+        raise ValueError("O CPF deve possuir 11 números.")
+
+    if not limpo.isascii() or not limpo.isdigit():
+        raise ValueError("O CPF deve conter apenas números.")
+
+    if len(set(limpo)) == 1:
+        raise ValueError("O CPF informado é inválido.")
+
+    primeiro_digito = (
+        sum(
+            int(digito) * peso
+            for digito, peso in zip(limpo[:9], range(10, 1, -1))
+        )
+        * 10
+    ) % 11
+    if primeiro_digito == 10:
+        primeiro_digito = 0
+
+    segundo_digito = (
+        sum(
+            int(digito) * peso
+            for digito, peso in zip(limpo[:10], range(11, 1, -1))
+        )
+        * 10
+    ) % 11
+    if segundo_digito == 10:
+        segundo_digito = 0
+
+    if limpo[-2:] != f"{primeiro_digito}{segundo_digito}":
+        raise ValueError("O CPF informado é inválido.")
+
+    return limpo
+
+
+def validar_senha_forte(valor: str) -> str:
+    """Exige mínimo de 8 caracteres, maiúscula, minúscula, número e caractere especial."""
+    if not isinstance(valor, str) or len(valor) < 8:
+        raise ValueError("A senha deve possuir no mínimo 8 caracteres.")
+
+    if not any(c.isupper() for c in valor):
+        raise ValueError(
+            "A senha deve possuir pelo menos uma letra maiúscula."
+        )
+
+    if not any(c.islower() for c in valor):
+        raise ValueError(
+            "A senha deve possuir pelo menos uma letra minúscula."
+        )
+
+    if not any(c.isdigit() for c in valor):
+        raise ValueError(
+            "A senha deve possuir pelo menos um número."
+        )
+
+    if not any(not c.isalnum() and not c.isspace() for c in valor):
+        raise ValueError(
+            "A senha deve possuir pelo menos um caractere especial."
+        )
+
+    return valor
 
 
 # =========================================================
@@ -134,6 +217,55 @@ def _normalizar_categoria(valor: str) -> str:
     return mapa_apelidos.get(sem_acentos, sem_acentos)
 
 
+CanalVerificacaoInput = Literal[
+    "email",
+    "telefone",
+    "sms",
+    "whatsapp",
+]
+
+DOMINIOS_EMAIL_ERRO_DIGITACAO: dict[str, str] = {
+    "gamil.com": "gmail.com",
+    "gnail.com": "gmail.com",
+    "gmial.com": "gmail.com",
+    "gmai.com": "gmail.com",
+    "gmail.con": "gmail.com",
+    "gmail.cmo": "gmail.com",
+    "gmail.cm": "gmail.com",
+    "hotmial.com": "hotmail.com",
+    "hotmal.com": "hotmail.com",
+    "hotmail.con": "hotmail.com",
+    "outlok.com": "outlook.com",
+    "outllok.com": "outlook.com",
+    "outlook.con": "outlook.com",
+    "yaho.com": "yahoo.com",
+    "yahooo.com": "yahoo.com",
+    "yahoo.con": "yahoo.com",
+}
+
+
+def validar_email_normalizado_e_dominio(valor: str) -> str:
+    """Normaliza o e-mail e bloqueia erros comuns de digitação de domínio."""
+    limpo = str(valor).strip().lower()
+    if "@" in limpo:
+        _, dominio = limpo.split("@", 1)
+        if dominio in DOMINIOS_EMAIL_ERRO_DIGITACAO:
+            sugestao = DOMINIOS_EMAIL_ERRO_DIGITACAO[dominio]
+            raise ValueError(
+                f"Domínio de e-mail inválido ('@{dominio}'). Verifique se você quis digitar '@{sugestao}'."
+            )
+    return limpo
+
+
+def validar_telefone_opcional(valor: str | None) -> str | None:
+    """Valida formato, DDD brasileiro (11 a 99) e quantidade de dígitos (10 ou 11)."""
+    if valor is None or not valor.strip():
+        return None
+    telefone = valor.strip()
+    normalizar_telefone_e164(telefone)
+    return telefone
+
+
 class UsuarioCreate(InputModel):
     nome_completo: str = Field(
         min_length=3,
@@ -149,34 +281,19 @@ class UsuarioCreate(InputModel):
         max_length=100
     )
 
+    canal_verificacao: CanalVerificacaoInput = "email"
+    aceite_termos: bool = True
+    aceite_privacidade: bool = True
+
     @field_validator("email")
     @classmethod
     def normalizar_email(cls, valor: EmailStr) -> str:
-        return str(valor).strip().lower()
+        return validar_email_normalizado_e_dominio(str(valor))
 
     @field_validator("telefone")
     @classmethod
     def validar_telefone(cls, valor: str | None) -> str | None:
-        if valor is None or not valor.strip():
-            return None
-
-        telefone = valor.strip()
-        caracteres_permitidos = set("+0123456789 ().-")
-        if any(caractere not in caracteres_permitidos for caractere in telefone):
-            raise ValueError("O telefone contém caracteres inválidos.")
-        if telefone.count("+") > 1 or (
-            "+" in telefone and not telefone.startswith("+")
-        ):
-            raise ValueError("O código do país deve aparecer no início.")
-
-        digitos = "".join(
-            caractere for caractere in telefone if caractere.isdigit()
-        )
-        if not 10 <= len(digitos) <= 15:
-            raise ValueError(
-                "O telefone deve conter entre 10 e 15 dígitos."
-            )
-        return telefone
+        return validar_telefone_opcional(valor)
 
     @field_validator("nome_completo")
     @classmethod
@@ -193,92 +310,73 @@ class UsuarioCreate(InputModel):
     @field_validator("cpf")
     @classmethod
     def validar_cpf(cls, valor: str) -> str:
-        valor = (
-            valor
-            .replace(".", "")
-            .replace("-", "")
-            .strip()
-        )
-
-        if len(valor) != 11:
-            raise ValueError(
-                "O CPF deve possuir 11 números."
-            )
-
-        if not valor.isascii() or not valor.isdigit():
-            raise ValueError(
-                "O CPF deve conter apenas números."
-            )
-
-        if len(set(valor)) == 1:
-            raise ValueError("O CPF informado é inválido.")
-
-        primeiro_digito = (
-            sum(
-                int(digito) * peso
-                for digito, peso in zip(valor[:9], range(10, 1, -1))
-            )
-            * 10
-        ) % 11
-        if primeiro_digito == 10:
-            primeiro_digito = 0
-
-        segundo_digito = (
-            sum(
-                int(digito) * peso
-                for digito, peso in zip(valor[:10], range(11, 1, -1))
-            )
-            * 10
-        ) % 11
-        if segundo_digito == 10:
-            segundo_digito = 0
-
-        if valor[-2:] != f"{primeiro_digito}{segundo_digito}":
-            raise ValueError("O CPF informado é inválido.")
-
-        return valor
+        return validar_cpf_brasileiro(valor)
 
     @field_validator("senha")
     @classmethod
-    def validar_senha(cls, valor):
-        if not any(c.isupper() for c in valor):
-            raise ValueError(
-                "A senha deve possuir pelo menos uma letra maiúscula."
-            )
+    def validar_senha(cls, valor: str) -> str:
+        return validar_senha_forte(valor)
 
-        if not any(c.islower() for c in valor):
+    @model_validator(mode="after")
+    def validar_consentimento_lgpd(self):
+        if not self.aceite_termos or not self.aceite_privacidade:
             raise ValueError(
-                "A senha deve possuir pelo menos uma letra minúscula."
+                "É obrigatório aceitar os Termos de Serviço e a Política de Privacidade (LGPD)."
             )
-
-        if not any(c.isdigit() for c in valor):
+        if self.canal_verificacao in ("telefone", "sms", "whatsapp") and not self.telefone:
             raise ValueError(
-                "A senha deve possuir pelo menos um número."
+                "Informe um telefone válido com DDD para receber o código de verificação por SMS ou WhatsApp."
             )
-
-        if not any(
-            not c.isalnum()
-            for c in valor
-        ):
-            raise ValueError(
-                "A senha deve possuir pelo menos um caractere especial."
-            )
-
-        return valor
+        return self
 
 
 class EsqueciSenhaRequest(InputModel):
     email: EmailStr
+    canal_verificacao: CanalVerificacaoInput = "email"
+    telefone: str | None = Field(default=None, max_length=32)
 
     @field_validator("email")
     @classmethod
     def normalizar_email(cls, valor: EmailStr) -> str:
-        return str(valor).strip().lower()
+        return validar_email_normalizado_e_dominio(str(valor))
+
+    @field_validator("telefone")
+    @classmethod
+    def validar_telefone(cls, valor: str | None) -> str | None:
+        return validar_telefone_opcional(valor)
+
+
+class ReenviarVerificacaoRequest(InputModel):
+    email: EmailStr
+    canal_verificacao: CanalVerificacaoInput = "email"
+    telefone: str | None = Field(default=None, max_length=32)
+
+    @field_validator("email")
+    @classmethod
+    def normalizar_email(cls, valor: EmailStr) -> str:
+        return validar_email_normalizado_e_dominio(str(valor))
+
+    @field_validator("telefone")
+    @classmethod
+    def validar_telefone(cls, valor: str | None) -> str | None:
+        return validar_telefone_opcional(valor)
+
+
+EnviarCodigoVerificacaoRequest = ReenviarVerificacaoRequest
 
 
 class ConfirmarEmailRequest(InputModel):
     email: EmailStr
     codigo_otp: str = Field(min_length=6, max_length=10)
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalizar_alias_codigo(cls, dados: Any) -> Any:
+        if isinstance(dados, dict) and "codigo" in dados and "codigo_otp" not in dados:
+            copia = dict(dados)
+            copia["codigo_otp"] = copia.pop("codigo")
+            return copia
+        return dados
 
     @field_validator("email")
     @classmethod
@@ -289,9 +387,91 @@ class ConfirmarEmailRequest(InputModel):
     @classmethod
     def validar_codigo_otp(cls, valor: str) -> str:
         codigo = valor.strip()
-        if not codigo.isdigit() or len(codigo) != 6:
+        if not codigo.isascii() or not codigo.isdigit() or len(codigo) != 6:
             raise ValueError("O código de verificação deve conter 6 dígitos numéricos.")
         return codigo
+
+
+VerificarEmailRequest = ConfirmarEmailRequest
+
+
+class GoogleAuthRequest(InputModel):
+    credential: str | None = Field(default=None, min_length=10, max_length=4096)
+    access_token: str | None = Field(default=None, min_length=10, max_length=4096)
+    cpf: str | None = None
+    telefone: str | None = Field(default=None, max_length=32)
+
+    @field_validator("credential", "access_token")
+    @classmethod
+    def normalizar_token_google(cls, valor: str | None) -> str | None:
+        if valor is None:
+            return None
+        limpo = valor.strip()
+        if not limpo:
+            return None
+        return limpo
+
+    @field_validator("cpf")
+    @classmethod
+    def validar_cpf(cls, valor: str | None) -> str | None:
+        if valor is None or not valor.strip():
+            return None
+        return validar_cpf_brasileiro(valor)
+
+    @field_validator("telefone")
+    @classmethod
+    def validar_telefone(cls, valor: str | None) -> str | None:
+        return validar_telefone_opcional(valor)
+
+    @model_validator(mode="after")
+    def exigir_credencial_ou_token(self):
+        if not self.credential and not self.access_token:
+            raise ValueError("Informe a credencial ou o token de acesso do Google.")
+        return self
+
+
+class GoogleAssistidoRequest(InputModel):
+    email: EmailStr
+    nome_completo: str = Field(min_length=3, max_length=150)
+    cpf: str | None = None
+    telefone: str | None = Field(default=None, max_length=32)
+
+    @field_validator("email")
+    @classmethod
+    def normalizar_email(cls, valor: EmailStr) -> str:
+        return validar_email_normalizado_e_dominio(str(valor))
+
+    @field_validator("nome_completo")
+    @classmethod
+    def validar_nome(cls, valor: str) -> str:
+        return UsuarioCreate.validar_nome(valor)
+
+    @field_validator("cpf")
+    @classmethod
+    def validar_cpf(cls, valor: str | None) -> str | None:
+        if valor is None or not valor.strip():
+            return None
+        return validar_cpf_brasileiro(valor)
+
+    @field_validator("telefone")
+    @classmethod
+    def validar_telefone(cls, valor: str | None) -> str | None:
+        return validar_telefone_opcional(valor)
+
+
+class CompletarCadastroOAuthRequest(InputModel):
+    cpf: str
+    telefone: str | None = Field(default=None, max_length=32)
+
+    @field_validator("cpf")
+    @classmethod
+    def validar_cpf(cls, valor: str) -> str:
+        return validar_cpf_brasileiro(valor)
+
+    @field_validator("telefone")
+    @classmethod
+    def validar_telefone(cls, valor: str | None) -> str | None:
+        return validar_telefone_opcional(valor)
 
 
 class RedefinirSenhaRequest(InputModel):
@@ -314,7 +494,7 @@ class RedefinirSenhaRequest(InputModel):
         if valor is None or not valor.strip():
             return None
         codigo = valor.strip()
-        if not codigo.isdigit() or len(codigo) != 6:
+        if not codigo.isascii() or not codigo.isdigit() or len(codigo) != 6:
             raise ValueError("O código de verificação deve conter 6 dígitos numéricos.")
         return codigo
 
@@ -323,18 +503,18 @@ class RedefinirSenhaRequest(InputModel):
     def validar_cpf(cls, valor: str | None) -> str | None:
         if valor is None or not valor.strip():
             return None
-        return UsuarioCreate.validar_cpf(valor)
+        return validar_cpf_brasileiro(valor)
 
     @field_validator("nova_senha")
     @classmethod
     def validar_nova_senha(cls, valor: str) -> str:
-        return UsuarioCreate.validar_senha(valor)
+        return validar_senha_forte(valor)
 
     @model_validator(mode="after")
     def validar_credencial_recuperacao(self):
         if not self.codigo_otp and not self.cpf:
             raise ValueError(
-                "Informe o código de verificação enviado por e-mail (codigo_otp) ou o CPF."
+                "Informe o código de verificação (codigo_otp) ou o CPF."
             )
         return self
 
@@ -362,19 +542,19 @@ class UsuarioUpdateMe(InputModel):
     def normalizar_email(cls, valor: EmailStr | None) -> str | None:
         if valor is None:
             return None
-        return str(valor).strip().lower()
+        return validar_email_normalizado_e_dominio(str(valor))
 
     @field_validator("telefone")
     @classmethod
     def validar_telefone(cls, valor: str | None) -> str | None:
-        return UsuarioCreate.validar_telefone(valor)
+        return validar_telefone_opcional(valor)
 
     @field_validator("nova_senha")
     @classmethod
     def validar_nova_senha(cls, valor: str | None) -> str | None:
         if valor is None or not valor:
             return None
-        return UsuarioCreate.validar_senha(valor)
+        return validar_senha_forte(valor)
 
     @model_validator(mode="after")
     def validar_alteracao_senha(self):
@@ -394,6 +574,11 @@ class UsuarioResponse(BaseModel):
     telefone: str | None
     email_verificado: bool = False
     criado_em: datetime
+    precisa_completar_cadastro: bool = False
+    canal_verificacao: str | None = None
+    destino_mascarado: str | None = None
+    modo_contingencia: bool = False
+    codigo_demonstracao: str | None = None
 
     @field_validator("telefone", mode="before")
     @classmethod
@@ -920,3 +1105,56 @@ class ResumoPeriodoResponse(BaseModel):
     total_transferencias_enviadas: Decimal
     total_ajustes: Decimal
     saldo_final: Decimal
+
+
+# =========================================================
+# ORÇAMENTOS E ALERTAS
+# =========================================================
+
+
+class DadosOrcamento(InputModel):
+    categoria: str = Field(min_length=1, max_length=100)
+    mes: date
+    limite: Decimal = Field(ge=0, max_digits=12, decimal_places=2, allow_inf_nan=False)
+
+    @field_validator("mes")
+    @classmethod
+    def validar_primeiro_dia(cls, valor: date) -> date:
+        if valor.day != 1:
+            raise ValueError("Informe o primeiro dia do mês.")
+        return valor
+
+
+class OrcamentoResponse(BaseModel):
+    id: int
+    categoria: str
+    mes: date
+    limite: Decimal
+    gasto: Decimal
+    restante: Decimal
+    percentual_gasto: float = 0.0
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class PreferenciasAlerta(InputModel):
+    orcamento: bool
+    vencimento: bool
+
+
+class PreferenciasAlertaResponse(BaseModel):
+    orcamento: bool
+    vencimento: bool
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class AlertaResponse(BaseModel):
+    chave: str
+    mensagem: str
+    lido: bool
+    tipo: Optional[Literal["orcamento", "vencimento"]] = None
+    titulo: Optional[str] = None
+    categoria: Optional[str] = None
+    data_referencia: Optional[date] = None
+    valor: Optional[Decimal] = None
