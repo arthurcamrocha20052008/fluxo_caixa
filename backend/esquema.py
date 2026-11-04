@@ -272,7 +272,7 @@ class UsuarioCreate(InputModel):
         max_length=150
     )
 
-    cpf: str
+    cpf: str | None = Field(default=None)
     email: EmailStr
     telefone: str | None = Field(default=None, max_length=32)
 
@@ -309,7 +309,9 @@ class UsuarioCreate(InputModel):
 
     @field_validator("cpf")
     @classmethod
-    def validar_cpf(cls, valor: str) -> str:
+    def validar_cpf(cls, valor: str | None) -> str | None:
+        if valor is None or not valor.strip():
+            return None
         return validar_cpf_brasileiro(valor)
 
     @field_validator("senha")
@@ -321,11 +323,11 @@ class UsuarioCreate(InputModel):
     def validar_consentimento_lgpd(self):
         if not self.aceite_termos or not self.aceite_privacidade:
             raise ValueError(
-                "É obrigatório aceitar os Termos de Serviço e a Política de Privacidade (LGPD)."
+                "É obrigatório aceitar os Termos de Uso e a Política de Privacidade (LGPD)."
             )
         if self.canal_verificacao in ("telefone", "sms", "whatsapp") and not self.telefone:
             raise ValueError(
-                "Informe um telefone válido com DDD para receber o código de verificação por SMS ou WhatsApp."
+                "Informe um telefone válido com DDD para receber o código de verificação por SMS."
             )
         return self
 
@@ -460,12 +462,14 @@ class GoogleAssistidoRequest(InputModel):
 
 
 class CompletarCadastroOAuthRequest(InputModel):
-    cpf: str
+    cpf: str | None = None
     telefone: str | None = Field(default=None, max_length=32)
 
     @field_validator("cpf")
     @classmethod
-    def validar_cpf(cls, valor: str) -> str:
+    def validar_cpf(cls, valor: str | None) -> str | None:
+        if valor is None or not valor.strip():
+            return None
         return validar_cpf_brasileiro(valor)
 
     @field_validator("telefone")

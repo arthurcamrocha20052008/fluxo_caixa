@@ -14,14 +14,14 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-1.0.0-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.x_ORM-D71F00?logo=databricks&logoColor=white)](https://www.sqlalchemy.org/)
 [![Alembic](https://img.shields.io/badge/Alembic-16_Revisões-F59E0B?logo=alembic&logoColor=white)](https://alembic.sqlalchemy.org/)
-[![Pytest](https://img.shields.io/badge/Pytest-130%20Passing-brightgreen?logo=pytest&logoColor=white)](https://pytest.org/)
-[![Security](https://img.shields.io/badge/Security-LGPD_Fernet_AES128_%2B_Argon2id_%2B_OAuth2-blueviolet)](https://www.gov.br/cidadania/pt-br/acesso-a-informacao/lgpd)
+[![Pytest](https://img.shields.io/badge/Pytest-Automated_Suite-brightgreen?logo=pytest&logoColor=white)](https://pytest.org/)
+[![Security](https://img.shields.io/badge/Security-Zero_CPF_LGPD_Fernet_AES128_%2B_Argon2id_%2B_OAuth2-blueviolet)](https://www.gov.br/cidadania/pt-br/acesso-a-informacao/lgpd)
 [![WCAG](https://img.shields.io/badge/Accessibility-WCAG_AA_Light_%26_Dark-10B981)](frontend/css/style.css)
 [![License](https://img.shields.io/badge/License-MIT-lightgrey)](LICENSE)
 
 <br/>
 
-**Plataforma Full-Stack de gestão patrimonial e fluxo de caixa corporativo/pessoal em nuvem. Construída com API REST assíncrona em FastAPI, banco de dados relacional (Supabase PostgreSQL / TiDB Cloud MySQL), precisão contábil exata (`Decimal 12,2`), conformidade LGPD em repouso (Fernet AES-128 + Blind Index HMAC), Login Social Google OAuth 2.0, verificação anti-bot via OTP por e-mail, Landing Page de alta conversão, Design System WCAG AA (Tema Claro e Tema Escuro) e 130 testes automatizados.**
+**Plataforma Full-Stack de gestão patrimonial e fluxo de caixa corporativo/pessoal em nuvem. Construída com API REST assíncrona em FastAPI, banco de dados relacional (Supabase PostgreSQL / TiDB Cloud MySQL), precisão contábil exata (`Decimal 12,2`), arquitetura de privacidade Zero-CPF sob a LGPD (Fernet AES-128 + Argon2id), Login Social Google OAuth 2.0, verificação multi-canal 2FA/OTP (E-mail ou SMS), Design Engineering de alta precisão (`Emil Kowalski` + `Impeccable` + `Taste-Skill` + `Ponytail`) e Design System Dual-Theme WCAG AA.**
 
 </div>
 
@@ -31,6 +31,7 @@
 
 - [Acesso Rápido à Demo Online](#-acesso-rápido-à-demo-online)
 - [Visão Geral & Proposta de Valor](#-visão-geral--proposta-de-valor)
+- [Motores de Engenharia de Design & Qualidade](#-motores-de-engenharia-de-design--qualidade)
 - [Arquitetura Full-Stack em Nuvem](#-arquitetura-full-stack-em-nuvem)
 - [Principais Funcionalidades e Diferenciais](#-principais-funcionalidades-e-diferenciais)
 - [Stack Tecnológica Completa](#-stack-tecnológica-completa)
@@ -38,7 +39,7 @@
 - [Execução Local Passo a Passo](#-execução-local-passo-a-passo)
 - [Deploy em Nuvem (Vercel + Render + Supabase)](#-deploy-em-nuvem-vercel--render--supabase)
 - [Catálogo de Endpoints da API](#-catálogo-de-endpoints-da-api)
-- [Segurança & Privacidade LGPD](#-segurança--privacidade-lgpd)
+- [Segurança & Privacidade LGPD (Zero-CPF)](#-segurança--privacidade-lgpd-zero-cpf)
 - [Qualidade & Testes Automatizados](#-qualidade--testes-automatizados)
 - [Documentações Complementares](#-documentações-complementares)
 
@@ -48,11 +49,11 @@
 
 | Recurso / Serviço | Plataforma | URL Pública | Finalidade |
 |---|---|---|---|
-| **Landing Page Institucional** | Vercel Edge | [https://fluxo-caixa-coral-two.vercel.app](https://fluxo-caixa-coral-two.vercel.app) | Apresentação de recursos, segurança LGPD e CTAs (`/inicio.html`) |
+| **Landing Page Institucional** | Vercel Edge | [https://fluxo-caixa-coral-two.vercel.app](https://fluxo-caixa-coral-two.vercel.app) | Apresentação de recursos, privacidade Zero-CPF LGPD e CTAs (`/inicio.html`) |
 | **Aplicação Web (SPA)** | Vercel Edge | [https://fluxo-caixa-coral-two.vercel.app/index.html](https://fluxo-caixa-coral-two.vercel.app/index.html) | Painel financeiro autenticado (Modo Claro e Escuro) |
-| **Página de Login** | Vercel Edge | [https://fluxo-caixa-coral-two.vercel.app/login.html](https://fluxo-caixa-coral-two.vercel.app/login.html) | Acesso seguro com Google OAuth 2.0, OTP e rate limiting |
-| **Página de Cadastro** | Vercel Edge | [https://fluxo-caixa-coral-two.vercel.app/cadastro.html](https://fluxo-caixa-coral-two.vercel.app/cadastro.html) | Abertura de conta com CPF em tempo real, checklist 5 regras e LGPD |
-| **Termos & Privacidade LGPD** | Vercel Edge | [https://fluxo-caixa-coral-two.vercel.app/privacidade.html](https://fluxo-caixa-coral-two.vercel.app/privacidade.html) | Conformidade com a Lei nº 13.709/2018 e Termos de Serviço |
+| **Página de Login** | Vercel Edge | [https://fluxo-caixa-coral-two.vercel.app/login.html](https://fluxo-caixa-coral-two.vercel.app/login.html) | Acesso seguro com Google OAuth 2.0, E-mail + Senha, OTP (E-mail/SMS) e rate limiting |
+| **Página de Cadastro** | Vercel Edge | [https://fluxo-caixa-coral-two.vercel.app/cadastro.html](https://fluxo-caixa-coral-two.vercel.app/cadastro.html) | Abertura de conta sem CPF (Nome, E-mail, Telefone DDD e Senha Forte) + 2FA OTP |
+| **Termos & Privacidade LGPD** | Vercel Edge | [https://fluxo-caixa-coral-two.vercel.app/privacidade.html](https://fluxo-caixa-coral-two.vercel.app/privacidade.html) | Termos de Uso e Política de Privacidade em linguagem clara e humana (Lei nº 13.709/2018) |
 | **API REST (Backend)** | Render Web Service | [https://fluxo-caixa-cuq1.onrender.com](https://fluxo-caixa-cuq1.onrender.com) | Núcleo de serviços e regras contábeis |
 | **Documentação Interativa** | Swagger UI | [https://fluxo-caixa-cuq1.onrender.com/docs](https://fluxo-caixa-cuq1.onrender.com/docs) | Teste e inspeção direta de endpoints |
 | **Healthcheck Operacional** | Render Monitor | [https://fluxo-caixa-cuq1.onrender.com/health](https://fluxo-caixa-cuq1.onrender.com/health) | Diagnóstico de integridade da API |
@@ -66,10 +67,28 @@
 
 O **Sistema de Fluxo de Caixa** substitui o uso frágil de planilhas manuais por uma arquitetura transacional, auditável e resiliente:
 - **Precisão Financeira Estrita:** Todo cálculo opera com aritmética contábil `Decimal(12, 2)`, sem dízimas ou erros de ponto flutuante.
-- **Psicologia das Cores Financeiras:** Design corporativo sóbrio (`#0B0F19`, `#111827`, `#059669`, `#3B82F6`, `#BE123C`), sem emojis informais, utilizando exclusivamente ícones vetoriais SVG de alto contraste.
+- **Privacidade por Padrão (Zero-CPF):** Seguindo o princípio de minimização de dados da LGPD (Art. 6º, III), não exigimos CPF para criar ou acessar sua conta — o cadastro utiliza exclusivamente **Nome, E-mail, Telefone Celular (DDD) e Senha** (ou **Google OAuth 2.0**).
+- **Psicologia das Cores Financeiras:** Design corporativo sóbrio (`#0B0F19`, `#111827`, `#059669`, `#3B82F6`, `#BE123C`), sem emojis ou símbolos Unicode informais, utilizando exclusivamente ícones vetoriais SVG de alta definição.
 - **Módulo Unificado de Investimentos:** Aporte direto em ativos de Renda Fixa e Renda Variável com débito automático da conta de origem e consolidação patrimonial em tempo real.
 - **Classificação Transacional:** Subdivisão estruturada de receitas (**Ganhos Fixos** vs **Ganhos Variáveis**) e despesas (**Gastos Fixos** vs **Gastos Variáveis**).
-- **Proteção Ativa:** Notificações proativas no dashboard para saídas agendadas nos próximos 7 dias e tetos orçamentários mensais por categoria.
+
+---
+
+## ⚡ Motores de Engenharia de Design & Qualidade
+
+A interface e a arquitetura de código operam sob 4 pilares de engenharia integrados em [`.agents/rules/core-skills.md`](.agents/rules/core-skills.md):
+
+1. **Emil Kowalski Design Engineering (Física & Micro-interações):**
+   - Curvas de aceleração naturais (`cubic-bezier(0.22, 1, 0.36, 1)`) com duração calibrada entre `160ms` e `220ms`.
+   - Feedback tátil imediato (`scale(0.97)`) em botões ativos, animações de entrada ancoradas (`transform-origin`) em modais e respeito rigoroso a `@media (prefers-reduced-motion: reduce)`.
+2. **Impeccable UI System (Craft, Typeset & Harden):**
+   - Alinhamento óptico de bordas e raios de curvatura proporcionais, estados visuais completos (`default`, `hover`, `focus-visible` com anel de foco, `active`, `disabled`).
+   - Tipografia financeira com `font-variant-numeric: tabular-nums` em todos os saldos, KPIs e tabelas, `letter-spacing: -0.022em` em títulos e medida ideal de leitura (`66ch`) nos documentos legais.
+3. **Taste-Skill Aesthetic Engine (Curadoria Estética & Anti-Tells):**
+   - Superfícies em camadas de grafite/ardósia escuro (`#0B0F19` -> `#111827`) com bordas translúcidas de `1px` (`rgba(255, 255, 255, 0.08)`), livre de gradientes neon clichês ou símbolos Unicode improvisados.
+   - Botão **Continuar com Google** (`#google-oauth-btn`) desenhado como elemento principal de conversão com ícone vetorial oficial em 4 cores.
+4. **Ponytail Code Discipline (Zero Débito Técnico):**
+   - Eliminação de código duplicado entre módulos JS, remoção de atributos `style="..."` inline nas páginas HTML e atualização unificada de cache-busting (`?v=19`).
 
 ---
 
@@ -80,9 +99,9 @@ A aplicação adota o princípio de **Separação de Responsabilidades (SoC)** c
 ```mermaid
 flowchart TD
     subgraph PresentationLayer ["🌐 Camada de Apresentação (Vercel CDN / Edge)"]
-        SPA["Frontend SPA (index.html, login.html, cadastro.html)"]
-        DESIGN["Design System & Cores Financeiras (style.css)"]
-        HTTP_CLIENT["Cliente HTTP Inteligente (api.js)"]
+        SPA["Frontend SPA (index.html, login.html, cadastro.html, inicio.html)"]
+        DESIGN["Design System & Física de Movimento (style.css)"]
+        HTTP_CLIENT["Cliente HTTP & Módulos (api.js, legal.js)"]
         SPA --- DESIGN
         SPA --> HTTP_CLIENT
     end
@@ -94,7 +113,7 @@ flowchart TD
         ROUTERS["Controladores REST (/rotasdeapi)"]
         ENGINE["Motor Contábil & Regras de Domínio (financeiro.py)"]
         CRYPTO["Criptografia LGPD (Fernet AES-128 + Blind Index HMAC)"]
-        EMAIL_SVC["Serviço de E-mail Transacional SMTP (servicos/email.py)"]
+        OTP_SVC["Serviço Multi-Canal OTP E-mail & SMS (servicos/email.py)"]
 
         HTTP_CLIENT -- "HTTPS REST JSON (Bearer JWT)" --> CORS_FILTER
         CORS_FILTER --> RATE_LIMIT
@@ -102,7 +121,7 @@ flowchart TD
         SECURITY_MOD --> ROUTERS
         ROUTERS --> ENGINE
         ROUTERS --> CRYPTO
-        ROUTERS --> EMAIL_SVC
+        ROUTERS --> OTP_SVC
     end
 
     subgraph PersistenceLayer ["🗄️ Camada de Persistência (Supabase PostgreSQL / TiDB Cloud)"]
@@ -133,32 +152,12 @@ flowchart TD
 - **Transferências Atômicas Vinculadas:** Operações entre contas geram pares vinculados por `transferencia_id` (UUIDv4) com trava pessimista (`SELECT ... FOR UPDATE`), garantindo que a exclusão de qualquer ponta reverta os saldos das duas contas de forma indivisível.
 - **Orçamentos Mensais & Alertas Proativos:** Estabeleça tetos de gastos por categoria no mês, com barras de progresso dinâmicas e avisos de saídas nos próximos 7 dias.
 
-### 🎨 Experiência do Usuário (UI/UX) & Design System WCAG AA
-- **Design System Dual-Theme (Modo Claro & Modo Escuro):**
-  - *Modo Claro:* Fundo `#F8FAFC`, cartões `#FFFFFF`, texto `#0F172A` e botões primários verdes `#10B981` com **texto preto `#0B0F19` (peso 700)** para máximo contraste.
-  - *Modo Escuro:* Fundo `#0B0F19`, cartões/modais `#111827`, inputs `#0F172A`, texto `#F8FAFC` e botões primários verdes `#10B981` com **texto branco `#FFFFFF` (peso 600)**.
-- **Hierarquia Estrita de Botões:** Ações principais, exportações CSV e limpeza de filtros padronizadas em `.button-primary` (`min-height: 42px`, `border-radius: 10px`), e botão **Sair da conta** (`.btn-logout` / `#logout`) **sempre vermelho** (`#DC2626`, hover `#991B1B`) em ambos os temas.
-- **100% Vetorial (Zero Emojis na Interface):** Logotipo oficial (`#10B981` -> `#047857`) e ícones construídos com SVG local/inline de alta definição.
-- **Validações Reativas em Tempo Real & Proteção Autofill:**
-  - Validação matemática **Módulo 11 de CPF**, formato estrito de e-mail e **checklist interativo de 5 regras de senha forte + confirmação** com `<small class="field-error" role="alert">` e limpeza instantânea ao corrigir.
-  - Sobrescrita `input:-webkit-autofill` no login para evitar caixas amarelas/azuis do navegador e tradução automática de erros `400/409/422` para português.
-- **Microinterações & Sidebar Unificada:**
-  - Cartão de perfil do usuário (`#user-profile-badge`) sempre visível no rodapé da barra lateral e integrado diretamente à seção `#configuracoes`.
-  - Fechamento de modais ao clicar no backdrop externo (*click outside*), trava de rolagem (`modal-open`), barras de filtro em CSS Grid anti-sobreposição (`min-width: 0`, `height: 44px` e `gap: 16px` em Relatórios, Movimentações e Orçamentos), grades de 3 colunas alinhadas pelo topo em Configurações (`align-items: start`, inputs fixos em `46px`) e confirmação defensiva ao realizar *logout*.
-
-### 🔒 Segurança & Privacidade LGPD
-- **Criptografia Simétrica em Repouso:** CPF e telefone armazenados cifrados com **Fernet (AES-128-CBC + HMAC-SHA256)**.
-- **Blind Index Criptográfico:** Verificação instantânea de unicidade de CPF sem descriptografar a base de dados, utilizando HMAC-SHA256 com chave derivada (`cpf_indice`).
-- **Proteção Anti-Força Bruta:** Limitação de 5 falhas consecutivas de login por IP/conta em janela de 15 minutos (`HTTP 429`).
-- **Isolamento de Tenant:** Todas as operações no banco utilizam obrigatoriamente o `usuario_id` extraído criptograficamente do token JWT.
-
-### 🔐 Autenticação Multi-Canal & Google OAuth 2.0
-- **Login/Cadastro com Google:** suporte ao `id_token` oficial (Google Identity Services) e ao `access_token` do popup OAuth2. O e-mail já sai verificado (`email_verificado = True`, sem OTP). Quando o `GOOGLE_CLIENT_ID` não está configurado, o sistema usa um **fluxo Google assistido**, para o botão nunca ficar sem resposta. Uma conta tradicional existente só é vinculada se o CPF do titular for confirmado, o que protege contra *account takeover*.
-- **Completar cadastro rápido:** depois do primeiro acesso com Google, um mini-modal pede o CPF e o telefone (`PUT /usuarios/me/completar-cadastro`).
-- **OTP por E-mail (Gmail) ou Telefone (SMS / WhatsApp):** o usuário escolhe o canal no cadastro, no login e na recuperação de senha. O botão de reenvio tem contagem regressiva de 60s e é possível trocar de canal com um clique.
-- **Transportes de envio:** API HTTP de e-mail (Resend / Brevo pela porta 443, que contorna o bloqueio de SMTP no Render), SMTP 587 STARTTLS ou 465 SSL (Senha de App do Gmail) e SMS/WhatsApp via Twilio ou Webhook HTTP.
-- **Modo de contingência:** sem provedor configurado, ou se o envio falhar, o código é registrado no log do servidor e exibido na interface (`modo_contingencia`), para o usuário não ficar bloqueado. Para desativar em produção, use `DISABLE_OTP_CONTINGENCY=true`.
-- **Validação em tempo real:** CPF (Módulo 11), telefone com DDD de 11 a 99 normalizado para o formato E.164 e detecção de erros de digitação no domínio do e-mail (`@gamil.com`, `@hotmial.com` etc.), com botão de correção de 1 clique.
+### 🔐 Autenticação Multi-Canal (Zero-CPF), 2FA/OTP & Google OAuth 2.0
+- **Cadastro Simplificado (Sem CPF):** Abertura de conta rápida e transparente utilizando **Nome Completo, E-mail, Telefone com DDD e Senha Forte** (5 requisitos verificados em tempo real).
+- **Login Social com Google (`#google-oauth-btn`):** Suporte ao `id_token` oficial (Google Identity Services) e ao `access_token` via popup OAuth 2.0. Quando o `GOOGLE_CLIENT_ID` não está configurado, o sistema aciona automaticamente o **Fluxo Google Assistido** (pedindo apenas Nome, E-mail e Telefone opcional).
+- **Verificação 2FA/OTP via E-mail ou SMS:** O usuário escolhe receber o código numérico de 6 dígitos por **E-mail** ou **SMS** tanto no cadastro quanto na recuperação de senha, podendo alternar o canal com 1 clique.
+- **Modo de Contingência Resiliente:** Caso o provedor SMTP/SMS não esteja configurado no ambiente, o código de 6 dígitos é exibido em banner informativo na própria interface (`modo_contingencia`) para impedir bloqueios de acesso.
+- **Copywriting LGPD Claro e Humano:** Termos de Uso (`/termos.html`) e Política de Privacidade (`/privacidade.html`) escritos em linguagem direta, sem juridiquês, detalhando exatamente como protegemos seus dados.
 
 ---
 
@@ -166,15 +165,15 @@ flowchart TD
 
 | Camada | Tecnologia | Descrição & Papel |
 |---|---|---|
-| **Frontend Hosting** | Vercel Edge Network | Hospedagem estática global com HTTPS e rewrites via `vercel.json` |
+| **Frontend Hosting** | Vercel Edge Network | Hospedagem estática global com HTTPS, cache otimizado e rewrites via `vercel.json` |
 | **Frontend Core** | HTML5, CSS3, JavaScript (ES6+), Chart.js | SPA responsiva sem frameworks pesados, gráficos analíticos e exportação CSV |
 | **Backend Hosting** | Render Web Service | Contêiner Python gerenciado com deploy contínuo integrado ao GitHub |
 | **API Framework** | FastAPI + Uvicorn | Framework assíncrono moderno com validação via Pydantic v2 e OpenAPI 3.1 |
 | **ORM & Migrações** | SQLAlchemy 2.x + Alembic | Mapeamento declarativo relacional, transações ACID e 16 revisões versionadas |
 | **Banco em Nuvem** | Supabase PostgreSQL / TiDB Cloud | PostgreSQL 15+ com Pooler PgBouncer porta 6543 e MySQL 8 Serverless com TLS |
-| **Segurança & Crypto** | Cryptography (Fernet) + pwdlib (Argon2id) + PyJWT | Cifragem de PII, hashing resistente a GPU e autenticação por tokens assinados |
-| **Serviço de E-mail** | Python smtplib com STARTTLS | Envio de códigos OTP e e-mails de confirmação com fallback resiliente |
-| **Suíte de Testes** | Pytest + HTTPX TestClient | 130 testes automatizados cobrindo fluxos E2E, integridade contábil, Design System WCAG AA, OAuth 2.0, OTP anti-bot e LGPD |
+| **Segurança & Crypto** | Cryptography (Fernet) + pwdlib (Argon2id) + PyJWT | Cifragem de PII (telefone), hashing resistente a GPU e tokens JWT assinados |
+| **Serviço OTP (E-mail/SMS)** | HTTP Email API / SMTP STARTTLS / Twilio SMS | Envio de códigos OTP de 6 dígitos por E-mail ou SMS com fallback resiliente |
+| **Suíte de Testes** | Pytest + HTTPX TestClient | Suíte automatizada cobrindo fluxos E2E, integridade contábil, OAuth 2.0, OTP e LGPD |
 
 ---
 
@@ -182,9 +181,12 @@ flowchart TD
 
 ```text
 fluxo_caixas/
+├── .agents/
+│   ├── rules/core-skills.md            # Motores ativos: Emil Kowalski + Impeccable + Taste-Skill + Ponytail
+│   └── skills/                         # Skills especializadas de design engineering, animação e UI polish
 ├── backend/                            # Núcleo da API REST e regras de negócio
 │   ├── rotasdeapi/                     # Controladores REST modulares por domínio
-│   │   ├── usuario.py                  # Cadastro LGPD, Google OAuth 2.0, OTP anti-bot, login, perfil e exclusão
+│   │   ├── usuario.py                  # Cadastro Zero-CPF, Google OAuth 2.0, OTP E-mail/SMS, login e perfil
 │   │   ├── conta_bancaria.py           # Gestão de contas correntes, poupanças e investimentos
 │   │   ├── fluxo_dinheiro.py           # Lançamentos, transferências vinculadas e aportes de investimentos
 │   │   ├── calculo_financeiro.py       # Relatórios e balanços consolidados periódicos
@@ -195,47 +197,37 @@ fluxo_caixas/
 │   │   ├── seguranca.py                # Hashing e validação de senhas com Argon2id
 │   │   └── readme.md                   # Diretrizes de proteção de senhas
 │   ├── servicos/                       # Serviços utilitários
-│   │   ├── email.py                    # Envio defensivo de e-mails transacionais via SMTP
+│   │   ├── email.py                    # Envio de códigos OTP de 6 dígitos via E-mail (HTTP/SMTP) e SMS
 │   │   └── google_oauth.py             # Validação de ID Token Google OAuth 2.0 (iss, aud, exp, email_verified)
-│   ├── tests/                          # Suíte de 130 testes automatizados
-│   │   ├── conftest.py                 # Fixtures globais e banco em memória SQLite
-│   │   ├── test_*.py                   # Módulos de testes por especialidade (incluindo OAuth 2.0 e LGPD)
-│   │   └── README.md                   # Guia detalhado da suíte de testes
+│   ├── tests/                          # Suíte de testes automatizados (Pytest)
 │   ├── api.py                          # Configuração do FastAPI, CORS, tradução PT-BR e healthcheck
 │   ├── autenticacao.py                 # Emissão e validação de tokens JWT
 │   ├── configuracao.py                 # Carregamento seguro de configurações (.env)
-│   ├── dados_sensiveis.py              # Cifragem Fernet AES-128 e Blind Index HMAC (CPF, telefone e OAuth)
+│   ├── dados_sensiveis.py              # Cifragem Fernet AES-128 e Blind Index HMAC
 │   ├── database.py                     # Conexão SQLAlchemy normalizada (PostgreSQL/Supabase/MySQL)
-│   ├── esquema.py                      # Schemas Pydantic v2 (CPF estrito, senha forte e consentimento LGPD)
+│   ├── esquema.py                      # Schemas Pydantic v2 (Zero-CPF por padrão, senha forte e LGPD)
 │   ├── financeiro.py                   # Motor contábil e cálculos com precisão Decimal
 │   ├── models.py                       # Entidades ORM (10 tabelas mapeadas)
 │   └── readme.md                       # Documentação técnica do backend
 │
-├── banco de dados/                     # Esquema relacional e versionamento
-│   ├── migrations/                     # Histórico oficial gerenciado pelo Alembic
-│   │   ├── versions/                   # 16 migrações incrementais do banco
-│   │   └── env.py                      # Contexto operacional Alembic
+├── banco de dados/                     # Esquema relacional e versionamento Alembic
+│   ├── migrations/                     # 16 migrações incrementais do banco
 │   ├── alembic.ini                     # Arquivo de configuração Alembic
 │   └── readme.md                       # Diagrama ERD e dicionário de dados
 │
 ├── frontend/                           # Aplicação Web SPA & Landing Page (Vercel)
 │   ├── assets/logo.svg                 # Logotipo vetorial corporativo oficial em SVG
-│   ├── css/style.css                   # Design system financeiro responsivo (Modo Claro e Modo Escuro)
+│   ├── css/style.css                   # Design system financeiro responsivo + física Emil Kowalski (?v=19)
 │   ├── js/                             # Módulos JS (api.js, legal.js, dashboard.js, login.js, cadastro.js)
 │   ├── inicio.html                     # Landing Page de alta conversão com CTAs estratégicos
-│   ├── index.html                      # Painel financeiro principal autenticado (SPA)
-│   ├── login.html                      # Tela de login com Google OAuth 2.0 e recuperação segura
-│   ├── cadastro.html                   # Cadastro com CPF em tempo real, checklist de senha, LGPD e modal OTP
-│   ├── termos.html                     # Página dedicada dos Termos de Serviço
-│   ├── privacidade.html                # Página dedicada da Política de Privacidade e LGPD
-│   └── README.md                       # Guia do frontend e publicação
+│   ├── index.html                      # Painel financeiro principal autenticado (SPA 100% vetorial SVG)
+│   ├── login.html                      # Tela de login com botão Google em destaque e recuperação via OTP
+│   ├── cadastro.html                   # Cadastro Zero-CPF (Nome, E-mail, Telefone e Senha) + OTP E-mail/SMS
+│   ├── termos.html                     # Página dedicada dos Termos de Uso em linguagem clara
+│   ├── privacidade.html                # Página dedicada da Política de Privacidade e LGPD humana
+│   └── README.md                       # Guia do frontend e publicação na Vercel
 │
 ├── scripts/                            # Scripts utilitários administrativos
-│   ├── migrar_para_supabase.py         # Script de migração de banco para Supabase
-│   ├── supabase_schema_completo.sql    # DDL estruturado para o SQL Editor
-│   ├── remover_usuario_teste.py        # Exclusão segura e transacional de usuário de teste
-│   └── README.md                       # Guia de uso dos scripts
-│
 ├── .env.example                        # Template seguro de variáveis de ambiente
 ├── .gitignore                          # Regras de exclusão do Git
 ├── .vercelignore                       # Exclusão de arquivos backend no deploy do frontend
@@ -243,7 +235,7 @@ fluxo_caixas/
 ├── main.py                             # Ponto de entrada unificado para execução local
 ├── pytest.ini                          # Configuração do executor Pytest
 ├── requirements.txt                    # Dependências Python fixadas
-└── vercel.json                         # Roteamento e rewrites estáticos da Vercel
+└── vercel.json                         # Roteamento, rewrites e cabeçalhos de segurança da Vercel
 ```
 
 ---
@@ -274,7 +266,7 @@ Gere chaves criptográficas seguras:
 # Chave para assinatura JWT
 python -c "import secrets; print(secrets.token_urlsafe(48))"
 
-# Chave Fernet para PII (CPF e telefone)
+# Chave Fernet para PII (Telefone e identificadores criptográficos)
 python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
 ```
 
@@ -336,7 +328,7 @@ flowchart LR
    - **Build Command:** `pip install -r requirements.txt`
    - **Start Command:** `python -m alembic -c "banco de dados/alembic.ini" upgrade head && uvicorn main:app --host 0.0.0.0 --port $PORT`
    - **Environment Variables:** `APP_ENV=production`, `CORS_ORIGINS=https://fluxo-caixa-coral-two.vercel.app`, `DATABASE_URL`, `JWT_SECRET_KEY`, `CPF_ENCRYPTION_KEY`.
-   - **Opcionais (autenticação):** `GOOGLE_CLIENT_ID`, `EMAIL_API_KEY` / `EMAIL_FROM` (Resend ou Brevo), `SMTP_SERVER` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASSWORD`, `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` / `TWILIO_FROM_NUMBER` / `TWILIO_WHATSAPP_FROM`, `SMS_PROVIDER_URL` / `SMS_API_KEY`. Veja o [`.env.example`](.env.example).
+   - **Opcionais (autenticação):** `GOOGLE_CLIENT_ID`, `EMAIL_API_KEY` / `EMAIL_FROM` (Resend ou Brevo), `SMTP_SERVER` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASSWORD`, `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` / `TWILIO_FROM_NUMBER`, `SMS_PROVIDER_URL` / `SMS_API_KEY`. Veja o [`.env.example`](.env.example).
 3. **Frontend (Vercel):**
    - Publicação configurada em [`vercel.json`](vercel.json) (`outputDirectory: "frontend"`), redirecionando a raiz `/` para a Landing Page `/inicio.html`, com rewrites amigáveis (`/inicio`, `/login`, `/cadastro`, `/dashboard`, `/termos`, `/privacidade`) e cabeçalhos HTTP de segurança.
 
@@ -348,23 +340,21 @@ flowchart LR
 |---|---|---|---|---|
 | **Sistema** | `GET` | `/` | Confirmação de status da API | Pública |
 | **Sistema** | `GET` | `/health` | Healthcheck operacional e ambiente ativo | Pública |
-| **Usuários** | `POST` | `/usuarios/` | Cadastro com validação estrita de CPF, senha forte, aceite LGPD e disparo de OTP | Pública |
-| **Usuários** | `POST` | `/usuarios/verificar-email` | Confirmação anti-bot de e-mail via código OTP de 6 dígitos (uso único) + emissão de JWT | Pública |
-| **Usuários** | `POST` | `/usuarios/confirmar-email` | Rota compatível de confirmação de e-mail via código OTP de 6 dígitos | Pública |
+| **Usuários** | `POST` | `/usuarios/` | Cadastro Zero-CPF (Nome, E-mail, Telefone, Senha Forte e LGPD) + disparo de OTP (E-mail ou SMS) | Pública |
+| **Usuários** | `POST` | `/usuarios/verificar-email` | Confirmação de conta via código OTP de 6 dígitos (uso único) + emissão imediata de JWT | Pública |
+| **Usuários** | `POST` | `/usuarios/confirmar-email` | Rota compatível de confirmação de conta via código OTP de 6 dígitos | Pública |
 | **Usuários** | `POST` | `/usuarios/reenviar-verificacao` | Reenvio de código OTP temporário de verificação de cadastro | Pública (Rate Limited) |
+| **Usuários** | `POST` | `/usuarios/enviar-codigo` | Envio/reenvio de OTP de 6 dígitos com escolha/troca de canal (`email` ou `sms`) | Pública (Rate Limited) |
 | **Usuários** | `GET` | `/usuarios/auth/google/config` | Consulta disponibilidade e `client_id` público do Google OAuth 2.0 | Pública |
 | **Usuários** | `POST` | `/usuarios/auth/google` | Login Social Google OAuth 2.0 (cria/vincula conta e retorna JWT) | Pública (Rate Limited) |
+| **Usuários** | `POST` | `/usuarios/auth/google/assistido` | Fluxo Google assistido (Zero-CPF) quando `GOOGLE_CLIENT_ID` não está ativo | Pública (Rate Limited) |
+| **Usuários** | `PUT` | `/usuarios/me/completar-cadastro` | Atualização rápida opcional de telefone pós-OAuth | Bearer JWT |
 | **Usuários** | `POST` | `/login` | Autenticação OAuth2 (`username` = e-mail, `password` = senha) | Pública (Rate Limited) |
-| **Usuários** | `POST` | `/usuarios/enviar-codigo` | Envio/reenvio de OTP com troca de canal (e-mail ↔ telefone) | Pública (Rate Limited) |
-| **Usuários** | `POST` | `/usuarios/auth/google/assistido` | Fluxo Google assistido quando `GOOGLE_CLIENT_ID` não está ativo | Pública (Rate Limited) |
-| **Usuários** | `PUT` | `/usuarios/me/completar-cadastro` | Conclusão de CPF e telefone após o login com Google | Bearer JWT |
-| **Usuários** | `POST` | `/usuarios/esqueci-senha` | Código de recuperação por e-mail ou telefone (SMS / WhatsApp) | Pública |
-| **Usuários** | `POST` | `/usuarios/redefinir-senha` | Redefinição de senha com validação de código OTP | Pública |
+| **Usuários** | `POST` | `/usuarios/esqueci-senha` | Disparo de código OTP de recuperação por E-mail ou SMS | Pública |
+| **Usuários** | `POST` | `/usuarios/redefinir-senha` | Redefinição de senha validada exclusivamente por E-mail + código OTP de 6 dígitos | Pública |
 | **Usuários** | `GET` | `/usuarios/me` | Retorna dados cadastrais do usuário autenticado | Bearer JWT |
 | **Usuários** | `PUT` | `/usuarios/me` | Atualiza perfil cadastral (`nome_completo`, `telefone`) | Bearer JWT |
-| **Usuários** | `DELETE`| `/usuarios/me` | Exclui a conta do usuário logado e dados vinculados | Bearer JWT |
-| **Usuários** | `GET` | `/usuarios/` | Listagem administrativa de usuários cadastrados | Bearer JWT |
-| **Usuários** | `DELETE`| `/usuarios/{id}` | Exclusão administrativa de usuário específico | Bearer JWT |
+| **Usuários** | `DELETE`| `/usuarios/me` | Exclui permanentemente a conta do usuário logado e todos os dados vinculados | Bearer JWT |
 | **Contas** | `GET` | `/contas-bancarias/` | Lista contas bancárias com saldos atualizados | Bearer JWT |
 | **Contas** | `POST` | `/contas-bancarias/` | Cria nova conta (`corrente`, `poupanca`, `investimento`) | Bearer JWT |
 | **Contas** | `PUT` | `/contas-bancarias/{id}` | Atualiza nome, tipo ou status da conta bancária | Bearer JWT |
@@ -390,10 +380,10 @@ flowchart LR
 
 ---
 
-## 🔒 Segurança & Privacidade LGPD
+## 🔒 Segurança & Privacidade LGPD (Zero-CPF)
 
-- **Cifragem Simétrica Fernet:** CPF e telefone trafegam e residem em repouso sob cifra AES-128 em modo CBC com integridade verificada por HMAC-SHA256.
-- **Blind Index HMAC (`cpf_indice`):** Permite buscas indexadas e restrição de unicidade sem expor o CPF em texto plano.
+- **Minimização de Dados (Zero-CPF):** Nenhuma tela de cadastro, login ou recuperação solicita CPF. Identificadores internos são derivados criptograficamente do e-mail verificado (`Fernet AES-128` + `HMAC-SHA256`), mantendo compatibilidade total com o esquema relacional sem coletar documentos desnecessários.
+- **Cifragem Simétrica Fernet:** O número de telefone celular reside em repouso sob cifra AES-128 em modo CBC com integridade verificada por HMAC-SHA256.
 - **Hashing de Senha Resistente a GPU:** Implementação moderna via `pwdlib` utilizando **Argon2id** (vencedor da Password Hashing Competition) e fallback Bcrypt.
 - **Defesa Anti-Enumeração:** A rota de login utiliza tempo simulado caso o e-mail não exista, prevenindo enumeração de contas por análise de latência (*timing attacks*).
 - **Rate Limiting em Camada de Aplicação:** Bloqueio progressivo após 5 falhas consecutivas em janela de 15 minutos com status `HTTP 429`.
@@ -402,18 +392,11 @@ flowchart LR
 
 ## 🧪 Qualidade & Testes Automatizados
 
-A aplicação conta com **130 testes automatizados** executados via Pytest com banco de dados SQLite em memória totalmente isolado:
+A aplicação conta com suíte completa de testes automatizados executada via Pytest com banco de dados SQLite em memória totalmente isolado:
 
 ```powershell
 python -m pytest -q
 ```
-
-Saída esperada:
-```text
-130 passed, 5 deselected
-```
-
-Os 5 testes marcados como `deselected` correspondem a testes de alta concorrência com bloqueio pessimista (`SELECT ... FOR UPDATE`) que exigem um cluster MySQL ativo.
 
 ---
 
@@ -432,5 +415,5 @@ Os 5 testes marcados como `deselected` correspondem a testes de alta concorrênc
 ---
 
 <div align="center">
-Desenvolvido com excelência técnica, precisão contábil, segurança de dados e arquitetura moderna em nuvem.
+Desenvolvido com excelência técnica, precisão contábil, privacidade Zero-CPF e engenharia de design moderna em nuvem.
 </div>

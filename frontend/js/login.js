@@ -1,8 +1,7 @@
 /*
  * FLUXO DE CAIXA
- * Login institucional, Google OAuth 2.0 (oficial + fluxo assistido), verificação
- * multi-canal de código OTP (E-mail Gmail ou Telefone SMS/WhatsApp) e recuperação
- * segura de senha com contador regressivo de 60s, troca de canal e modo de contingência.
+ * Autenticação de usuário, Google OAuth 2.0, verificação 2FA/OTP multi-canal
+ * (E-mail ou SMS) e recuperação de senha por token de 6 dígitos.
  */
 
 function inicializarBotoesVerSenha(root = document) {
@@ -33,11 +32,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (message) {
         if (params.get("verificado") === "sucesso") {
             message.textContent =
-                "Código verificado com sucesso! Entre com suas credenciais para acessar o painel.";
+                "Conta verificada com sucesso. Entre com seu e-mail e senha.";
             message.className = "form-message info";
         } else if (params.get("cadastro") === "sucesso") {
             message.textContent =
-                "Cadastro criado! Entre com seu e-mail e senha ou confirme seu código de 6 dígitos abaixo.";
+                "Conta criada. Entre com suas credenciais ou valide seu código de 6 dígitos.";
             message.className = "form-message info";
         }
     }
@@ -64,9 +63,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const submitButton = form.querySelector('[type="submit"]');
 
     if (!emailInput || !senhaInput || !message) {
-        console.error(
-            "O formulário de login precisa dos campos #email, #senha e #login-message."
-        );
         return;
     }
 
@@ -88,7 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!formatoValido || erroDominio) {
             const msgErro = erroDominio
                 ? erroDominio.mensagem
-                : "Informe um endereço de e-mail válido (ex.: nome@dominio.com).";
+                : "Informe um endereço de e-mail válido (ex.: voce@dominio.com).";
             inputEl.classList.add("input-invalid");
             inputEl.classList.remove("input-valid");
             inputEl.setAttribute("aria-invalid", "true");
@@ -116,7 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
         message.className = "form-message";
 
         if (!email || !senha) {
-            message.textContent = "Preencha o e-mail e a senha.";
+            message.textContent = "Informe seu e-mail e sua senha.";
             message.classList.add("error");
             (!email ? emailInput : senhaInput).focus();
             return;
@@ -131,7 +127,7 @@ document.addEventListener("DOMContentLoaded", () => {
             submitButton.classList.add("is-loading");
         }
 
-        message.textContent = "Autenticando com segurança...";
+        message.textContent = "Verificando credenciais...";
         message.classList.add("info");
 
         try {
@@ -157,7 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 if (loginVerifyMessage) {
                     loginVerifyMessage.textContent =
-                        "Sua conta possui confirmação pendente de código. Digite o código OTP recebido para validar sua conta ou continue para o painel.";
+                        "Confirme o token de 6 dígitos enviado por E-mail ou SMS para validar sua conta, ou acesse o painel agora.";
                     loginVerifyMessage.className = "form-message info";
                 }
                 if (typeof loginVerifyDialog.showModal === "function") {
@@ -179,7 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // =========================================================
-    // 1. MODAL MULTI-CANAL DE VERIFICAÇÃO DE CÓDIGO NO LOGIN
+    // 1. MODAL 2FA / OTP NO LOGIN (E-MAIL OU SMS)
     // =========================================================
     const openLoginVerifyTrigger = document.querySelector("#open-login-verify-trigger");
     const loginVerifyDialog = document.querySelector("#login-verify-dialog");
@@ -225,8 +221,8 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         if (loginVerifySwitchBtn) {
             loginVerifySwitchBtn.textContent = porTel
-                ? "Não recebeu no Telefone? Enviar código para o meu E-mail"
-                : "Não recebeu no Gmail? Enviar código para o meu Telefone";
+                ? "Prefere E-mail? Enviar token para minha caixa de entrada"
+                : "Prefere SMS? Enviar token para o meu Telefone";
         }
     }
 
@@ -245,7 +241,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!loginVerifySendBtn) return;
             if (segundosLoginVerify > 0) {
                 loginVerifySendBtn.disabled = true;
-                loginVerifySendBtn.textContent = `Reenviar código (${segundosLoginVerify}s)`;
+                loginVerifySendBtn.textContent = `Reenviar (${segundosLoginVerify}s)`;
             } else {
                 loginVerifySendBtn.disabled = false;
                 loginVerifySendBtn.textContent = "Reenviar código";
@@ -283,8 +279,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (loginVerifySwitchBtn) loginVerifySwitchBtn.disabled = true;
         loginVerifyMessage.textContent =
             canal === "telefone"
-                ? "Enviando código de 6 dígitos para o seu telefone cadastrado..."
-                : "Enviando código de 6 dígitos para o seu e-mail...";
+                ? "Enviando token de 6 dígitos por SMS..."
+                : "Enviando token de 6 dígitos por E-mail...";
         loginVerifyMessage.className = "form-message info";
 
         try {
@@ -294,7 +290,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
             if (loginVerifySubtitle && resp?.destino_mascarado) {
-                loginVerifySubtitle.textContent = `Código de 6 dígitos enviado para ${resp.destino_mascarado}.`;
+                loginVerifySubtitle.textContent = `Token de 6 dígitos enviado para ${resp.destino_mascarado}.`;
             }
 
             if (loginVerifyContingencyBanner && loginVerifyContingencyCode) {
@@ -308,7 +304,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             loginVerifyMessage.textContent =
-                resp?.mensagem || "Código enviado! Digite os 6 dígitos abaixo.";
+                resp?.mensagem || "Token enviado. Digite os 6 dígitos abaixo.";
             loginVerifyMessage.className = "form-message info";
             iniciarContadorLoginVerify(60);
             loginVerifyOtp?.focus();
@@ -395,14 +391,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const codigo = loginVerifyOtp.value.trim();
         if (!/^\d{6}$/.test(codigo)) {
-            loginVerifyMessage.textContent = "Digite os 6 dígitos numéricos do código recebido.";
+            loginVerifyMessage.textContent = "Digite os 6 dígitos numéricos do token recebido.";
             loginVerifyMessage.className = "form-message error";
             loginVerifyOtp.focus();
             return;
         }
 
         if (loginVerifySubmit) loginVerifySubmit.disabled = true;
-        loginVerifyMessage.textContent = "Confirmando código e autenticando...";
+        loginVerifyMessage.textContent = "Validando token...";
         loginVerifyMessage.className = "form-message info";
 
         try {
@@ -431,7 +427,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // =========================================================
-    // 2. MODAL: ESQUECEU A SENHA? (OTP POR E-MAIL, TELEFONE OU CPF)
+    // 2. MODAL: REDEFINIR SENHA VIA TOKEN OTP (E-MAIL OU SMS)
     // =========================================================
     const forgotTrigger = document.querySelector("#forgot-password-trigger");
     const forgotDialog = document.querySelector("#forgot-password-dialog");
@@ -450,8 +446,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const resetEmailInput = document.querySelector("#reset-email");
     const resetEmailError = document.querySelector("#reset-email-error");
     const resetOtpInput = document.querySelector("#reset-otp");
-    const resetCpfInput = document.querySelector("#reset-cpf");
-    const resetCpfFeedback = document.querySelector("#reset-cpf-feedback");
     const resetPasswordInput = document.querySelector("#reset-password");
     const resetPasswordChecklist = document.querySelector("#reset-password-checklist");
     const resetConfirmInput = document.querySelector("#reset-password-confirm");
@@ -463,10 +457,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (typeof vincularValidacaoEmailTempoReal === "function" && resetEmailInput) {
         vincularValidacaoEmailTempoReal(resetEmailInput, resetEmailError);
-    }
-
-    if (typeof vincularValidacaoCpfTempoReal === "function") {
-        vincularValidacaoCpfTempoReal(resetCpfInput, resetCpfFeedback);
     }
 
     if (typeof vincularChecklistSenha === "function") {
@@ -498,8 +488,8 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         if (resetSwitchChannelBtn) {
             resetSwitchChannelBtn.textContent = porTel
-                ? "Não recebeu no Telefone? Enviar código para o meu E-mail"
-                : "Não recebeu no Gmail? Enviar código para o meu Telefone";
+                ? "Prefere E-mail? Enviar código para minha caixa de entrada"
+                : "Prefere SMS? Enviar código para o meu Telefone";
         }
     }
 
@@ -561,7 +551,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         if (resetDestinationHelp) {
             resetDestinationHelp.textContent =
-                "Código seguro de 6 dígitos válido por 15 minutos.";
+                "Token descartável de 6 dígitos com validade de 15 minutos.";
         }
         atualizarCardsCanalReset();
         if (resetMessage) {
@@ -594,15 +584,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    if (forgotTrigger) {
-        forgotTrigger.addEventListener("click", abrirModalRedefinicao);
-    }
-    if (forgotClose) {
-        forgotClose.addEventListener("click", fecharModalRedefinicao);
-    }
-    if (forgotCancel) {
-        forgotCancel.addEventListener("click", fecharModalRedefinicao);
-    }
+    forgotTrigger?.addEventListener("click", abrirModalRedefinicao);
+    forgotClose?.addEventListener("click", fecharModalRedefinicao);
+    forgotCancel?.addEventListener("click", fecharModalRedefinicao);
 
     async function solicitarCodigoRecuperacao(canalForcado = null) {
         if (!sendOtpButton || !resetEmailInput || !resetMessage) return;
@@ -628,8 +612,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (resetSwitchChannelBtn) resetSwitchChannelBtn.disabled = true;
         resetMessage.textContent =
             canal === "telefone"
-                ? "Enviando código de recuperação para o seu telefone cadastrado..."
-                : "Enviando código de recuperação para o seu e-mail...";
+                ? "Enviando código de recuperação por SMS..."
+                : "Enviando código de recuperação por E-mail...";
         resetMessage.classList.add("info");
 
         try {
@@ -657,7 +641,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 "Código enviado! Digite os 6 dígitos recebidos abaixo.";
             resetMessage.className = "form-message info";
             iniciarContadorResetOtp(60);
-            if (resetOtpInput) resetOtpInput.focus();
+            resetOtpInput?.focus();
         } catch (error) {
             resetMessage.textContent = error.message;
             resetMessage.className = "form-message error";
@@ -693,13 +677,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const email = resetEmailInput.value.trim();
             const codigoOtp = resetOtpInput ? resetOtpInput.value.trim() : "";
-            const cpf = resetCpfInput ? resetCpfInput.value.trim() : "";
             const novaSenha = resetPasswordInput.value;
             const confirmarSenha = resetConfirmInput.value;
 
-            if (!email || (!codigoOtp && !cpf) || !novaSenha || !confirmarSenha) {
+            if (!email || !codigoOtp || !novaSenha || !confirmarSenha) {
                 resetMessage.textContent =
-                    "Informe o e-mail, o código OTP (ou CPF) e a nova senha.";
+                    "Informe seu e-mail, o código de 6 dígitos e a nova senha.";
                 resetMessage.classList.add("error");
                 return;
             }
@@ -708,21 +691,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            if (codigoOtp && !/^\d{6}$/.test(codigoOtp)) {
-                resetMessage.textContent = "O código OTP deve conter exatamente 6 números.";
+            if (!/^\d{6}$/.test(codigoOtp)) {
+                resetMessage.textContent = "O código de verificação deve conter exatamente 6 números.";
                 resetMessage.classList.add("error");
                 resetOtpInput?.focus();
                 return;
-            }
-
-            if (!codigoOtp && cpf && typeof validarCpfMatematico === "function") {
-                const validacaoCpf = validarCpfMatematico(cpf);
-                if (!validacaoCpf.valido) {
-                    resetMessage.textContent = validacaoCpf.mensagem;
-                    resetMessage.classList.add("error");
-                    resetCpfInput?.focus();
-                    return;
-                }
             }
 
             if (typeof obterMensagemErroSenha === "function") {
@@ -736,35 +709,28 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             if (novaSenha !== confirmarSenha) {
-                resetMessage.textContent = "As senhas informadas não conferem.";
+                resetMessage.textContent = "As senhas informadas não coincidem.";
                 resetMessage.classList.add("error");
                 resetConfirmInput.focus();
                 return;
             }
 
             if (forgotSubmit) forgotSubmit.disabled = true;
-            resetMessage.textContent = "Validando credencial e redefinindo senha...";
+            resetMessage.textContent = "Validando código e atualizando sua senha...";
             resetMessage.classList.add("info");
 
             try {
-                const payload = {
+                await api.post("/usuarios/redefinir-senha", {
                     email,
+                    codigo_otp: codigoOtp,
                     nova_senha: novaSenha
-                };
-                if (codigoOtp) {
-                    payload.codigo_otp = codigoOtp;
-                }
-                if (cpf) {
-                    payload.cpf = cpf;
-                }
-
-                await api.post("/usuarios/redefinir-senha", payload);
+                });
 
                 fecharModalRedefinicao();
                 emailInput.value = email;
                 senhaInput.value = "";
                 senhaInput.focus();
-                message.textContent = "Senha redefinida com sucesso! Entre com sua nova senha.";
+                message.textContent = "Senha atualizada com sucesso. Entre com sua nova senha.";
                 message.className = "form-message info";
             } catch (error) {
                 resetMessage.textContent = error.message;

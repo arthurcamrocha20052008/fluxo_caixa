@@ -4322,3 +4322,258 @@ html:not([data-theme="dark"]) body:not(.dark-theme):not(.login-page) .otp-contin
         width: 100%;
     }
 }
+
+/* =========================================================
+   MOTOR INTEGRADO [EMIL KOWALSKI + IMPECCABLE + TASTE-SKILL + PONYTAIL]
+   Física de Movimento, Polimento Óptico, Tabular-Nums & Botão Google OAuth
+========================================================= */
+
+:root {
+    --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-spring-subtle: cubic-bezier(0.16, 1, 0.3, 1);
+    --duration-fast: 160ms;
+    --duration-normal: 220ms;
+}
+
+/* 1. Tipografia Financeira Impeccable: tabular-nums & tracking ótico */
+.card-value,
+.topbar-metric-pill strong,
+.invested-inline-badge strong,
+.preview-kpi strong,
+.preview-item strong,
+.otp-code-input,
+.otp-contingency-code,
+.category-stat,
+.budget-card-values,
+.goal-amount,
+table td.align-right,
+table th.align-right,
+input[type="number"],
+input[inputmode="decimal"],
+input[inputmode="numeric"] {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1, "zero" 1;
+}
+
+h1,
+h2,
+.hero-headline,
+#hero-main-title,
+#login-title,
+#register-title {
+    letter-spacing: -0.022em;
+}
+
+.legal-prose p,
+.legal-prose li,
+.landing-lead,
+.hero-description {
+    max-width: 66ch;
+}
+
+/* 2. Botão de Login Social Google (Elemento Principal de Conversão) */
+.btn-google-oauth {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 18px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: #ffffff;
+    color: #0f172a;
+    font-family: var(--font-sans);
+    font-size: 14.5px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    box-shadow:
+        0 1px 2px rgba(15, 23, 42, 0.08),
+        0 4px 12px rgba(15, 23, 42, 0.14);
+    transform-origin: center center;
+    transition:
+        transform var(--duration-fast) var(--ease-out-expo),
+        background-color var(--duration-fast) var(--ease-out-expo),
+        border-color var(--duration-fast) var(--ease-out-expo),
+        box-shadow var(--duration-fast) var(--ease-out-expo);
+}
+
+.btn-google-oauth:hover:not(:disabled) {
+    background: #f8fafc;
+    border-color: #10b981;
+    box-shadow:
+        0 4px 16px rgba(16, 185, 129, 0.18),
+        0 2px 6px rgba(15, 23, 42, 0.12);
+    transform: translateY(-1px);
+}
+
+.btn-google-oauth:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.btn-google-oauth:focus-visible {
+    outline: none;
+    box-shadow:
+        0 0 0 2px #0b0f19,
+        0 0 0 4px #10b981;
+}
+
+.google-icon-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: #ffffff;
+    flex-shrink: 0;
+}
+
+.btn-google-label {
+    color: #0f172a;
+    font-weight: 700;
+}
+
+.btn-google-arrow {
+    margin-left: auto;
+    color: #64748b;
+    transition: transform var(--duration-fast) var(--ease-out-expo), color var(--duration-fast) var(--ease-out-expo);
+}
+
+.btn-google-oauth:hover:not(:disabled) .btn-google-arrow {
+    transform: translateX(3px);
+    color: #0f172a;
+}
+
+/* 3. Emil Kowalski Micro-interações & Feedback Tátil (160ms-220ms) */
+.button-primary,
+.button-secondary,
+.button-danger,
+.nav-link,
+.channel-option-card,
+.nature-tab,
+.email-typo-fix-btn {
+    transform-origin: center center;
+    transition:
+        transform var(--duration-fast) var(--ease-out-expo),
+        background-color var(--duration-fast) var(--ease-out-expo),
+        border-color var(--duration-fast) var(--ease-out-expo),
+        color var(--duration-fast) var(--ease-out-expo),
+        box-shadow var(--duration-fast) var(--ease-out-expo),
+        opacity var(--duration-fast) var(--ease-out-expo);
+}
+
+.button-primary:active:not(:disabled),
+.button-secondary:active:not(:disabled),
+.button-danger:active:not(:disabled),
+.nature-tab:active:not(:disabled),
+.email-typo-fix-btn:active:not(:disabled) {
+    transform: scale(0.97);
+}
+
+.button-primary:focus-visible,
+.button-secondary:focus-visible,
+.button-danger:focus-visible,
+.nav-link:focus-visible,
+.password-toggle-btn:focus-visible,
+.forgot-password-link:focus-visible,
+.otp-switch-channel-btn:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* Modais com entrada ancorada e física suave */
+dialog.form-dialog[open] {
+    transform-origin: center center;
+    animation: dialog-spring-in var(--duration-normal) var(--ease-out-expo);
+}
+
+@keyframes dialog-spring-in {
+    from {
+        opacity: 0;
+        transform: scale(0.96) translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* 4. Classes Semânticas Substituindo Estilos Inline (Ponytail Clean Code) */
+.preview-header-title {
+    color: #f8fafc;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.preview-header-subtitle {
+    display: block;
+    color: #94a3b8;
+    font-size: 11.5px;
+    margin-top: 2px;
+}
+
+.preview-val-emerald {
+    color: #34d399;
+}
+
+.preview-val-blue {
+    color: #60a5fa;
+}
+
+.preview-val-neutral {
+    color: #f8fafc;
+}
+
+.preview-val-amber {
+    color: #fcd34d;
+}
+
+.landing-cta-group-centered {
+    justify-content: center;
+    margin-bottom: 0;
+}
+
+.footer-brand-strong {
+    color: #f8fafc;
+}
+
+.panel-header-spaced {
+    margin-bottom: 20px;
+}
+
+.panel-header-compact {
+    margin-bottom: 16px;
+}
+
+.form-message-spaced {
+    margin-bottom: 16px;
+}
+
+.category-desc {
+    color: var(--color-text-secondary);
+}
+
+.summary-grid-spaced,
+.panel-bottom-spaced {
+    margin-bottom: 24px;
+}
+
+.panel-top-spaced {
+    margin-top: 24px;
+}
+
+/* 5. Guard rail estrito para prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

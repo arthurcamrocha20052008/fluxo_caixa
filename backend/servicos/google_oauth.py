@@ -33,15 +33,8 @@ def modo_google_assistido_habilitado() -> bool:
 
 
 def usuario_possui_cadastro_incompleto_oauth(usuario: Any) -> bool:
-    """Retorna True se o usuário ainda possui identificador temporário OAuth em vez de CPF real."""
-    cpf_cifrado = getattr(usuario, "cpf", None)
-    if not cpf_cifrado or not isinstance(cpf_cifrado, str):
-        return False
-    try:
-        valor = descriptografar_cpf(cpf_cifrado)
-        return valor.startswith("oauth:")
-    except ValueError:
-        return False
+    """Retorna False: o CPF foi abolido como identificador primário (LGPD data minimization)."""
+    return False
 
 
 def _derivar_nome_padrao(email: str, nome_informado: str) -> str:

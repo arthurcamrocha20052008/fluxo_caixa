@@ -276,16 +276,19 @@ def criar_usuario(
     _verificar_limites(db, (chave_cliente,))
     _registrar_tentativa(db, (chave_cliente,))
 
-    # Defesa em profundidade: valida novamente o CPF antes da persistência
-    try:
-        cpf_validado = validar_cpf_brasileiro(usuario.cpf)
-    except ValueError as erro:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=str(erro),
-        ) from erro
-
-    cpf_hash = indice_cpf(cpf_validado)
+    if usuario.cpf and usuario.cpf.strip():
+        try:
+            cpf_validado = validar_cpf_brasileiro(usuario.cpf)
+        except ValueError as erro:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=str(erro),
+            ) from erro
+        cpf_cifrado = criptografar_cpf(cpf_validado)
+        cpf_hash = indice_cpf(cpf_validado)
+    else:
+        cpf_cifrado = criptografar_identificador_oauth("email", usuario.email)
+        cpf_hash = indice_identificador_oauth("email", usuario.email)
 
     usuario_existente = (
         db.query(Usuario)
@@ -299,7 +302,7 @@ def criar_usuario(
     if usuario_existente:
         raise HTTPException(
             status_code=400,
-            detail="E-mail ou CPF já cadastrado."
+            detail="Este endereço de e-mail já está cadastrado."
         )
 
     # =========================================================
@@ -310,7 +313,7 @@ def criar_usuario(
         raise HTTPException(
             status_code=422,
             detail=(
-                "Informe um telefone válido com DDD para receber o código por SMS ou WhatsApp."
+                "Informe um telefone válido com DDD para receber o código por SMS."
             ),
         )
 
@@ -328,7 +331,7 @@ def criar_usuario(
 
     novo_usuario = Usuario(
         nome_completo=usuario.nome_completo,
-        cpf=criptografar_cpf(cpf_validado),
+        cpf=cpf_cifrado,
         cpf_indice=cpf_hash,
         email=usuario.email,
         telefone=(
@@ -349,7 +352,7 @@ def criar_usuario(
         db.rollback()
         raise HTTPException(
             status_code=400,
-            detail="E-mail ou CPF já cadastrado.",
+            detail="Este endereço de e-mail já está cadastrado.",
         ) from None
     db.refresh(novo_usuario)
 
@@ -761,30 +764,6 @@ def autenticar_com_google_assistido(
 
     novo_usuario = False
     if usuario is not None:
-        eh_conta_oauth = usuario_possui_cadastro_incompleto_oauth(usuario)
-        if not eh_conta_oauth:
-            if not dados.cpf:
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail=(
-                        "Já existe uma conta cadastrada com este e-mail. "
-                        "Informe o CPF do titular abaixo para vincular seu acesso Google."
-                    ),
-                )
-            cpf_hash_informado = indice_cpf(dados.cpf)
-            if not hmac.compare_digest(usuario.cpf_indice, cpf_hash_informado):
-                bloqueado = _registrar_tentativa(db, (chave_ip,))
-                if bloqueado:
-                    raise HTTPException(
-                        status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                        detail="Muitas tentativas de autenticação. Tente novamente mais tarde.",
-                        headers={"Retry-After": str(int(JANELA_TENTATIVAS.total_seconds()))},
-                    )
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="O CPF informado não corresponde ao titular desta conta.",
-                )
-
         alterou = False
         if not usuario.email_verificado:
             usuario.email_verificado = True
@@ -795,7 +774,7 @@ def autenticar_com_google_assistido(
             db.commit()
             db.refresh(usuario)
 
-        if eh_conta_oauth and (dados.cpf or dados.telefone):
+        if dados.cpf or dados.telefone:
             _aplicar_dados_complementares_oauth(db, usuario, dados.cpf, dados.telefone)
     else:
         if dados.cpf:
@@ -973,8 +952,8 @@ def esqueci_senha(
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=(
-                        "Esta conta não possui telefone cadastrado para SMS/WhatsApp. "
-                        "Solicite o código por E-mail (Gmail) ou valide com seu CPF."
+                        "Esta conta não possui telefone cadastrado para SMS. "
+                        "Solicite o código de 6 dígitos por E-mail."
                     ),
                 )
             if dados.telefone:

@@ -18,11 +18,11 @@
         }
     </script>
 
-    <link rel="stylesheet" href="css/style.css?v=18">
+    <link rel="stylesheet" href="css/style.css?v=19">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>
-    <script src="js/api.js?v=18" defer></script>
-    <script src="js/legal.js?v=18" defer></script>
-    <script src="js/dashboard.js?v=18" defer></script>
+    <script src="js/api.js?v=19" defer></script>
+    <script src="js/legal.js?v=19" defer></script>
+    <script src="js/dashboard.js?v=19" defer></script>
 </head>
 
 <body>
@@ -332,7 +332,9 @@
                     </div>
 
                     <div class="chart-placeholder" id="dashboard-chart-empty">
-                        <div class="chart-symbol" aria-hidden="true">▥</div>
+                        <div class="chart-symbol" aria-hidden="true">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                        </div>
 
                         <h4>Sem lançamentos para exibir gráficos</h4>
 
@@ -359,7 +361,9 @@
                     </div>
 
                     <div class="empty-state" id="accounts-list">
-                        <div class="empty-icon" aria-hidden="true">▤</div>
+                        <div class="empty-icon" aria-hidden="true">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                        </div>
 
                         <p>Nenhuma conta carregada.</p>
 
@@ -435,7 +439,9 @@
                     </div>
 
                     <div class="empty-state" id="view-accounts-list">
-                        <div class="empty-icon" aria-hidden="true">▤</div>
+                        <div class="empty-icon" aria-hidden="true">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                        </div>
                         <p>Carregando contas bancárias...</p>
                         <span>Aguarde um momento enquanto conectamos à API.</span>
                     </div>
@@ -544,7 +550,7 @@
             <div id="view-categorias" class="app-view" hidden>
                 <!-- Painel de Orçamentos Mensais -->
                 <section class="budget-panel" aria-labelledby="orcamentos-titulo">
-                    <div class="panel-header" style="margin-bottom: 20px;">
+                    <div class="panel-header panel-header-spaced">
                         <div>
                             <h3 id="orcamentos-titulo">Orçamentos mensais por categoria</h3>
                             <p>Defina limites de gastos para cada categoria e acompanhe o percentual consumido em tempo real.</p>
@@ -583,11 +589,11 @@
                         </div>
                     </form>
 
-                    <div id="orcamento-mensagem" class="form-message" role="status" aria-live="polite" style="margin-bottom: 16px;"></div>
+                    <div id="orcamento-mensagem" class="form-message form-message-spaced" role="status" aria-live="polite"></div>
                     <ul id="orcamento-lista" class="budget-grid"></ul>
                 </section>
 
-                <div class="panel-header" style="margin-bottom: 16px;">
+                <div class="panel-header panel-header-compact">
                     <div>
                         <h3>Categorias financeiras</h3>
                         <p>Classificação de despesas e receitas utilizadas pelo sistema</p>
@@ -595,22 +601,22 @@
                 </div>
 
                 <div class="category-grid" id="categories-cards-grid">
-                    <div class="category-card" data-category="alimentacao"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg></div><div><strong>Alimentação</strong><br><small style="color:var(--color-text-secondary);">Supermercado e refeições</small><span class="category-stat" data-category-total="alimentacao"></span></div></div>
-                    <div class="category-card" data-category="moradia"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div><div><strong>Moradia</strong><br><small style="color:var(--color-text-secondary);">Aluguel e condomínio</small><span class="category-stat" data-category-total="moradia"></span></div></div>
-                    <div class="category-card" data-category="salario"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></div><div><strong>Salário</strong><br><small style="color:var(--color-text-secondary);">Remuneração mensal</small><span class="category-stat" data-category-total="salario"></span></div></div>
-                    <div class="category-card" data-category="transporte"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg></div><div><strong>Transporte</strong><br><small style="color:var(--color-text-secondary);">Combustível e transporte</small><span class="category-stat" data-category-total="transporte"></span></div></div>
-                    <div class="category-card" data-category="saude"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg></div><div><strong>Saúde</strong><br><small style="color:var(--color-text-secondary);">Farmácia e consultas</small><span class="category-stat" data-category-total="saude"></span></div></div>
-                    <div class="category-card" data-category="educacao"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></div><div><strong>Educação</strong><br><small style="color:var(--color-text-secondary);">Cursos e mensalidades</small><span class="category-stat" data-category-total="educacao"></span></div></div>
-                    <div class="category-card" data-category="lazer"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg></div><div><strong>Lazer</strong><br><small style="color:var(--color-text-secondary);">Passeios e cultura</small><span class="category-stat" data-category-total="lazer"></span></div></div>
-                    <div class="category-card" data-category="investimento"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg></div><div><strong>Investimento</strong><br><small style="color:var(--color-text-secondary);">Aportes e patrimônio</small><span class="category-stat" data-category-total="investimento"></span></div></div>
-                    <div class="category-card" data-category="contas"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></div><div><strong>Contas</strong><br><small style="color:var(--color-text-secondary);">Água, energia e internet</small><span class="category-stat" data-category-total="contas"></span></div></div>
-                    <div class="category-card" data-category="compras"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg></div><div><strong>Compras</strong><br><small style="color:var(--color-text-secondary);">Vestuário e eletrônicos</small><span class="category-stat" data-category-total="compras"></span></div></div>
-                    <div class="category-card" data-category="impostos"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div><div><strong>Impostos</strong><br><small style="color:var(--color-text-secondary);">Tributos e taxas</small><span class="category-stat" data-category-total="impostos"></span></div></div>
-                    <div class="category-card" data-category="freelance"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg></div><div><strong>Freelance</strong><br><small style="color:var(--color-text-secondary);">Trabalhos extras</small><span class="category-stat" data-category-total="freelance"></span></div></div>
-                    <div class="category-card" data-category="vendas"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg></div><div><strong>Vendas</strong><br><small style="color:var(--color-text-secondary);">Comércio e desapegos</small><span class="category-stat" data-category-total="vendas"></span></div></div>
-                    <div class="category-card" data-category="transferencia"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg></div><div><strong>Transferência</strong><br><small style="color:var(--color-text-secondary);">Entre contas</small><span class="category-stat" data-category-total="transferencia"></span></div></div>
-                    <div class="category-card" data-category="ajuste"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg></div><div><strong>Ajuste</strong><br><small style="color:var(--color-text-secondary);">Correção contábil</small><span class="category-stat" data-category-total="ajuste"></span></div></div>
-                    <div class="category-card" data-category="outros"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></div><div><strong>Outros</strong><br><small style="color:var(--color-text-secondary);">Diversos</small><span class="category-stat" data-category-total="outros"></span></div></div>
+                    <div class="category-card" data-category="alimentacao"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg></div><div><strong>Alimentação</strong><br><small class="category-desc">Supermercado e refeições</small><span class="category-stat" data-category-total="alimentacao"></span></div></div>
+                    <div class="category-card" data-category="moradia"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div><div><strong>Moradia</strong><br><small class="category-desc">Aluguel e condomínio</small><span class="category-stat" data-category-total="moradia"></span></div></div>
+                    <div class="category-card" data-category="salario"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></div><div><strong>Salário</strong><br><small class="category-desc">Remuneração mensal</small><span class="category-stat" data-category-total="salario"></span></div></div>
+                    <div class="category-card" data-category="transporte"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg></div><div><strong>Transporte</strong><br><small class="category-desc">Combustível e transporte</small><span class="category-stat" data-category-total="transporte"></span></div></div>
+                    <div class="category-card" data-category="saude"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg></div><div><strong>Saúde</strong><br><small class="category-desc">Farmácia e consultas</small><span class="category-stat" data-category-total="saude"></span></div></div>
+                    <div class="category-card" data-category="educacao"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></div><div><strong>Educação</strong><br><small class="category-desc">Cursos e mensalidades</small><span class="category-stat" data-category-total="educacao"></span></div></div>
+                    <div class="category-card" data-category="lazer"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg></div><div><strong>Lazer</strong><br><small class="category-desc">Passeios e cultura</small><span class="category-stat" data-category-total="lazer"></span></div></div>
+                    <div class="category-card" data-category="investimento"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg></div><div><strong>Investimento</strong><br><small class="category-desc">Aportes e patrimônio</small><span class="category-stat" data-category-total="investimento"></span></div></div>
+                    <div class="category-card" data-category="contas"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></div><div><strong>Contas</strong><br><small class="category-desc">Água, energia e internet</small><span class="category-stat" data-category-total="contas"></span></div></div>
+                    <div class="category-card" data-category="compras"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg></div><div><strong>Compras</strong><br><small class="category-desc">Vestuário e eletrônicos</small><span class="category-stat" data-category-total="compras"></span></div></div>
+                    <div class="category-card" data-category="impostos"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div><div><strong>Impostos</strong><br><small class="category-desc">Tributos e taxas</small><span class="category-stat" data-category-total="impostos"></span></div></div>
+                    <div class="category-card" data-category="freelance"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg></div><div><strong>Freelance</strong><br><small class="category-desc">Trabalhos extras</small><span class="category-stat" data-category-total="freelance"></span></div></div>
+                    <div class="category-card" data-category="vendas"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg></div><div><strong>Vendas</strong><br><small class="category-desc">Comércio e desapegos</small><span class="category-stat" data-category-total="vendas"></span></div></div>
+                    <div class="category-card" data-category="transferencia"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg></div><div><strong>Transferência</strong><br><small class="category-desc">Entre contas</small><span class="category-stat" data-category-total="transferencia"></span></div></div>
+                    <div class="category-card" data-category="ajuste"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg></div><div><strong>Ajuste</strong><br><small class="category-desc">Correção contábil</small><span class="category-stat" data-category-total="ajuste"></span></div></div>
+                    <div class="category-card" data-category="outros"><div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></div><div><strong>Outros</strong><br><small class="category-desc">Diversos</small><span class="category-stat" data-category-total="outros"></span></div></div>
                 </div>
 
                 <article class="panel chart-panel">
@@ -627,7 +633,9 @@
                     </div>
 
                     <div class="chart-placeholder" id="categories-chart-empty">
-                        <div class="chart-symbol" aria-hidden="true">▧</div>
+                        <div class="chart-symbol" aria-hidden="true">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
+                        </div>
                         <h4>Nenhuma movimentação categorizada</h4>
                         <p>
                             Adicione receitas ou despesas para visualizar a distribuição
@@ -639,7 +647,7 @@
 
             <!-- View: Investimentos e Metas -->
             <div id="view-investimentos" class="app-view" hidden>
-                <section class="summary-grid" style="margin-bottom: 24px;">
+                <section class="summary-grid summary-grid-spaced">
                     <article class="summary-card">
                         <div class="card-heading">
                             <span>Total em investimentos</span>
@@ -698,7 +706,9 @@
                         </div>
 
                         <div class="chart-placeholder" id="investments-chart-empty">
-                            <div class="chart-symbol" aria-hidden="true">↗</div>
+                            <div class="chart-symbol" aria-hidden="true">
+                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                            </div>
                             <h4>Sem patrimônio ou aportes registrados</h4>
                             <p>
                                 Cadastre contas de poupança/investimento ou registre aportes
@@ -730,7 +740,7 @@
                     </article>
                 </section>
 
-                <article class="panel transactions-panel" style="margin-top: 24px;">
+                <article class="panel transactions-panel panel-top-spaced">
                     <div class="panel-header">
                         <div>
                             <h3>Carteira de ativos e investimentos registrados</h3>
@@ -770,7 +780,7 @@
 
             <!-- View: Relatórios -->
             <div id="view-relatorios" class="app-view" hidden>
-                <article class="panel" style="margin-bottom: 24px;">
+                <article class="panel panel-bottom-spaced">
                     <div class="panel-header">
                         <div>
                             <h3>Relatório financeiro por período customizado</h3>
@@ -834,7 +844,9 @@
                         <article class="summary-card">
                             <div class="card-heading">
                                 <span>Saldo inicial no período</span>
-                                <span class="card-icon">R$</span>
+                                <span class="card-icon balance-icon" aria-hidden="true">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                                </span>
                             </div>
                             <p class="card-value" id="report-initial-balance">—</p>
                             <p class="card-description" id="report-period-description">Selecione um período acima</p>
@@ -843,7 +855,9 @@
                         <article class="summary-card">
                             <div class="card-heading">
                                 <span>Entradas no período</span>
-                                <span class="card-icon income-icon">↑</span>
+                                <span class="card-icon income-icon" aria-hidden="true">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+                                </span>
                             </div>
                             <p class="card-value" id="report-total-income">—</p>
                             <p class="card-description" id="report-transfers-in">Transferências recebidas: R$ 0,00</p>
@@ -852,7 +866,9 @@
                         <article class="summary-card">
                             <div class="card-heading">
                                 <span>Saídas no período</span>
-                                <span class="card-icon expense-icon">↓</span>
+                                <span class="card-icon expense-icon" aria-hidden="true">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+                                </span>
                             </div>
                             <p class="card-value" id="report-total-expenses">—</p>
                             <p class="card-description" id="report-investments-out">Aportes em investimento: R$ 0,00</p>
@@ -861,7 +877,9 @@
                         <article class="summary-card">
                             <div class="card-heading">
                                 <span>Saldo final no período</span>
-                                <span class="card-icon">=</span>
+                                <span class="card-icon result-icon" aria-hidden="true">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                                </span>
                             </div>
                             <p class="card-value" id="report-final-balance">—</p>
                             <p class="card-description" id="report-net-result">Resultado líquido: —</p>
@@ -869,7 +887,7 @@
                     </div>
                 </article>
 
-                <article class="panel chart-panel" style="margin-bottom: 24px;">
+                <article class="panel chart-panel panel-bottom-spaced">
                     <div class="panel-header">
                         <div>
                             <h3>Visão financeira consolidada</h3>
@@ -883,7 +901,9 @@
                     </div>
 
                     <div class="chart-placeholder" id="reports-chart-empty">
-                        <div class="chart-symbol" aria-hidden="true">▥</div>
+                        <div class="chart-symbol" aria-hidden="true">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                        </div>
                         <h4>Sem dados suficientes para o relatório gráfico</h4>
                         <p>
                             Registre movimentações ou gere um relatório de período para
@@ -929,7 +949,7 @@
             <!-- View: Configurações -->
             <div id="view-configuracoes" class="app-view" hidden>
                 <!-- Alternador de Tema (Claro / Escuro) -->
-                <article class="panel" style="margin-bottom: 24px;">
+                <article class="panel panel-bottom-spaced">
                     <div class="panel-header">
                         <div>
                             <h3>Aparência do sistema</h3>
@@ -951,7 +971,7 @@
                 </article>
 
                 <!-- Alteração de Dados Cadastrais e Senha -->
-                <article class="panel" style="margin-bottom: 24px;">
+                <article class="panel panel-bottom-spaced">
                     <div class="panel-header">
                         <div>
                             <h3>Dados cadastrais e segurança</h3>
@@ -1138,11 +1158,11 @@
             </div>
 
             <footer class="footer">
-                <p>Fluxo de Caixa · Controle financeiro pessoal com criptografia e conformidade LGPD</p>
+                <p>Fluxo de Caixa · Engenharia financeira pessoal · Arquitetura Zero-CPF &amp; Conformidade LGPD</p>
                 <p>
-                    <a href="inicio.html" class="auth-link">Apresentação</a> ·
-                    <a href="termos.html" data-open-legal="termos" class="auth-link">Termos de Serviço</a> ·
-                    <a href="privacidade.html" data-open-legal="privacidade" class="auth-link">Política de Privacidade (LGPD)</a>
+                    <a href="inicio.html" class="auth-link">Produto</a> ·
+                    <a href="termos.html" data-open-legal="termos" class="auth-link">Termos de Uso</a> ·
+                    <a href="privacidade.html" data-open-legal="privacidade" class="auth-link">Privacidade &amp; LGPD</a>
                 </p>
             </footer>
 

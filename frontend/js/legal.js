@@ -6,170 +6,114 @@
 
 const CONTEUDO_TERMOS_SERVICO = `
 <article class="legal-prose">
-    <h1>Termos de Serviço — Fluxo de Caixa</h1>
-    <span class="legal-meta">Vigência e última atualização: Outubro de 2026 · Versão 2.0</span>
+    <h1>Termos de Uso — Fluxo de Caixa</h1>
+    <span class="legal-meta">Última atualização: Novembro de 2026 · Linguagem Clara &amp; Transparente</span>
 
     <p>
-        Bem-vindo(a) ao <strong>Fluxo de Caixa</strong>. Estes Termos de Serviço regulam o acesso e a utilização da
-        plataforma digital de gestão financeira e patrimonial pessoal ("Plataforma"), composta por interface web
-        responsiva e API RESTful segura. Ao criar uma conta, autenticar-se ou utilizar qualquer funcionalidade,
-        você ("Usuário" ou "Titular") declara ter lido, compreendido e aceitado integralmente estes Termos.
+        Estes Termos explicam de forma direta como funciona o <strong>Fluxo de Caixa</strong>, o que você pode esperar
+        da nossa plataforma e como mantemos sua conta segura. Sem letras miúdas e sem juridiquês.
     </p>
 
-    <h3>1. Objeto da Plataforma</h3>
+    <h3>1. O que o Fluxo de Caixa faz</h3>
     <p>
-        O <strong>Fluxo de Caixa</strong> disponibiliza ferramentas tecnológicas para organização financeira pessoal,
-        incluindo cadastro e conciliação de contas bancárias, registro de entradas, saídas e transferências com
-        precisão decimal contábil, acompanhamento de carteira de investimentos (Poupança, CDB, LCI/LCA, Tesouro Direto,
-        Fundos de Investimento, Ações, ETFs, FIIs e Subscrições), definição de metas financeiras, orçamentos mensais
-        por categoria e alertas preventivos de vencimentos.
+        O <strong>Fluxo de Caixa</strong> é uma plataforma de engenharia financeira pessoal. Você registra e acompanha
+        contas bancárias, entradas, saídas, transferências entre contas, carteira de investimentos (CDB, Tesouro Direto,
+        LCI/LCA, Ações, FIIs, ETFs), metas e orçamentos mensais com precisão contábil de duas casas decimais.
     </p>
 
-    <h3>2. Natureza Informativa e Ausência de Consultoria Financeira</h3>
+    <h3>2. O que nós não fazemos</h3>
     <p>
-        A Plataforma atua exclusivamente como ferramenta de organização, consolidação de dados inseridos pelo próprio
-        Usuário e visualização analítica. <strong>Nenhuma informação, gráfico, alerta ou indicador exibido constitui
-        recomendação de investimento, consultoria de valores mobiliários (CVM), assessoria tributária, jurídica ou
-        intermediação bancária (BACEN).</strong> Decisões financeiras tomadas a partir dos registros cadastrados são
-        de responsabilidade exclusiva do Usuário.
+        Nós fornecemos software de organização e análise visual. <strong>Não somos banco, corretora nem consultoria de
+        investimentos.</strong> Nenhum gráfico, projeção ou alerta dentro do app é recomendação de compra ou venda de
+        ativos. As decisões financeiras continuam sendo 100% suas.
     </p>
 
-    <h3>3. Elegibilidade, Cadastro, Validação de CPF e Verificação Anti-Bot</h3>
+    <h3>3. Cadastro simples, sem CPF</h3>
     <ul>
-        <li>O cadastro é destinado a pessoas físicas plenamente capazes nos termos da legislação civil brasileira.</li>
-        <li>O Usuário compromete-se a fornecer dados verdadeiros, exatos e atualizados, incluindo nome completo, CPF válido de sua titularidade e endereço de e-mail ativo.</li>
-        <li>A Plataforma executa validação matemática estrita dos dígitos verificadores do CPF antes da confirmação cadastral e impede duplicidade de contas por meio de indexação criptográfica cega (<em>Blind Index</em>).</li>
-        <li>Para prevenção contra automações abusivas (<em>bots</em>) e fraudes de identidade, o cadastro dispara código descartável de verificação por e-mail (OTP de 6 dígitos com expiração de 15 minutos) ou validação federada via Google OAuth 2.0.</li>
+        <li>Para criar sua conta, pedimos apenas o essencial: <strong>Nome, E-mail, Telefone e Senha</strong> (ou login direto com sua conta Google).</li>
+        <li><strong>Nós não coletamos seu CPF.</strong> Acreditamos em minimização real de dados: você não precisa expor documentos civis para organizar seu fluxo de caixa.</li>
+        <li>Para garantir que a conta pertence a você e bloquear automações (<em>bots</em>), enviamos um código numérico de 6 dígitos (OTP) para o seu <strong>E-mail</strong> ou <strong>SMS</strong> com validade de 15 minutos.</li>
     </ul>
 
-    <h3>4. Segurança de Credenciais, Senhas Fortes e Login Social (Google OAuth 2.0)</h3>
+    <h3>4. Segurança da sua conta</h3>
     <ul>
-        <li>A senha de acesso é pessoal e intransferível, devendo atender obrigatoriamente aos requisitos mínimos de segurança: ao menos 8 caracteres, letra maiúscula, letra minúscula, algarismo numérico e caractere especial.</li>
-        <li>O Usuário também pode autenticar-se utilizando sua conta Google (OAuth 2.0), hipótese em que a identidade e a posse do e-mail são validadas criptograficamente junto aos servidores oficiais do Google.</li>
-        <li>É dever do Usuário manter a confidencialidade de suas credenciais e encerrar sua sessão ao utilizar dispositivos compartilhados.</li>
+        <li>Sua senha precisa ter no mínimo 8 caracteres, combinando letras maiúsculas, minúsculas, números e símbolos. Ela é transformada em um hash irreversível (<strong>Argon2id</strong>) — nem nossa equipe consegue lê-la.</li>
+        <li>Se preferir, use o botão <strong>Continuar com o Google</strong> (OAuth 2.0) para entrar com um clique sem criar senhas novas.</li>
+        <li>Protegemos os endpoints de login e verificação com limites automáticos de tentativas (<em>rate limiting</em>) contra força bruta.</li>
     </ul>
 
-    <h3>5. Regras de Uso Aceitável e Condutas Vedadas</h3>
-    <p>É expressamente proibido ao Usuário:</p>
+    <h3>5. Uso responsável</h3>
+    <p>Ao usar o Fluxo de Caixa, você concorda em:</p>
     <ul>
-        <li>Utilizar CPF, e-mail ou dados pessoais pertencentes a terceiros sem autorização legal;</li>
-        <li>Empregar scripts automatizados, varreduras de força bruta, engenharia reversa ou tentativas de contorno dos mecanismos de limitação de requisições (<em>Rate Limiting</em>) e isolamento multiusuário;</li>
-        <li>Utilizar a Plataforma para registrar, ocultar ou controlar atividades ilícitas de qualquer natureza.</li>
+        <li>Informar um e-mail e número de telefone aos quais você realmente tenha acesso;</li>
+        <li>Não tentar explorar vulnerabilidades, burlar limites de requisição ou acessar dados de terceiros;</li>
+        <li>Não usar a plataforma para atividades ilícitas.</li>
     </ul>
 
-    <h3>6. Disponibilidade, Manutenção e Limites Operacionais</h3>
+    <h3>6. Seus dados pertencem a você (Portabilidade e Exclusão)</h3>
     <p>
-        Empregamos boas práticas de engenharia para manter elevada disponibilidade e integridade transacional,
-        incluindo bloqueio temporário automatizado contra tentativas excessivas de autenticação (HTTP 429).
-        Interrupções pontuais poderão ocorrer para manutenção evolutiva, atualizações de segurança ou por falhas
-        externas de provedores de nuvem e telecomunicações.
+        Você nunca fica preso na plataforma. A qualquer momento, você pode exportar suas movimentações em arquivo
+        <strong>CSV</strong> aberto ou excluir sua conta de forma definitiva em <strong>Configurações &gt; Zona de Perigo</strong>.
+        Quando você exclui a conta, apagamos imediatamente todos os seus lançamentos, contas, metas e alertas do banco de dados.
     </p>
 
-    <h3>7. Propriedade Intelectual</h3>
+    <h3>7. Disponibilidade e suporte</h3>
     <p>
-        Todo o código-fonte, algoritmos de cálculo financeiro, arquitetura visual, logotipos em SVG, textos e
-        elementos de interface do <strong>Fluxo de Caixa</strong> são protegidos pela legislação de propriedade
-        intelectual e direitos autorais, sendo concedida ao Usuário apenas licença de uso pessoal, não exclusiva
-        e intransferível. Os dados financeiros inseridos pelo Usuário permanecem de titularidade do próprio Usuário.
-    </p>
-
-    <h3>8. Portabilidade e Exclusão Irreversível de Conta</h3>
-    <p>
-        O Usuário pode exportar seu histórico de movimentações em formato aberto CSV a qualquer momento na seção de
-        Relatórios/Movimentações, bem como solicitar a <strong>exclusão permanente e imediata</strong> de sua conta e
-        de todos os registros associados diretamente em <strong>Configurações &gt; Zona de Perigo</strong>, mediante
-        confirmação de credencial.
-    </p>
-
-    <h3>9. Proteção de Dados Pessoais (LGPD)</h3>
-    <p>
-        O tratamento de dados pessoais observa rigorosamente a Lei nº 13.709/2018 (Lei Geral de Proteção de Dados — LGPD),
-        conforme detalhado integralmente em nossa <strong>Política de Privacidade</strong>, que integra estes Termos
-        para todos os fins de direito.
-    </p>
-
-    <h3>10. Limitação de Responsabilidade e Foro</h3>
-    <p>
-        O <strong>Fluxo de Caixa</strong> não se responsabiliza por prejuízos decorrentes de inserção incorreta de
-        lançamentos pelo Usuário, compartilhamento voluntário de senhas ou indisponibilidade de serviços de terceiros.
-        Estes Termos são regidos pelas leis da República Federativa do Brasil, ficando eleito o foro do domicílio do
-        Titular para dirimir eventuais controvérsias.
+        Trabalhamos para manter o serviço rápido, estável e disponível 24/7. Caso façamos manutenções programadas ou
+        atualizações de segurança, faremos o possível para que ocorram sem interromper seu uso. Estes Termos seguem as
+        leis brasileiras, incluindo a <strong>LGPD (Lei nº 13.709/2018)</strong>.
     </p>
 </article>
 `;
 
 const CONTEUDO_POLITICA_PRIVACIDADE = `
 <article class="legal-prose">
-    <h1>Política de Privacidade e Conformidade LGPD</h1>
-    <span class="legal-meta">Lei Geral de Proteção de Dados (Lei nº 13.709/2018) · Atualização: Outubro de 2026</span>
+    <h1>Política de Privacidade e Proteção de Dados (LGPD)</h1>
+    <span class="legal-meta">Lei nº 13.709/2018 (LGPD) · Arquitetura Zero-CPF · Atualização: Novembro de 2026</span>
 
     <p>
-        Esta Política de Privacidade descreve de forma transparente como o <strong>Fluxo de Caixa</strong> coleta,
-        utiliza, armazena, criptografa e protege os dados pessoais de seus Usuários, bem como os meios diretos para o
-        exercício dos direitos previstos na <strong>Lei nº 13.709/2018 (LGPD)</strong>.
+        Privacidade não é um documento burocrático — é arquitetura de software. Esta página explica exatamente quais
+        dados coletamos, como os criptografamos e por que decidimos <strong>não pedir seu CPF</strong> nem dados bancários sensíveis.
     </p>
 
-    <h3>1. Princípios e Minimização de Dados</h3>
+    <h3>1. Resumo direto: o que coletamos (e o que nunca pedimos)</h3>
+    <ul>
+        <li><strong>Nome, E-mail e Telefone:</strong> usados exclusivamente para identificar seu perfil, enviar códigos de verificação de 6 dígitos (2FA/OTP via E-mail ou SMS) e recuperar seu acesso.</li>
+        <li><strong>Senha ou Login Google:</strong> sua senha é processada com hash <strong>Argon2id</strong> irreversível. No login com Google, recebemos apenas seu nome, e-mail verificado e identificador único OAuth (<code>sub</code>).</li>
+        <li><strong>Lançamentos Financeiros:</strong> saldos, receitas, despesas, metas e investimentos que você registra para gerar seus próprios gráficos e relatórios.</li>
+        <li><strong>O que NUNCA coletamos:</strong> não pedimos <strong>CPF</strong>, senhas de banco, números de cartão de crédito, chaves Pix nem acesso direto ao seu internet banking.</li>
+    </ul>
+
+    <h3>2. Como protegemos seus dados na prática</h3>
+    <p>Aplicamos criptografia de ponta e isolamento multiusuário em todas as camadas:</p>
+    <ul>
+        <li><strong>Telefone Criptografado em Repouso:</strong> seu número de telefone nunca fica salvo em texto aberto no banco. Ele é criptografado com <strong>Fernet (AES-128-CBC + HMAC-SHA256)</strong> antes de ser gravado.</li>
+        <li><strong>Senhas Blindadas com Argon2id:</strong> usamos o algoritmo padrão-ouro da criptografia moderna contra ataques de GPU/força bruta.</li>
+        <li><strong>Tokens OTP Temporários:</strong> cada código de 6 dígitos enviado por E-mail ou SMS expira em 15 minutos, tem apenas seu hash SHA-256 salvo durante a validação e é descartado logo após o uso.</li>
+        <li><strong>Isolamento Total por Usuário:</strong> todas as consultas ao banco exigem seu token JWT assinado e filtram estritamente pelo seu ID de usuário. Ninguém mais vê seus números.</li>
+    </ul>
+
+    <h3>3. Zero anúncios, zero venda de dados</h3>
     <p>
-        Coletamos estritamente os dados mínimos necessários para autenticação segura, prevenção à fraude e execução
-        das funcionalidades de controle financeiro pessoal solicitadas pelo próprio Titular, observando os princípios
-        da finalidade, adequação, necessidade, segurança e prevenção (Art. 6º da LGPD).
+        O Fluxo de Caixa não exibe anúncios, não usa cookies de rastreamento publicitário e <strong>jamais vende ou
+        compartilha seus dados pessoais ou financeiros</strong> com corretoras, bancos, birôs de crédito ou terceiros.
+        Usamos apenas <code>sessionStorage</code> para manter sua sessão ativa na aba atual e <code>localStorage</code>
+        para lembrar seu tema visual (Claro ou Escuro).
     </p>
 
-    <h3>2. Dados Coletados e Respectivas Finalidades</h3>
+    <h3>4. Seus direitos na LGPD (Acesso, Correção, Exportação e Exclusão)</h3>
+    <p>Pelo Art. 18 da LGPD, você tem controle total sobre suas informações diretamente no painel, sem precisar abrir chamado:</p>
     <ul>
-        <li><strong>Dados Cadastrais de Identificação (Nome completo e E-mail):</strong> utilizados para identificação personalizada no painel, envio de códigos temporários de verificação anti-bot/recuperação de acesso e comunicação transacional.</li>
-        <li><strong>CPF (Dado Pessoal de Alta Criticidade Cadastral):</strong> coletado exclusivamente para validação de unicidade cadastral, prevenção contra contas falsas/automatizadas e mecanismo alternativo de recuperação de credencial.</li>
-        <li><strong>Telefone (Opcional):</strong> utilizado apenas se fornecido voluntariamente pelo Titular para segurança cadastral e contato de conta.</li>
-        <li><strong>Credenciais de Autenticação:</strong> senha submetida exclusivamente a hash criptográfico irreversível ou identificador federado (<code>sub</code>) validado via Google OAuth 2.0.</li>
-        <li><strong>Registros Financeiros Pessoais:</strong> nomes referenciais de contas, movimentações, categorias, metas e orçamentos cadastrados pelo Usuário para geração exclusiva de seus relatórios e gráficos. Note que <strong>não solicitamos senhas bancárias, números de cartão de crédito nem chaves Pix</strong>.</li>
-        <li><strong>Registros Técnicos de Segurança:</strong> hashes anônimos de controle de tentativas por endereço IP/conta para mitigação de ataques de força bruta, descartados automaticamente após a janela de retenção de 24 horas.</li>
+        <li><strong>Consultar e corrigir:</strong> edite seu nome, e-mail, telefone e senha em tempo real na aba <em>Configurações</em>;</li>
+        <li><strong>Exportar seus dados:</strong> baixe todo o seu histórico de movimentações em formato <em>CSV</em> a qualquer momento;</li>
+        <li><strong>Excluir tudo permanentemente:</strong> em <em>Configurações &gt; Zona de Perigo</em>, você pode apagar sua conta com confirmação de senha. A exclusão remove imediatamente seus dados cadastrais e todo o histórico financeiro do banco de dados.</li>
     </ul>
 
-    <h3>3. Bases Legais do Tratamento (Art. 7º da LGPD)</h3>
-    <ul>
-        <li><strong>Execução de Contrato (Art. 7º, V):</strong> prestação dos serviços de gestão financeira da Plataforma mediante aceite dos Termos de Serviço;</li>
-        <li><strong>Consentimento Livre, Informado e Inequívoco (Art. 7º, I):</strong> manifestado por meio das caixas de seleção obrigatórias no momento do cadastro;</li>
-        <li><strong>Prevenção à Fraude e Segurança do Titular (Art. 11, II, "g" e Art. 7º, IX):</strong> verificação de e-mail anti-bot, validação matemática de CPF e proteção contra acessos não autorizados.</li>
-    </ul>
-
-    <h3>4. Arquitetura Criptográfica e Segurança da Informação (Art. 46 da LGPD)</h3>
-    <p>Aplicamos controles criptográficos em nível de aplicação e banco de dados para proteger os dados em trânsito e em repouso:</p>
-    <ul>
-        <li><strong>Criptografia Simétrica Autenticada de CPF e Telefone:</strong> o CPF e o telefone jamais são gravados em texto puro no banco de dados. São cifrados em repouso com <strong>Fernet (AES-128-CBC + assinatura de integridade HMAC-SHA256)</strong> utilizando chave mestra segregada no servidor (<code>CPF_ENCRYPTION_KEY</code>).</li>
-        <li><strong>Indexação Cega (<em>Blind Index</em> HMAC-SHA256):</strong> a verificação de unicidade de CPF e de vínculo OAuth ocorre via resumo criptográfico unidirecional com chave derivada e separação de domínio (<code>cpf_indice</code>), impedindo consultas reversas em caso de exposição de armazenamento.</li>
-        <li><strong>Senhas Irreversíveis com Argon2id:</strong> nenhuma senha é armazenada ou conhecida pela Plataforma; utilizamos algoritmo vencedor da <em>Password Hashing Competition</em> resistente a ataques por GPU/ASIC e comparação em tempo constante.</li>
-        <li><strong>Códigos OTP Descartáveis:</strong> códigos de verificação de e-mail possuem 6 dígitos gerados por fonte criptograficamente segura (CSPRNG), expiram em 15 minutos, têm apenas seu hash SHA-256 persistido e são invalidados imediatamente após o primeiro uso.</li>
-        <li><strong>Isolamento Estrito Multiusuário:</strong> todas as consultas SQL filtram obrigatoriamente pelo identificador do usuário autenticado via token JWT assinado (HS256), impedindo acesso cruzado (IDOR).</li>
-    </ul>
-
-    <h3>5. Autenticação Social com Google OAuth 2.0</h3>
+    <h3>5. Base Legal (Art. 7º da LGPD)</h3>
     <p>
-        Quando o Usuário opta por "Entrar com o Google", recebemos apenas o token de identidade assinado pelo Google
-        contendo identificador único (<code>sub</code>), nome de exibição e e-mail verificado. Não recebemos acesso à
-        sua senha do Google, caixa de e-mails, contatos ou arquivos do Google Drive.
-    </p>
-
-    <h3>6. Armazenamento no Navegador e Ausência de Rastreadores Publicitários</h3>
-    <p>
-        Utilizamos apenas <code>sessionStorage</code> para manter o token JWT durante a aba ativa (encerrado ao fechar
-        o navegador ou clicar em "Sair") e <code>localStorage</code> para lembrar sua preferência visual de Tema Claro
-        ou Tema Escuro. <strong>Não utilizamos cookies de rastreamento comportamental nem vendemos ou compartilhamos
-        dados financeiros com anunciantes ou birôs de crédito.</strong>
-    </p>
-
-    <h3>7. Direitos do Titular de Dados (Art. 18 da LGPD)</h3>
-    <p>O Titular pode exercer seus direitos diretamente pela interface da Plataforma, de forma imediata e gratuita:</p>
-    <ul>
-        <li><strong>Confirmação, Acesso e Correção:</strong> visualização e atualização imediata de nome, e-mail, telefone e senha na aba <em>Configurações</em> (<code>GET/PUT /usuarios/me</code>);</li>
-        <li><strong>Portabilidade de Dados:</strong> exportação integral das movimentações financeiras em arquivo estruturado CSV compatível com planilhas;</li>
-        <li><strong>Eliminação Definitiva e Revogação:</strong> exclusão permanente e em cascata da conta, dados cifrados, contas bancárias, movimentações, orçamentos, alertas e metas em <em>Configurações &gt; Zona de Perigo</em> (<code>DELETE /usuarios/me</code>).</li>
-    </ul>
-
-    <h3>8. Retenção, Descarte e Governança</h3>
-    <p>
-        Os dados permanecem armazenados enquanto o Usuário mantiver sua conta ativa. Efetuada a exclusão da conta pelo
-        Titular, todos os registros operacionais vinculados são removidos permanentemente do banco de dados ativo.
+        Tratamos seu e-mail e telefone com base no seu <strong>consentimento transparente</strong> no cadastro (Art. 7º, I),
+        na <strong>execução direta do serviço</strong> que você contratou ao criar a conta (Art. 7º, V) e na
+        <strong>prevenção à fraude e segurança</strong> da sua própria conta via verificação OTP (Art. 11, II, "g").
     </p>
 </article>
 `;
@@ -1128,7 +1072,6 @@ function abrirModalGoogleAssistido({ onAuthenticated }) {
         ""
     ).trim();
     const nomePreenchido = (document.querySelector("#register-name")?.value || "").trim();
-    const cpfPreenchido = (document.querySelector("#register-cpf")?.value || "").trim();
     const telPreenchido = (document.querySelector("#register-phone")?.value || "").trim();
 
     dialog = document.createElement("dialog");
@@ -1141,14 +1084,14 @@ function abrirModalGoogleAssistido({ onAuthenticated }) {
                 <div>
                     <h2 id="google-assisted-title">Continuar com o Google</h2>
                     <p>
-                        Informe sua conta Gmail para entrar ou criar sua conta verificada instantaneamente (sem necessidade de código OTP).
+                        Informe seu e-mail Google para entrar ou criar sua conta verificada instantaneamente.
                     </p>
                 </div>
                 <button type="button" class="dialog-close" id="google-assisted-close" aria-label="Fechar janela">&times;</button>
             </div>
 
             <div class="otp-contingency-banner is-info">
-                <strong>Autenticação Google Assistida Ativa:</strong> seu acesso será liberado imediatamente com e-mail verificado.
+                <strong>Acesso rápido Google:</strong> sua sessão será iniciada imediatamente com e-mail verificado e proteção LGPD (sem coleta de CPF).
             </div>
 
             <div class="form-field">
@@ -1157,36 +1100,24 @@ function abrirModalGoogleAssistido({ onAuthenticated }) {
                     id="google-assisted-email"
                     type="email"
                     autocomplete="email"
-                    placeholder="seu.nome@gmail.com"
+                    placeholder="voce@gmail.com"
                     required
                 >
                 <small class="field-error" id="google-assisted-email-error" role="alert" hidden></small>
             </div>
 
-            <div class="form-field">
-                <label for="google-assisted-name">Nome completo de exibição</label>
-                <input
-                    id="google-assisted-name"
-                    type="text"
-                    autocomplete="name"
-                    minlength="3"
-                    maxlength="150"
-                    placeholder="Seu nome completo"
-                    required
-                >
-            </div>
-
             <div class="form-row-2col">
                 <div class="form-field">
-                    <label for="google-assisted-cpf">CPF <span class="field-optional" id="google-assisted-cpf-tag">(opcional no 1º acesso)</span></label>
+                    <label for="google-assisted-name">Seu nome</label>
                     <input
-                        id="google-assisted-cpf"
+                        id="google-assisted-name"
                         type="text"
-                        inputmode="numeric"
-                        maxlength="14"
-                        placeholder="000.000.000-00"
+                        autocomplete="name"
+                        minlength="3"
+                        maxlength="150"
+                        placeholder="Nome completo"
+                        required
                     >
-                    <small class="field-error" id="google-assisted-cpf-error" role="alert" hidden></small>
                 </div>
 
                 <div class="form-field">
@@ -1209,7 +1140,7 @@ function abrirModalGoogleAssistido({ onAuthenticated }) {
                     Cancelar
                 </button>
                 <button type="submit" class="button-primary" id="google-assisted-submit">
-                    Continuar com esta conta Google
+                    Continuar com o Google
                 </button>
             </div>
         </form>
@@ -1219,9 +1150,6 @@ function abrirModalGoogleAssistido({ onAuthenticated }) {
     const inputEmail = dialog.querySelector("#google-assisted-email");
     const errEmail = dialog.querySelector("#google-assisted-email-error");
     const inputNome = dialog.querySelector("#google-assisted-name");
-    const inputCpf = dialog.querySelector("#google-assisted-cpf");
-    const tagCpf = dialog.querySelector("#google-assisted-cpf-tag");
-    const errCpf = dialog.querySelector("#google-assisted-cpf-error");
     const inputTel = dialog.querySelector("#google-assisted-phone");
     const errTel = dialog.querySelector("#google-assisted-phone-error");
     const msg = dialog.querySelector("#google-assisted-message");
@@ -1232,14 +1160,11 @@ function abrirModalGoogleAssistido({ onAuthenticated }) {
 
     if (inputEmail && emailPreenchido) inputEmail.value = emailPreenchido;
     if (inputNome && nomePreenchido) inputNome.value = nomePreenchido;
-    if (inputCpf && cpfPreenchido) inputCpf.value = formatarMascaraCpf(cpfPreenchido);
     if (inputTel && telPreenchido) inputTel.value = formatarMascaraTelefone(telPreenchido);
 
     vincularValidacaoEmailTempoReal(inputEmail, errEmail);
-    vincularValidacaoCpfTempoReal(inputCpf, null, errCpf);
     vincularValidacaoTelefoneTempoReal(inputTel, errTel, () => false);
 
-    // Preenche sugestão amigável de nome a partir do e-mail caso o usuário esteja na tela de login
     inputEmail?.addEventListener("blur", () => {
         if (!inputNome.value.trim() && inputEmail.value.includes("@")) {
             const prefixo = inputEmail.value
@@ -1274,7 +1199,7 @@ function abrirModalGoogleAssistido({ onAuthenticated }) {
             const erroDom = detectarErroDominioEmail(email);
             const txtErro = erroDom
                 ? erroDom.mensagem
-                : "Informe um e-mail Google válido (ex.: nome@gmail.com).";
+                : "Informe um e-mail Google válido (ex.: voce@gmail.com).";
             if (msg) {
                 msg.textContent = txtErro;
                 msg.className = "form-message error";
@@ -1291,30 +1216,12 @@ function abrirModalGoogleAssistido({ onAuthenticated }) {
                 inputNome.value = nome;
             } else {
                 if (msg) {
-                    msg.textContent = "Informe seu nome completo (mínimo de 3 caracteres).";
+                    msg.textContent = "Informe seu nome (mínimo de 3 caracteres).";
                     msg.className = "form-message error";
                 }
                 inputNome.focus();
                 return;
             }
-        }
-
-        let cpfDigitos = null;
-        if (inputCpf.value.trim()) {
-            const valCpf = validarCpfMatematico(inputCpf.value);
-            if (!valCpf.valido) {
-                if (errCpf) {
-                    errCpf.textContent = valCpf.mensagem;
-                    errCpf.hidden = false;
-                }
-                if (msg) {
-                    msg.textContent = valCpf.mensagem;
-                    msg.className = "form-message error";
-                }
-                inputCpf.focus();
-                return;
-            }
-            cpfDigitos = valCpf.digitos;
         }
 
         const telTexto = inputTel.value.trim();
@@ -1336,7 +1243,7 @@ function abrirModalGoogleAssistido({ onAuthenticated }) {
 
         if (btnSubmit) btnSubmit.disabled = true;
         if (msg) {
-            msg.textContent = "Autenticando sua conta Google com aprovação automática...";
+            msg.textContent = "Autenticando sua conta Google...";
             msg.className = "form-message info";
         }
 
@@ -1345,19 +1252,13 @@ function abrirModalGoogleAssistido({ onAuthenticated }) {
             const dados = await api.post("/usuarios/auth/google/assistido", {
                 email,
                 nome_completo: nome,
-                cpf: cpfDigitos,
                 telefone: telTexto || null
             });
             fechar();
             await onAuthenticated(dados);
         } catch (erro) {
-            const textoErro = erro.message || "Não foi possível autenticar com o Google.";
-            if (textoErro.toLowerCase().includes("cpf") && tagCpf) {
-                tagCpf.textContent = "(obrigatório para vincular conta existente)";
-                inputCpf?.focus();
-            }
             if (msg) {
-                msg.textContent = textoErro;
+                msg.textContent = erro.message || "Não foi possível autenticar com o Google.";
                 msg.className = "form-message error";
             }
         } finally {
@@ -1582,3 +1483,7 @@ window.FluxoLegal = {
     abrirDocumentoJuridico,
     inicializarBotaoGoogleOAuth
 };
+
+Object.assign(window, window.FluxoLegal, {
+    MAPA_DOMINIOS_EMAIL_SUGERIDOS
+});

@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta
         name="description"
-        content="Abra sua conta no Fluxo de Caixa. Controle financeiro institucional com precisão, validação de CPF, conformidade LGPD e verificação de e-mail."
+        content="Crie sua conta no Fluxo de Caixa sem burocracia e sem CPF. Controle financeiro com login Google ou verificação 2FA por E-mail e SMS."
     >
-    <title>Fluxo de Caixa | Criar Nova Conta</title>
+    <title>Fluxo de Caixa | Criar Conta</title>
     <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="css/style.css?v=18">
-    <script src="js/api.js?v=18" defer></script>
-    <script src="js/legal.js?v=18" defer></script>
-    <script src="js/cadastro.js?v=18" defer></script>
+    <link rel="stylesheet" href="css/style.css?v=19">
+    <script src="js/api.js?v=19" defer></script>
+    <script src="js/legal.js?v=19" defer></script>
+    <script src="js/cadastro.js?v=19" defer></script>
 </head>
 <body class="login-page">
     <main class="login-shell register-shell">
@@ -38,31 +38,37 @@
                     </span>
                     <div>
                         <span class="brand-title">Fluxo de Caixa</span>
-                        <span class="brand-subtitle">Gestão Patrimonial &amp; Financeira</span>
+                        <span class="brand-subtitle">Engenharia Financeira Pessoal</span>
                     </div>
                 </a>
 
                 <div class="register-header-meta">
-                    <h1 id="register-title">Crie sua conta institucional</h1>
+                    <h1 id="register-title">Crie sua conta em segundos</h1>
                     <p class="login-description">
-                        Inicie o gerenciamento profissional do seu patrimônio com máxima privacidade, conformidade LGPD e precisão.
+                        Apenas e-mail, telefone e senha — sem pedir seu CPF. Seus dados são protegidos com criptografia Fernet e Argon2id sob a LGPD.
                     </p>
                 </div>
             </div>
 
-            <!-- Cadastro Rápido com Google OAuth 2.0 -->
+            <!-- Elemento Principal de Conversão: Cadastro Rápido com Google OAuth 2.0 -->
             <div class="oauth-section">
                 <div id="google-gsi-button" class="google-gsi-container" hidden></div>
                 <button type="button" id="google-oauth-btn" class="btn-google-oauth">
-                    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-                        <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
-                        <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.7z"/>
-                        <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.8-.4-2.8s.2-2 .4-2.8L1.6 6.4C.6 8.3 0 10.1 0 12s.6 3.7 1.6 5.6l3.7-2.8z"/>
-                        <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5l-3.7 2.8C3.5 20.4 7.4 23 12 23z"/>
+                    <span class="google-icon-badge" aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 24 24">
+                            <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
+                            <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.7z"/>
+                            <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.8-.4-2.8s.2-2 .4-2.8L1.6 6.4C.6 8.3 0 10.1 0 12s.6 3.7 1.6 5.6l3.7-2.8z"/>
+                            <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5l-3.7 2.8C3.5 20.4 7.4 23 12 23z"/>
+                        </svg>
+                    </span>
+                    <span class="btn-google-label">Continuar com o Google</span>
+                    <svg class="btn-google-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
                     </svg>
-                    <span>Cadastrar / Continuar com o Google</span>
                 </button>
-                <div class="auth-divider"><span>ou cadastre-se com e-mail verificado</span></div>
+                <div class="auth-divider"><span>ou preencha seus dados de acesso</span></div>
             </div>
 
             <form id="register-form" class="login-form register-form" novalidate>
@@ -78,7 +84,7 @@
                             name="nome_completo"
                             type="text"
                             autocomplete="name"
-                            placeholder="Seu nome completo"
+                            placeholder="Como você prefere ser chamado"
                             minlength="3"
                             maxlength="150"
                             required
@@ -88,32 +94,29 @@
 
                 <div class="form-row-2col">
                     <div class="form-field">
-                        <label for="register-cpf">CPF do titular</label>
+                        <label for="register-email">E-mail</label>
                         <div class="input-icon-wrapper">
                             <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-                                <line x1="2" y1="10" x2="22" y2="10"></line>
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
                             </svg>
                             <input
-                                id="register-cpf"
-                                name="cpf"
-                                type="text"
-                                inputmode="numeric"
-                                autocomplete="off"
-                                maxlength="14"
-                                placeholder="000.000.000-00"
+                                id="register-email"
+                                name="email"
+                                type="email"
+                                autocomplete="email"
+                                maxlength="100"
+                                placeholder="voce@dominio.com"
                                 required
                             >
                         </div>
-                        <small class="field-error" id="cpf-error" role="alert" hidden></small>
-                        <span class="field-help" id="cpf-feedback">
-                            Criptografado em repouso (Fernet AES + HMAC-SHA256).
-                        </span>
+                        <small class="field-error" id="email-error" role="alert" hidden></small>
+                        <span class="field-help">Usado para login e alertas de segurança.</span>
                     </div>
 
                     <div class="form-field">
                         <label for="register-phone">
-                            Telefone <span class="field-optional" id="register-phone-optional">(opcional)</span>
+                            Número de telefone <span class="field-optional" id="register-phone-optional">(com DDD)</span>
                         </label>
                         <div class="input-icon-wrapper">
                             <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -127,37 +130,17 @@
                                 autocomplete="tel"
                                 maxlength="20"
                                 placeholder="(11) 98765-4321"
+                                required
                             >
                         </div>
                         <small class="field-error" id="phone-error" role="alert" hidden></small>
-                        <span class="field-help">DDD válido (11 a 99) · Criptografia simétrica LGPD.</span>
+                        <span class="field-help">Criptografado em repouso (Fernet AES-128).</span>
                     </div>
                 </div>
 
-                <div class="form-field">
-                    <label for="register-email">E-mail corporativo ou pessoal</label>
-                    <div class="input-icon-wrapper">
-                        <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                            <polyline points="22,6 12,13 2,6"></polyline>
-                        </svg>
-                        <input
-                            id="register-email"
-                            name="email"
-                            type="email"
-                            autocomplete="email"
-                            maxlength="100"
-                            placeholder="seu-email@gmail.com"
-                            required
-                        >
-                    </div>
-                    <small class="field-error" id="email-error" role="alert" hidden></small>
-                    <span class="field-help">Validamos erros de digitação de domínio em tempo real.</span>
-                </div>
-
-                <!-- Seletor Elegante de Canal de Verificação (E-mail Gmail ou Telefone SMS/WhatsApp) -->
+                <!-- Seletor de Canal de Verificação 2FA/OTP (E-mail ou SMS) -->
                 <div class="form-field verification-channel-group" role="radiogroup" aria-labelledby="register-channel-label">
-                    <label id="register-channel-label">Onde deseja receber seu código de verificação (6 dígitos)?</label>
+                    <label id="register-channel-label">Onde prefere receber o código de verificação (6 dígitos)?</label>
                     <div class="channel-selector-grid">
                         <label class="channel-option-card is-selected" for="channel-email">
                             <input
@@ -168,8 +151,8 @@
                                 checked
                             >
                             <span class="channel-option-content">
-                                <span class="channel-option-title">Receber código por E-mail (Gmail)</span>
-                                <span class="channel-option-desc">Envio imediato para sua caixa de entrada</span>
+                                <span class="channel-option-title">Receber via E-mail</span>
+                                <span class="channel-option-desc">Token numérico enviado para sua caixa de entrada</span>
                             </span>
                         </label>
 
@@ -181,8 +164,8 @@
                                 value="telefone"
                             >
                             <span class="channel-option-content">
-                                <span class="channel-option-title">Receber código no Telefone (SMS / WhatsApp)</span>
-                                <span class="channel-option-desc">Código direto no celular com DDD</span>
+                                <span class="channel-option-title">Receber via SMS</span>
+                                <span class="channel-option-desc">Token numérico direto no seu celular com DDD</span>
                             </span>
                         </label>
                     </div>
@@ -190,7 +173,7 @@
 
                 <div class="form-row-2col">
                     <div class="form-field">
-                        <label for="register-password">Senha forte de acesso</label>
+                        <label for="register-password">Senha</label>
                         <div class="password-input-wrapper">
                             <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
@@ -203,7 +186,7 @@
                                 autocomplete="new-password"
                                 minlength="8"
                                 maxlength="100"
-                                placeholder="Mínimo 8 caracteres"
+                                placeholder="Mínimo de 8 caracteres"
                                 required
                             >
                             <button
@@ -227,7 +210,7 @@
                     </div>
 
                     <div class="form-field">
-                        <label for="register-password-confirm">Confirme a senha</label>
+                        <label for="register-password-confirm">Confirmar senha</label>
                         <div class="password-input-wrapper">
                             <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
@@ -267,45 +250,15 @@
                 </div>
 
                 <!-- Checklist Visual Interativo de Força de Senha -->
-                <div class="password-checklist" id="register-password-checklist" aria-live="polite">
-                    <div class="password-checklist-title">
-                        <span>Critérios de segurança da senha</span>
-                        <span data-password-status>0/5 requisitos</span>
-                    </div>
-                    <div class="password-strength-meter">
-                        <div class="password-strength-bar"></div>
-                    </div>
-                    <ul class="password-checklist-grid">
-                        <li class="password-req" data-req="tamanho">
-                            <span class="password-req-dot" aria-hidden="true"></span>
-                            Mínimo de 8 caracteres
-                        </li>
-                        <li class="password-req" data-req="maiuscula">
-                            <span class="password-req-dot" aria-hidden="true"></span>
-                            Pelo menos uma letra maiúscula (A-Z)
-                        </li>
-                        <li class="password-req" data-req="minuscula">
-                            <span class="password-req-dot" aria-hidden="true"></span>
-                            Pelo menos uma letra minúscula (a-z)
-                        </li>
-                        <li class="password-req" data-req="numero">
-                            <span class="password-req-dot" aria-hidden="true"></span>
-                            Pelo menos um número (0-9)
-                        </li>
-                        <li class="password-req" data-req="especial">
-                            <span class="password-req-dot" aria-hidden="true"></span>
-                            Pelo menos um caractere especial (!@#$%^&amp;*(),.?&quot;:{}|&lt;&gt;_-)
-                        </li>
-                    </ul>
-                </div>
+                <div class="password-checklist" id="register-password-checklist" aria-live="polite"></div>
 
-                <!-- Aceite Obrigatório dos Termos de Serviço e Política de Privacidade (LGPD) -->
-                <div class="legal-consent-box" role="group" aria-label="Consentimento legal e LGPD">
+                <!-- Consentimento Transparente LGPD (Linguagem Humana) -->
+                <div class="legal-consent-box" role="group" aria-label="Termos e Privacidade LGPD">
                     <label class="legal-checkbox-item" for="accept-terms">
                         <input type="checkbox" id="accept-terms" name="aceite_termos" required>
                         <span>
-                            Li e concordo integralmente com os
-                            <button type="button" class="legal-inline-link" data-open-legal="termos">Termos de Serviço</button>
+                            Li e concordo com os
+                            <button type="button" class="legal-inline-link" data-open-legal="termos">Termos de Uso</button>
                             do Fluxo de Caixa.
                         </span>
                     </label>
@@ -313,8 +266,8 @@
                     <label class="legal-checkbox-item" for="accept-privacy">
                         <input type="checkbox" id="accept-privacy" name="aceite_privacidade" required>
                         <span>
-                            Estou ciente e autorizo o tratamento criptografado dos meus dados pessoais conforme a
-                            <button type="button" class="legal-inline-link" data-open-legal="privacidade">Política de Privacidade e Conformidade LGPD</button>.
+                            Compreendo como meu e-mail e telefone são criptografados sob a LGPD (sem coleta de CPF), conforme a
+                            <button type="button" class="legal-inline-link" data-open-legal="privacidade">Política de Privacidade</button>.
                         </span>
                     </label>
                 </div>
@@ -327,7 +280,7 @@
                 ></p>
 
                 <button class="button-primary login-submit" type="submit" id="register-submit-btn">
-                    <span id="register-submit-label">Criar conta e receber código</span>
+                    <span id="register-submit-label">Criar conta e enviar código</span>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                         <polyline points="12 5 19 12 12 19"></polyline>
@@ -336,29 +289,29 @@
             </form>
 
             <footer class="login-footer">
-                <span>Já possui cadastro?</span>
-                <a href="login.html" class="link-cadastro">Acessar minha conta</a>
+                <span>Já tem uma conta?</span>
+                <a href="login.html" class="link-cadastro">Fazer login</a>
             </footer>
 
-            <nav class="auth-legal-bar" aria-label="Links institucionais e jurídicos">
-                <a href="inicio.html">Apresentação</a>
+            <nav class="auth-legal-bar" aria-label="Links institucionais e privacidade">
+                <a href="inicio.html">Produto</a>
                 <span>·</span>
-                <a href="termos.html" data-open-legal="termos">Termos de Serviço</a>
+                <a href="termos.html" data-open-legal="termos">Termos de Uso</a>
                 <span>·</span>
                 <a href="privacidade.html" data-open-legal="privacidade">Privacidade &amp; LGPD</a>
             </nav>
         </section>
     </main>
 
-    <!-- Modal Multi-Canal Anti-Bot: Verificação com Código OTP de 6 Dígitos (E-mail ou Telefone) -->
+    <!-- Modal Multi-Canal 2FA/OTP (E-mail ou SMS) -->
     <dialog class="form-dialog" id="verify-email-dialog" aria-labelledby="verify-email-title">
         <form id="verify-email-form" class="dialog-form" novalidate>
             <div class="dialog-header">
                 <div>
-                    <h2 id="verify-email-title">Verifique seu código de acesso</h2>
+                    <h2 id="verify-email-title">Valide seu código de 6 dígitos</h2>
                     <p id="verify-email-subtitle">
-                        Enviamos um código de 6 dígitos para
-                        <strong id="verify-email-display">—</strong>. Digite-o abaixo para ativar seu acesso definitivo.
+                        Enviamos um token de verificação para
+                        <strong id="verify-email-display">—</strong>. Digite os 6 números abaixo para liberar seu painel.
                     </p>
                 </div>
                 <button
@@ -369,21 +322,20 @@
                 >&times;</button>
             </div>
 
-            <!-- Aviso Visual Amigável de Contingência (quando servidor Render ainda não possui SMTP/SMS ativo) -->
             <div class="otp-contingency-banner" id="verify-contingency-banner" role="status" aria-live="polite" hidden>
                 <div class="otp-contingency-text">
-                    <strong>Modo de Contingência Ativo:</strong> o provedor externo de envio ainda não está ativo neste servidor. Utilize o código de verificação gerado abaixo para concluir agora:
+                    <strong>Código instantâneo disponível:</strong> utilize o token de 6 dígitos gerado abaixo para concluir a validação agora:
                 </div>
                 <div class="otp-contingency-code-row">
                     <code class="otp-contingency-code" id="verify-contingency-code">000000</code>
                     <button type="button" class="button-secondary button-small" id="verify-fill-contingency-btn">
-                        Preencher código
+                        Preencher token
                     </button>
                 </div>
             </div>
 
             <div class="form-field">
-                <label for="verify-otp-input">Código de verificação (6 dígitos)</label>
+                <label for="verify-otp-input">Token de verificação (6 dígitos)</label>
                 <input
                     id="verify-otp-input"
                     name="codigo_otp"
@@ -396,14 +348,13 @@
                     required
                 >
                 <span class="field-help" id="verify-otp-help">
-                    Código temporário e de uso único, válido por 15 minutos. Verifique também a pasta de spam ou SMS/WhatsApp.
+                    Válido por 15 minutos. Você pode alternar entre E-mail e SMS a qualquer momento abaixo.
                 </span>
             </div>
 
-            <!-- Campo rápido de telefone caso o usuário troque de Gmail para Telefone sem ter preenchido antes -->
             <div class="otp-inline-phone-box" id="verify-inline-phone-box" hidden>
                 <div class="form-field">
-                    <label for="verify-inline-phone">Informe seu celular com DDD para receber via SMS / WhatsApp</label>
+                    <label for="verify-inline-phone">Confirme seu celular com DDD para receber via SMS</label>
                     <div class="otp-email-row">
                         <input
                             id="verify-inline-phone"
@@ -420,7 +371,6 @@
                 </div>
             </div>
 
-            <!-- Ações rápidas: Reenviar com contador de 60s e Trocar Canal (Gmail <-> Telefone) -->
             <div class="otp-quick-actions">
                 <button
                     type="button"
@@ -434,7 +384,7 @@
                     class="otp-switch-channel-btn"
                     id="switch-verification-channel-btn"
                 >
-                    Não recebeu no Gmail? Enviar código para o meu Telefone
+                    Prefere SMS? Enviar código para o meu Telefone
                 </button>
             </div>
 
@@ -451,7 +401,7 @@
                     class="button-primary"
                     id="verify-email-submit"
                 >
-                    Confirmar código e acessar painel
+                    Confirmar token e acessar painel
                 </button>
             </div>
         </form>
