@@ -4566,7 +4566,474 @@ dialog.form-dialog[open] {
     margin-top: 24px;
 }
 
-/* 5. Guard rail estrito para prefers-reduced-motion */
+/* =========================================================
+   6. REFINAMENTO ANTI-"AI TEMPLATE" (TASTE-SKILL + IMPECCABLE)
+   Superfícies contidas, Bento Grid assimétrico, Monospace e Zero Glow Neon
+========================================================= */
+
+:root {
+    --font-mono: ui-monospace, "JetBrains Mono", "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+}
+
+/* Eliminação de brilhos neon, gradientes de texto clichês e sombras pesadas */
+.landing-hero {
+    padding: 84px 0 72px;
+    background: #090d16;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.landing-eyebrow-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px;
+    margin-bottom: 22px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
+    color: #cbd5e1;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+}
+
+.status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
+    flex-shrink: 0;
+}
+
+.landing-hero h1 {
+    font-size: clamp(32px, 3.8vw, 46px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    color: #f8fafc;
+    margin-bottom: 18px;
+}
+
+.landing-lead {
+    font-size: 15.5px;
+    line-height: 1.65;
+    color: #94a3b8;
+    max-width: 56ch;
+    margin-bottom: 28px;
+}
+
+.landing-specs-strip {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    padding-top: 22px;
+    margin-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.spec-item dt {
+    font-size: 11px;
+    font-weight: 500;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 3px;
+}
+
+.spec-item dd {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #e2e8f0;
+}
+
+/* Ledger Demonstrativo Sóbrio */
+.landing-preview-card {
+    padding: 22px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    background: #0f1523;
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.05) inset,
+        0 20px 44px rgba(0, 0, 0, 0.45);
+}
+
+.preview-kicker {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: #64748b;
+    margin-bottom: 3px;
+}
+
+.preview-status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(16, 185, 129, 0.28);
+    background: rgba(16, 185, 129, 0.08);
+    color: #34d399;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.preview-kpi {
+    padding: 13px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: #090d16;
+}
+
+.preview-kpi strong {
+    font-family: var(--font-mono);
+    font-size: 16.5px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.preview-ledger-table {
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 10px;
+    background: #090d16;
+    overflow: hidden;
+}
+
+.preview-ledger-head {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr 0.9fr;
+    gap: 8px;
+    padding: 9px 13px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.02);
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+}
+
+.preview-ledger-table .preview-item {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr 0.9fr;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 13px;
+    border: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 0;
+    background: transparent;
+    font-size: 12px;
+}
+
+.preview-ledger-table .preview-item:last-child {
+    border-bottom: 0;
+}
+
+.preview-item-title {
+    color: #e2e8f0;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.preview-item-tag {
+    color: #64748b;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.preview-ledger-table .preview-item strong {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Bento Grid Assimétrico (Fim das grades monótonas de 6 cartões iguais) */
+.section-kicker {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: #10b981;
+    margin-bottom: 10px;
+}
+
+.landing-section-header {
+    max-width: 640px;
+    margin: 0 0 36px;
+    text-align: left;
+}
+
+.landing-bento-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.landing-bento-grid .bento-span-2 {
+    grid-column: span 2;
+}
+
+.landing-feature-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 24px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #0f1523;
+    transition:
+        border-color var(--duration-fast) var(--ease-out-expo),
+        background-color var(--duration-fast) var(--ease-out-expo);
+}
+
+.landing-feature-card:hover {
+    transform: none;
+    border-color: rgba(255, 255, 255, 0.18);
+    background: #131b2e;
+}
+
+.feature-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.feature-index {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.feature-tag {
+    padding: 3px 8px;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    color: #94a3b8;
+    font-family: var(--font-mono);
+    font-size: 11px;
+}
+
+.landing-feature-card h3 {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: #f8fafc;
+    margin: 0 0 8px;
+}
+
+.landing-feature-card p {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: #94a3b8;
+    margin: 0;
+}
+
+/* Banner CTA Contido */
+.landing-cta-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 24px;
+    padding: 36px 40px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #0f1523;
+    text-align: left;
+}
+
+.landing-cta-copy h2 {
+    font-size: clamp(20px, 2.2vw, 26px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+}
+
+.landing-cta-copy p {
+    margin: 0;
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+/* Login Split-Screen Editorial */
+.login-hero {
+    background: #090d16;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.login-hero-overlay {
+    display: none;
+}
+
+.hero-badge {
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
+    color: #cbd5e1;
+    font-family: var(--font-mono);
+    font-size: 11px;
+}
+
+.hero-highlight-card {
+    background: #0f1523;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    backdrop-filter: none;
+}
+
+.hero-highlight-card:hover {
+    transform: none;
+    border-color: rgba(255, 255, 255, 0.16);
+}
+
+.hero-step-index {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
+    color: #10b981;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.login-card,
+.register-card {
+    background: #0f1523;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 14px;
+    box-shadow: 0 20px 44px rgba(0, 0, 0, 0.45);
+}
+
+/* Dashboard Principal: Superfícies Sóbrias, Sem Hover Flutuante Clichê e Sem Glow */
+.button-primary {
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);
+}
+
+.button-primary:hover:not(:disabled) {
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
+    transform: none;
+}
+
+.button-secondary:hover:not(:disabled),
+.btn-logout:hover:not(:disabled),
+#logout:hover:not(:disabled),
+.btn-google-oauth:hover:not(:disabled),
+.summary-card:hover,
+.category-card:hover,
+.sidebar-user:hover {
+    transform: none;
+}
+
+.summary-card,
+.panel,
+.alerts-panel,
+.budget-panel,
+.category-card {
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+body.dark-theme .summary-card,
+body.dark-theme .panel,
+body.dark-theme .alerts-panel,
+body.dark-theme .budget-panel,
+body.dark-theme .category-card {
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: none;
+}
+
+.card-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--color-surface-subtle) !important;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary) !important;
+}
+
+.card-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+.card-value {
+    font-family: var(--font-mono);
+    font-size: clamp(20px, 1.75vw, 24px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+}
+
+.topbar-metric-pill strong,
+.invested-inline-badge strong,
+td.align-right,
+.category-stat,
+.budget-card-metrics strong {
+    font-family: var(--font-mono);
+}
+
+@media (max-width: 960px) {
+    .landing-bento-grid,
+    .landing-specs-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .landing-bento-grid .bento-span-2 {
+        grid-column: span 2;
+    }
+}
+
+@media (max-width: 640px) {
+    .landing-bento-grid,
+    .landing-specs-strip {
+        grid-template-columns: 1fr;
+    }
+
+    .landing-bento-grid .bento-span-2 {
+        grid-column: span 1;
+    }
+
+    .landing-cta-banner {
+        padding: 26px 22px;
+    }
+
+    .preview-ledger-head,
+    .preview-ledger-table .preview-item {
+        grid-template-columns: 1.2fr 0.9fr;
+    }
+
+    .preview-ledger-head span:nth-child(2),
+    .preview-item-tag {
+        display: none;
+    }
+}
+
+/* 7. Guard rail estrito para prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {
     *,
     *::before,

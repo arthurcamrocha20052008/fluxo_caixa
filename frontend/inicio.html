@@ -5,15 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta
         name="description"
-        content="Fluxo de Caixa — Engenharia financeira pessoal para conciliação de contas, investimentos, orçamentos mensais e metas com privacidade Zero-CPF sob a LGPD."
+        content="Fluxo de Caixa — Controle financeiro de contas, investimentos, orçamentos mensais e metas com privacidade sob a LGPD."
     >
-    <title>Fluxo de Caixa | Engenharia Financeira &amp; Patrimonial</title>
+    <title>Fluxo de Caixa — Controle Patrimonial &amp; Fluxo de Caixa</title>
     <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="css/style.css?v=19">
-    <script src="js/legal.js?v=19" defer></script>
+    <link rel="stylesheet" href="css/style.css?v=20">
+    <script src="js/legal.js?v=20" defer></script>
 </head>
 <body class="landing-page">
-    <!-- Barra de Navegação -->
+    <!-- Barra de Navegação Minimalista -->
     <header class="landing-navbar">
         <div class="landing-container landing-navbar-inner">
             <a href="inicio.html" class="brand" aria-label="Fluxo de Caixa — Página inicial">
@@ -36,281 +36,263 @@
                 </span>
                 <div>
                     <span class="brand-title">Fluxo de Caixa</span>
-                    <span class="brand-subtitle">Engenharia Financeira Pessoal</span>
+                    <span class="brand-subtitle">Gestão Patrimonial</span>
                 </div>
             </a>
 
             <nav class="landing-nav-links" aria-label="Seções da página">
-                <a href="#recursos">Recursos</a>
-                <a href="#seguranca">Privacidade &amp; LGPD</a>
-                <a href="#conversao">Começar</a>
+                <a href="#arquitetura">Produto</a>
+                <a href="#privacidade">Privacidade</a>
+                <a href="termos.html" data-open-legal="termos">Termos</a>
             </nav>
 
             <div class="landing-nav-actions">
                 <a href="login.html" class="button-secondary">Entrar</a>
-                <a href="cadastro.html" class="button-primary">Criar conta gratuita</a>
+                <a href="cadastro.html" class="button-primary">Criar conta</a>
             </div>
         </div>
     </header>
 
     <main>
-        <!-- Seção Hero -->
+        <!-- Seção Hero Editorial -->
         <section class="landing-hero" aria-labelledby="hero-main-title">
             <div class="landing-container landing-hero-grid">
-                <div>
-                    <div class="landing-pill">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                        </svg>
-                        <span>Precisão Decimal · Arquitetura Zero-CPF · Conformidade LGPD</span>
+                <div class="landing-hero-copy">
+                    <div class="landing-eyebrow-tag">
+                        <span class="status-dot" aria-hidden="true"></span>
+                        <span>Motor Contábil Decimal(12,2) · Zero-CPF · LGPD</span>
                     </div>
 
                     <h1 id="hero-main-title">
-                        Controle financeiro de precisão para o seu <span class="landing-gradient-text">patrimônio e fluxo de caixa</span>.
+                        Contabilidade pessoal e patrimonial sem ruído.
                     </h1>
 
                     <p class="landing-lead">
-                        Consolide contas bancárias, receitas fixas e variáveis, carteira de investimentos (CDB, Tesouro Direto, LCI/LCA, Ações, FIIs e ETFs), metas e orçamentos mensais em uma interface rápida, silenciosa e transparente.
+                        Um livro-razão limpo para conciliar contas correntes, receitas fixas e variáveis, carteira de investimentos e limites mensais de gastos. Sem anúncios, sem coleta de CPF e com exportação aberta.
                     </p>
 
                     <div class="landing-cta-group">
                         <a href="cadastro.html" class="button-primary button-cta-lg">
-                            <span>Criar conta gratuita</span>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <span>Começar agora</span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <line x1="5" y1="12" x2="19" y2="12"></line>
                                 <polyline points="12 5 19 12 12 19"></polyline>
                             </svg>
                         </a>
                         <a href="login.html" class="button-secondary button-cta-lg">
-                            Continuar com Google ou E-mail
+                            Acessar painel
                         </a>
                     </div>
 
-                    <div class="landing-micro-trust">
-                        <span>
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            Sem coleta de CPF nem senhas bancárias
-                        </span>
-                        <span>
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            Verificação 2FA via E-mail ou SMS
-                        </span>
-                        <span>
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            Exportação CSV aberta a qualquer momento
-                        </span>
-                    </div>
+                    <dl class="landing-specs-strip" aria-label="Especificações técnicas">
+                        <div class="spec-item">
+                            <dt>Precisão</dt>
+                            <dd>Decimal 12,2</dd>
+                        </div>
+                        <div class="spec-item">
+                            <dt>Autenticação</dt>
+                            <dd>OAuth 2.0 &amp; OTP</dd>
+                        </div>
+                        <div class="spec-item">
+                            <dt>Criptografia</dt>
+                            <dd>Fernet + Argon2id</dd>
+                        </div>
+                        <div class="spec-item">
+                            <dt>Portabilidade</dt>
+                            <dd>CSV UTF-8</dd>
+                        </div>
+                    </dl>
                 </div>
 
-                <!-- Cartão Demonstrativo Executivo (Sem Estilos Inline) -->
-                <aside class="landing-preview-card" aria-label="Prévia executiva do painel financeiro">
+                <!-- Ledger Demonstrativo Estruturado -->
+                <aside class="landing-preview-card" aria-label="Demonstrativo do balanço patrimonial">
                     <div class="preview-header">
                         <div>
-                            <strong class="preview-header-title">Balanço Patrimonial Consolidado</strong>
-                            <span class="preview-header-subtitle">Cálculo exato em duas casas decimais</span>
+                            <span class="preview-kicker">CONSOLIDAÇÃO MENSAL</span>
+                            <strong class="preview-header-title">Patrimônio &amp; Liquidez</strong>
                         </div>
-                        <span class="hero-badge">Tempo Real</span>
+                        <span class="preview-status-pill">Conciliado</span>
                     </div>
 
                     <div class="preview-kpi-grid">
                         <div class="preview-kpi">
-                            <span>Saldo Disponível</span>
-                            <strong class="preview-val-emerald">R$ 28.450,00</strong>
+                            <span>Liquidez Imediata</span>
+                            <strong class="preview-val-neutral">R$ 28.450,00</strong>
                         </div>
                         <div class="preview-kpi">
-                            <span>Carteira Investida</span>
-                            <strong class="preview-val-blue">R$ 94.200,00</strong>
+                            <span>Ativos Sob Custódia</span>
+                            <strong class="preview-val-emerald">R$ 94.200,00</strong>
                         </div>
                         <div class="preview-kpi">
-                            <span>Entradas no Mês</span>
-                            <strong class="preview-val-neutral">+ R$ 14.800,00</strong>
+                            <span>Receitas no Mês</span>
+                            <strong class="preview-val-emerald">+ R$ 14.800,00</strong>
                         </div>
                         <div class="preview-kpi">
-                            <span>Orçamento Mensal</span>
-                            <strong class="preview-val-emerald">62,4% utilizado</strong>
+                            <span>Teto Orçamentário</span>
+                            <strong class="preview-val-neutral">62,4%</strong>
                         </div>
                     </div>
 
-                    <div class="preview-list">
-                        <div class="preview-item">
-                            <span>Tesouro Selic / CDB Liquidez Diária</span>
-                            <strong class="preview-val-blue">+ R$ 3.500,00</strong>
+                    <div class="preview-ledger-table" role="region" aria-label="Últimos lançamentos">
+                        <div class="preview-ledger-head">
+                            <span>Lançamento</span>
+                            <span>Classificação</span>
+                            <span class="align-right">Valor</span>
                         </div>
                         <div class="preview-item">
-                            <span>Receita Fixa · Salário / Pró-labore</span>
-                            <strong class="preview-val-emerald">+ R$ 12.000,00</strong>
+                            <span class="preview-item-title">Tesouro Selic 2029</span>
+                            <span class="preview-item-tag">Aporte · Renda Fixa</span>
+                            <strong class="preview-val-neutral align-right">R$ 3.500,00</strong>
                         </div>
                         <div class="preview-item">
-                            <span>Alerta Preventivo · Vencimentos (7 dias)</span>
-                            <strong class="preview-val-amber">Monitorado</strong>
+                            <span class="preview-item-title">Remuneração Mensal</span>
+                            <span class="preview-item-tag">Entrada · Fixa</span>
+                            <strong class="preview-val-emerald align-right">+ R$ 12.000,00</strong>
+                        </div>
+                        <div class="preview-item">
+                            <span class="preview-item-title">Condomínio &amp; Energia</span>
+                            <span class="preview-item-tag">Vencimento · 4 dias</span>
+                            <strong class="preview-val-amber align-right">- R$ 1.420,00</strong>
                         </div>
                     </div>
                 </aside>
             </div>
         </section>
 
-        <!-- Seção de Funcionalidades -->
-        <section class="landing-section" id="recursos" aria-labelledby="features-heading">
+        <!-- Bento Grid Assimétrico (Arquitetura do Produto) -->
+        <section class="landing-section" id="arquitetura" aria-labelledby="features-heading">
             <div class="landing-container">
                 <div class="landing-section-header">
-                    <h2 id="features-heading">Construído para substituir planilhas frágeis</h2>
+                    <span class="section-kicker">ARQUITETURA OPERACIONAL</span>
+                    <h2 id="features-heading">Projetado como um instrumento financeiro</h2>
                     <p>
-                        Cada componente foi desenhado para dar visibilidade imediata sobre liquidez, obrigações futuras e alocação de ativos.
+                        Sem gráficos decorativos ou métricas de vaidade. Cada módulo resolve uma etapa real do fechamento mensal.
                     </p>
                 </div>
 
-                <div class="landing-features-grid">
-                    <article class="landing-feature-card">
-                        <div class="highlight-icon blue">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-                                <line x1="1" y1="10" x2="23" y2="10"></line>
-                            </svg>
+                <div class="landing-bento-grid">
+                    <article class="landing-feature-card bento-span-2">
+                        <div class="feature-card-top">
+                            <span class="feature-index">01</span>
+                            <span class="feature-tag">Transações Atômicas</span>
                         </div>
-                        <h3>Contas Bancárias &amp; Transferências</h3>
+                        <h3>Contas Bancárias &amp; Transferências Vinculadas</h3>
                         <p>
-                            Cadastre contas correntes, poupanças e corretoras com transferências internas conciliadas e motor Decimal imune a erros de ponto flutuante.
+                            Gerencie contas correntes, reservas em poupança e contas de corretora. Transferências entre contas criam pares vinculados por UUID com bloqueio transacional — se um lançamento é estornado, ambas as pontas recalculam o saldo instantaneamente.
                         </p>
                     </article>
 
                     <article class="landing-feature-card">
-                        <div class="highlight-icon green">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                                <line x1="16" y1="2" x2="16" y2="6"></line>
-                                <line x1="8" y1="2" x2="8" y2="6"></line>
-                                <line x1="3" y1="10" x2="21" y2="10"></line>
-                            </svg>
+                        <div class="feature-card-top">
+                            <span class="feature-index">02</span>
+                            <span class="feature-tag">Alocação</span>
                         </div>
-                        <h3>Recorrência de Contas Fixas &amp; Salários</h3>
+                        <h3>Carteira de Investimentos</h3>
                         <p>
-                            Programe salários, aluguéis e assinaturas com repetição mensal automática, separando despesas estruturais de gastos variáveis.
+                            Aportes em CDB, LCI/LCA, Tesouro Direto, Fundos, Ações, FIIs e ETFs com débito automático na conta de origem.
                         </p>
                     </article>
 
                     <article class="landing-feature-card">
-                        <div class="highlight-icon green">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
-                                <polyline points="17 6 23 6 23 12"></polyline>
-                            </svg>
+                        <div class="feature-card-top">
+                            <span class="feature-index">03</span>
+                            <span class="feature-tag">Previsibilidade</span>
                         </div>
-                        <h3>Carteira de Investimentos Conciliada</h3>
+                        <h3>Fluxo Fixo vs. Variável</h3>
                         <p>
-                            Registre aportes em CDB, Poupança, LCI/LCA, Tesouro Direto, Fundos, Ações, FIIs e ETFs com atualização direta na conta de origem.
+                            Separe salários e despesas estruturais (com dia fixo de repetição no mês) de ganhos e gastos pontuais.
                         </p>
                     </article>
 
                     <article class="landing-feature-card">
-                        <div class="highlight-icon purple">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <circle cx="12" cy="12" r="6"></circle>
-                                <circle cx="12" cy="12" r="2"></circle>
-                            </svg>
+                        <div class="feature-card-top">
+                            <span class="feature-index">04</span>
+                            <span class="feature-tag">Controle de Risco</span>
                         </div>
-                        <h3>Metas de Longo Prazo</h3>
+                        <h3>Tetos Mensais &amp; Avisos de 7 Dias</h3>
                         <p>
-                            Estruture sua reserva de emergência ou projetos pessoais acompanhando o percentual concluído e o valor restante a cada aporte.
+                            Defina limites de gasto por categoria e acompanhe alertas preventivos para obrigações que vencem na próxima semana.
                         </p>
                     </article>
 
                     <article class="landing-feature-card">
-                        <div class="highlight-icon purple">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                            </svg>
+                        <div class="feature-card-top">
+                            <span class="feature-index">05</span>
+                            <span class="feature-tag">Auditoria</span>
                         </div>
-                        <h3>Tetos de Orçamento &amp; Alertas</h3>
+                        <h3>Fechamento de Período &amp; CSV</h3>
                         <p>
-                            Defina limites mensais por categoria e receba avisos automáticos para contas que vencem nos próximos 7 dias.
-                        </p>
-                    </article>
-
-                    <article class="landing-feature-card">
-                        <div class="highlight-icon blue">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="7 10 12 15 17 10"></polyline>
-                                <line x1="12" y1="15" x2="12" y2="3"></line>
-                            </svg>
-                        </div>
-                        <h3>Relatórios por Período &amp; Exportação CSV</h3>
-                        <p>
-                            Analise intervalos personalizados, salve snapshots no histórico e baixe suas movimentações em arquivo CSV compatível com qualquer planilha.
+                            Consolide balanços diários, mensais ou anuais no banco de dados e exporte qualquer extrato em CSV UTF-8.
                         </p>
                     </article>
                 </div>
             </div>
         </section>
 
-        <!-- Seção de Privacidade e LGPD -->
-        <section class="landing-section" id="seguranca" aria-labelledby="security-heading">
+        <!-- Seção de Privacidade e Engenharia de Segurança -->
+        <section class="landing-section" id="privacidade" aria-labelledby="security-heading">
             <div class="landing-container">
                 <div class="landing-section-header">
-                    <h2 id="security-heading">Privacidade transparente sob a LGPD</h2>
+                    <span class="section-kicker">PRIVACIDADE &amp; CONFORMIDADE LGPD</span>
+                    <h2 id="security-heading">Minimização de dados levada a sério</h2>
                     <p>
-                        Coletamos apenas o mínimo indispensável para autenticar sua conta: seu nome, e-mail e telefone. Sem documentos civis desnecessários.
+                        Você não precisa entregar seu CPF para organizar seu próprio dinheiro. Coletamos apenas o estritamente necessário para autenticar sua sessão.
                     </p>
                 </div>
 
-                <div class="landing-features-grid">
+                <div class="landing-bento-grid landing-bento-3col">
                     <article class="landing-feature-card">
-                        <div class="highlight-icon green">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                            </svg>
+                        <div class="feature-card-top">
+                            <span class="feature-index">LGPD · Art. 6º</span>
+                            <span class="feature-tag">Zero-CPF</span>
                         </div>
-                        <h3>Zero-CPF &amp; Criptografia Fernet</h3>
+                        <h3>Identificação sem documento civil</h3>
                         <p>
-                            Não exigimos seu CPF para criar ou usar a conta. Seu número de telefone é criptografado em repouso com Fernet (AES-128-CBC + HMAC-SHA256).
+                            Sua conta opera exclusivamente com nome, e-mail e celular. O telefone é cifrado em repouso com Fernet (AES-128-CBC + HMAC-SHA256).
                         </p>
                     </article>
 
                     <article class="landing-feature-card">
-                        <div class="highlight-icon blue">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                            </svg>
+                        <div class="feature-card-top">
+                            <span class="feature-index">Credenciais</span>
+                            <span class="feature-tag">Argon2id + 2FA</span>
                         </div>
-                        <h3>Argon2id, Google OAuth &amp; Token 2FA</h3>
+                        <h3>Google OAuth 2.0 &amp; Código OTP</h3>
                         <p>
-                            Senhas protegidas com hash Argon2id irreversível, login oficial com Google OAuth 2.0 e código numérico de 6 dígitos enviado por E-mail ou SMS.
+                            Entre com 1 clique pelo Google ou valide seu acesso com código descartável de 6 dígitos enviado por E-mail ou SMS.
                         </p>
                     </article>
 
                     <article class="landing-feature-card">
-                        <div class="highlight-icon purple">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                <polyline points="14 2 14 8 20 8"></polyline>
-                            </svg>
+                        <div class="feature-card-top">
+                            <span class="feature-index">Soberania</span>
+                            <span class="feature-tag">Exclusão Imediata</span>
                         </div>
-                        <h3>Controle Total dos Seus Dados</h3>
+                        <h3>Seus dados pertencem a você</h3>
                         <p>
-                            Exporte todo o seu histórico em CSV ou apague sua conta e todos os registros associados instantaneamente em Configurações.
+                            Baixe suas movimentações em planilha quando quiser ou exclua permanentemente sua conta e todos os registros em Configurações.
                         </p>
                     </article>
                 </div>
             </div>
         </section>
 
-        <!-- Banner Final de Conversão -->
-        <section class="landing-section" id="conversao" aria-labelledby="cta-final-heading">
+        <!-- Chamada Final -->
+        <section class="landing-section landing-section-cta" id="conversao" aria-labelledby="cta-final-heading">
             <div class="landing-container">
                 <div class="landing-cta-banner">
-                    <h2 id="cta-final-heading">Comece a organizar seu fluxo de caixa hoje</h2>
-                    <p>
-                        Crie sua conta em segundos usando o Google ou seu e-mail e telefone, e acesse o painel completo nos modos Claro e Escuro.
-                    </p>
+                    <div class="landing-cta-copy">
+                        <h2 id="cta-final-heading">Pronto para organizar seu fluxo de caixa?</h2>
+                        <p>
+                            Acesso imediato via Google ou e-mail. Interface limpa nos temas Claro e Escuro.
+                        </p>
+                    </div>
                     <div class="landing-cta-group landing-cta-group-centered">
                         <a href="cadastro.html" class="button-primary button-cta-lg">
                             Criar conta gratuita
                         </a>
                         <a href="login.html" class="button-secondary button-cta-lg">
-                            Entrar na minha conta
+                            Fazer login
                         </a>
                     </div>
                 </div>
@@ -323,7 +305,7 @@
         <div class="landing-container landing-footer-inner">
             <div>
                 <strong class="footer-brand-strong">Fluxo de Caixa</strong>
-                <span> · Engenharia Financeira Pessoal · Arquitetura Zero-CPF</span>
+                <span> · Gestão Patrimonial · Arquitetura Zero-CPF (LGPD)</span>
             </div>
             <nav class="landing-footer-links" aria-label="Links jurídicos e de acesso">
                 <a href="termos.html" data-open-legal="termos">Termos de Uso</a>
