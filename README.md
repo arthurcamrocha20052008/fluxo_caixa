@@ -1,7 +1,8 @@
 # 💰 Sistema de Fluxo de Caixa — Enterprise Edition
 
 > 🌐 **Aplicação Web Online (Vercel):** [**https://fluxo-caixa-coral-two.vercel.app**](https://fluxo-caixa-coral-two.vercel.app)  
-> ⚡ **API Backend em Produção (Render):** [**https://fluxo-caixa-cuq1.onrender.com**](https://fluxo-caixa-cuq1.onrender.com) | [**Swagger UI (`/docs`)**](https://fluxo-caixa-cuq1.onrender.com/docs) | [**Healthcheck (`/health`)**](https://fluxo-caixa-cuq1.onrender.com/health)
+> ⚡ **API Backend em Produção (Render):** [**https://fluxo-caixa-cuq1.onrender.com**](https://fluxo-caixa-cuq1.onrender.com) | [**Swagger UI (`/docs`)**](https://fluxo-caixa-cuq1.onrender.com/docs) | [**Healthcheck (`/health`)**](https://fluxo-caixa-cuq1.onrender.com/health)  
+> 📜 **Histórico de Atualizações:** [**HISTORICO.md**](./HISTORICO.md)
 
 <div align="center">
 
@@ -41,6 +42,7 @@
 - [Catálogo de Endpoints da API](#-catálogo-de-endpoints-da-api)
 - [Segurança & Privacidade LGPD (Zero-CPF)](#-segurança--privacidade-lgpd-zero-cpf)
 - [Qualidade & Testes Automatizados](#-qualidade--testes-automatizados)
+- [Histórico de Desenvolvimento (Changelog)](HISTORICO.md)
 - [Documentações Complementares](#-documentações-complementares)
 
 ---
@@ -402,6 +404,7 @@ python -m pytest -q
 
 ## 📚 Documentações Complementares
 
+- 📜 [**Histórico de Desenvolvimento e Atualizações (HISTORICO.md)**](HISTORICO.md)
 - 🏛️ [**Mapa Arquitetural Completo (ESTRUTURA.md)**](ESTRUTURA.md)
 - ⚙️ [**Guia do Módulo Backend**](backend/readme.md)
 - 🧭 [**Catálogo Técnico de Rotas da API**](backend/rotasdeapi/readme.md)

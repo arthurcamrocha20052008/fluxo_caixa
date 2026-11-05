@@ -52,3 +52,10 @@ A função `normalizar_database_url` detecta automaticamente a tecnologia do ban
 
 ### 3. Gestão Integrada de Investimentos (`rotasdeapi/fluxo_dinheiro.py`)
 - Ao registrar um lançamento do tipo `investimento`, o motor contábil debita automaticamente o valor da conta bancária de origem e atualiza o patrimônio global do usuário, suportando tanto **Renda Fixa** (Poupança, CDB, LCI/LCA, Tesouro Direto, Fundos) quanto **Renda Variável** (Ações, ETFs, FIIs, Subscrições).
+
+---
+
+## 🔗 Navegação e Referências
+* Consulte o [**README Principal**](../README.md) para visão geral, infraestrutura e instruções de execução local.
+* Consulte o [**Histórico de Desenvolvimento (Changelog)**](../HISTORICO.md) para acompanhar as alterações de arquitetura, banco e releases.
+

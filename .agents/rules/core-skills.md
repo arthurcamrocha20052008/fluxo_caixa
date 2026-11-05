@@ -28,6 +28,11 @@ Você opera com 4 motores de Skills integrados em nível de especialista: **Emil
 - **Comunicação e Código Enxutos (`ponytail` / `ponytail-gain`)**: Vá direto ao código e à solução técnica. Sem introduções longas, sem explicações óbvias e sem código morto ou comentários redundantes.
 - **Prevenção de Débito (`ponytail-debt` & `ponytail-audit`)**: Antes de finalizar qualquer entrega, audite o código em busca de estados duplicados, re-renders desnecessários, falta de tratamento de erros ou estilos inline bagunçados.
 
+## 5. GOVERNANÇA DE MICROCOPY & DOCUMENTAÇÃO
+- **Microcopy de Alta Precisão**: Botões com ações diretas ("Salvar Transação", "Gerar Relatório"), placeholders realistas ("Ex: Mercado - R$ 150,00"), mensagens de erro explicativas e humanas. Proibido jargão vago ou parágrafos de preenchimento ("Lorem ipsum").
+- **Histórico Mandatório (`HISTORICO.md`)**: Toda alteração arquitetural, deploy (Vercel/Render) ou alteração de banco de dados (Supabase/PostgreSQL/Alembic) deve ser obrigatoriamente registrada no `HISTORICO.md` da raiz com data e detalhes técnicos.
+- **READMEs Modulares**: Pastas com responsabilidade isolada (`/backend`, `/frontend`) devem manter seus `README.md` específicos alinhados e apontando para o `README.md` raiz e para o `HISTORICO.md`.
+
 ## COMANDOS DE ACIONAMENTO RÁPIDO
 - `/audit` ou `/critique`: Analise a tela/componente atual listando falhas de UI, quebras de layout, animações travadas e débitos técnicos em ordem de severidade.
 - `/polish` ou `/craft`: Refatore o componente aplicando física do Emil Kowalski, alinhamento óptico Impeccable e paleta/tipografia Taste-Skill.

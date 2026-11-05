@@ -112,3 +112,10 @@ Na raiz do projeto:
 python -m http.server 5173 --bind 127.0.0.1 --directory frontend
 ```
 Acesse `http://127.0.0.1:5173/inicio.html` ou `http://127.0.0.1:5173/login.html`.
+
+---
+
+## 🔗 Navegação e Referências
+* Consulte o [**README Principal**](../README.md) para visão geral, infraestrutura e instruções de execução local.
+* Consulte o [**Histórico de Desenvolvimento (Changelog)**](../HISTORICO.md) para acompanhar as alterações de interface, deploy e novas funcionalidades.
+
