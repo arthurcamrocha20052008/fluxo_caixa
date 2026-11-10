@@ -188,9 +188,10 @@ def _origens_cors() -> list[str]:
 
     if app_env == "production":
         if not origens_env:
-            raise RuntimeError(
-                "CORS_ORIGINS deve ser definida em produção (APP_ENV=production)."
-            )
+            return [
+                "https://fluxo-caixa-coral-two.vercel.app",
+                "https://fluxo-caixa-coral-dois.vercel.app",
+            ]
         origens = [origem.strip() for origem in origens_env.split(",") if origem.strip()]
         if "*" in origens:
             raise RuntimeError(

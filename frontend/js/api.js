@@ -39,6 +39,7 @@ function traduzirMensagemErroApi(mensagemBruta, statusHttp = 400) {
     return textolimpo;
 }
 
+const RAILWAY_API_URL = "https://fluxocaixa-production-95d3afc7.up.railway.app";
 const RENDER_API_URL = "https://fluxo-caixa-cuq1.onrender.com";
 
 function obterUrlBaseApi() {
@@ -50,7 +51,7 @@ function obterUrlBaseApi() {
         return urlPersistida.trim().replace(/\/+$/, "");
     }
     if (window.location.protocol === "https:") {
-        return RENDER_API_URL;
+        return RAILWAY_API_URL || RENDER_API_URL;
     }
     return "http://127.0.0.1:8000";
 }

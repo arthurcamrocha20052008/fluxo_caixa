@@ -1379,7 +1379,7 @@ async function inicializarBotaoGoogleOAuth({
                 });
             }
 
-            if (containerGsi && !tokenClientOAuth2) {
+            if (containerGsi) {
                 containerGsi.hidden = false;
                 window.google.accounts.id.renderButton(containerGsi, {
                     type: "standard",
@@ -1392,6 +1392,7 @@ async function inicializarBotaoGoogleOAuth({
                     width: 360
                 });
                 if (botaoFallback) botaoFallback.hidden = true;
+                window.google.accounts.id.prompt();
                 return;
             }
         } catch {
@@ -1405,7 +1406,7 @@ async function inicializarBotaoGoogleOAuth({
                 try {
                     await carregarScriptGoogleGsi();
                     if (tokenClientOAuth2) {
-                        tokenClientOAuth2.requestAccessToken({ prompt: "select_account" });
+                        tokenClientOAuth2.requestAccessToken({ prompt: "" });
                         return;
                     }
                     if (window.google?.accounts?.oauth2) {
@@ -1418,7 +1419,7 @@ async function inicializarBotaoGoogleOAuth({
                                 }
                             }
                         });
-                        tokenClientOAuth2.requestAccessToken({ prompt: "select_account" });
+                        tokenClientOAuth2.requestAccessToken({ prompt: "" });
                         return;
                     }
                     window.google.accounts.id.prompt();

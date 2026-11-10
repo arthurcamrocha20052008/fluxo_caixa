@@ -8,14 +8,15 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Em Andamento] - Novembro 2026
 
-### 🚀 Adicionado
+### 🚀 Adicionado & Infraestrutura
+* **Migração de Produção para Railway:** Configuração da API de alta disponibilidade no Railway (`https://fluxocaixa-production-95d3afc7.up.railway.app`) com `Procfile` e `main.py` adaptados para `$PORT`, eliminando esperas e hibernação de cold-start.
 * **Skill Global de Desenvolvimento (`dev-standards`):** Padronização de governança para microcopy de UI, documentação obrigatória no `HISTORICO.md` e alinhamento de READMEs modulares.
 * **Links de Rastreabilidade nos READMEs:** Referência cruzada direta entre o [README Principal](./README.md), [Backend README](./backend/README.md) e [Frontend README](./frontend/README.md).
-* **Diretrizes Globais do Antigravity:** Integração de regras globais em `~/.gemini/config/rules/global_dev_rules.md` para novos projetos herdarem o padrão.
 
-### 🎨 Corrigido & Polimento de Interface (Microcopy)
-* **Revisão de Microcopy na Interface:** Substituição de textos genéricos por ações claras e intuitivas ("Salvar Transação", "Gerar Relatório"), mensagens de erro humanizadas e placeholders com exemplos realistas (`Ex: Mercado - R$ 150,00`).
-* **Micro-interações e Acessibilidade:** Validação de feedback de estados nos botões de formulário e travamento de rolagem (*scroll lock*) durante modais e popovers.
+### 🎨 Corrigido & Polimento Editorial de Interface
+* **Foco no Valor Real do Produto:** Substituição de jargões técnicos de infraestrutura/criptografia na Landing Page, Login e Cadastro por explicações práticas sobre o que o sistema faz (orçamentos por categoria, alertas de contas a pagar, gestão de investimentos e relatórios).
+* **Otimização do Botão Google (OAuth / One Tap):** Ajuste na integração com Google Identity Services para exibir o botão nativo "Continuar com o Google" e fluxo imediato sem atrito.
+* **Microcopy de Ações Claras:** Refinamento dos botões de ação e filtros em todo o painel financeiro.
 
 ---
 
