@@ -1,13 +1,13 @@
-# 💰 Sistema de Fluxo de Caixa — Enterprise Edition
+# 💰 Sistema de Fluxo de Caixa — Gestão Financeira & Patrimonial
 
 > 🌐 **Aplicação Web Online (Vercel):** [**https://fluxo-caixa-coral-two.vercel.app**](https://fluxo-caixa-coral-two.vercel.app)  
-> ⚡ **API Backend em Produção (Render):** [**https://fluxo-caixa-cuq1.onrender.com**](https://fluxo-caixa-cuq1.onrender.com) | [**Swagger UI (`/docs`)**](https://fluxo-caixa-cuq1.onrender.com/docs) | [**Healthcheck (`/health`)**](https://fluxo-caixa-cuq1.onrender.com/health)  
+> ⚡ **API Backend em Produção (Railway):** [**https://fluxocaixa-production-95d3afc7.up.railway.app**](https://fluxocaixa-production-95d3afc7.up.railway.app) | [**Swagger UI (`/docs`)**](https://fluxocaixa-production-95d3afc7.up.railway.app/docs) | [**Healthcheck (`/health`)**](https://fluxocaixa-production-95d3afc7.up.railway.app/health)  
 > 📜 **Histórico de Atualizações:** [**HISTORICO.md**](./HISTORICO.md)
 
 <div align="center">
 
 [![Live Demo](https://img.shields.io/badge/Demo_Online-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://fluxo-caixa-coral-two.vercel.app)
-[![API Status](https://img.shields.io/badge/API_Backend-Render-46E3B7?style=for-the-badge&logo=render&logoColor=black)](https://fluxo-caixa-cuq1.onrender.com/health)
+[![API Status](https://img.shields.io/badge/API_Backend-Railway-7C3AED?style=for-the-badge&logo=railway&logoColor=white)](https://fluxocaixa-production-95d3afc7.up.railway.app/health)
 [![Database](https://img.shields.io/badge/Database-Supabase_PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com)
 [![Database](https://img.shields.io/badge/MySQL_Compatível-TiDB_Cloud-005571?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com/)
 
@@ -16,13 +16,12 @@
 [![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.x_ORM-D71F00?logo=databricks&logoColor=white)](https://www.sqlalchemy.org/)
 [![Alembic](https://img.shields.io/badge/Alembic-16_Revisões-F59E0B?logo=alembic&logoColor=white)](https://alembic.sqlalchemy.org/)
 [![Pytest](https://img.shields.io/badge/Pytest-Automated_Suite-brightgreen?logo=pytest&logoColor=white)](https://pytest.org/)
-[![Security](https://img.shields.io/badge/Security-Zero_CPF_LGPD_Fernet_AES128_%2B_Argon2id_%2B_OAuth2-blueviolet)](https://www.gov.br/cidadania/pt-br/acesso-a-informacao/lgpd)
 [![WCAG](https://img.shields.io/badge/Accessibility-WCAG_AA_Light_%26_Dark-10B981)](frontend/css/style.css)
 [![License](https://img.shields.io/badge/License-MIT-lightgrey)](LICENSE)
 
 <br/>
 
-**Plataforma Full-Stack de gestão patrimonial e fluxo de caixa corporativo/pessoal em nuvem. Construída com API REST assíncrona em FastAPI, banco de dados relacional (Supabase PostgreSQL / TiDB Cloud MySQL), precisão contábil exata (`Decimal 12,2`), arquitetura de privacidade Zero-CPF sob a LGPD (Fernet AES-128 + Argon2id), Login Social Google OAuth 2.0, verificação multi-canal 2FA/OTP (E-mail ou SMS), Design Engineering de alta precisão (`Emil Kowalski` + `Impeccable` + `Taste-Skill` + `Ponytail`) e Design System Dual-Theme WCAG AA.**
+**Plataforma completa de controle financeiro e gestão patrimonial em nuvem. Permite acompanhar contas bancárias, organizar entradas e saídas (fixas e variáveis), planejar orçamentos mensais por categoria, gerenciar carteira de investimentos, receber alertas de vencimentos e exportar relatórios financeiros detalhados.**
 
 </div>
 
@@ -56,9 +55,9 @@
 | **Página de Login** | Vercel Edge | [https://fluxo-caixa-coral-two.vercel.app/login.html](https://fluxo-caixa-coral-two.vercel.app/login.html) | Acesso seguro com Google OAuth 2.0, E-mail + Senha, OTP (E-mail/SMS) e rate limiting |
 | **Página de Cadastro** | Vercel Edge | [https://fluxo-caixa-coral-two.vercel.app/cadastro.html](https://fluxo-caixa-coral-two.vercel.app/cadastro.html) | Abertura de conta sem CPF (Nome, E-mail, Telefone DDD e Senha Forte) + 2FA OTP |
 | **Termos & Privacidade LGPD** | Vercel Edge | [https://fluxo-caixa-coral-two.vercel.app/privacidade.html](https://fluxo-caixa-coral-two.vercel.app/privacidade.html) | Termos de Uso e Política de Privacidade em linguagem clara e humana (Lei nº 13.709/2018) |
-| **API REST (Backend)** | Render Web Service | [https://fluxo-caixa-cuq1.onrender.com](https://fluxo-caixa-cuq1.onrender.com) | Núcleo de serviços e regras contábeis |
-| **Documentação Interativa** | Swagger UI | [https://fluxo-caixa-cuq1.onrender.com/docs](https://fluxo-caixa-cuq1.onrender.com/docs) | Teste e inspeção direta de endpoints |
-| **Healthcheck Operacional** | Render Monitor | [https://fluxo-caixa-cuq1.onrender.com/health](https://fluxo-caixa-cuq1.onrender.com/health) | Diagnóstico de integridade da API |
+| **API REST (Backend)** | Railway Cloud | [https://fluxocaixa-production-95d3afc7.up.railway.app](https://fluxocaixa-production-95d3afc7.up.railway.app) | Núcleo de serviços e regras contábeis |
+| **Documentação Interativa** | Swagger UI | [https://fluxocaixa-production-95d3afc7.up.railway.app/docs](https://fluxocaixa-production-95d3afc7.up.railway.app/docs) | Teste e inspeção direta de endpoints |
+| **Healthcheck Operacional** | Railway Monitor | [https://fluxocaixa-production-95d3afc7.up.railway.app/health](https://fluxocaixa-production-95d3afc7.up.railway.app/health) | Diagnóstico de integridade da API |
 
 > [!NOTE]
 > No plano gratuito do Render, caso a API permaneça inativa por alguns minutos, a primeira requisição (*cold start*) pode levar cerca de **30 a 50 segundos** para despertar o contêiner. Após a inicialização, todas as respostas são servidas em milissegundos.

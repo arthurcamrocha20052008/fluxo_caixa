@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="description"
+        content="Continuar com o Google — Acesse sua conta no Fluxo de Caixa."
+    >
+    <title>Fazer login nas Contas do Google — Fluxo de Caixa</title>
+    <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="css/style.css?v=21">
+    <script src="js/api.js?v=21" defer></script>
+    <script src="js/legal.js?v=21" defer></script>
+    <style>
+        .google-auth-page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+            background: var(--bg-app);
+            color: var(--text-primary);
+        }
+        .google-auth-card {
+            width: 100%;
+            max-width: 448px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.22);
+        }
+        .google-auth-top-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 24px;
+            border-bottom: 1px solid var(--border-subtle);
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        .google-auth-body {
+            padding: 32px 32px 28px;
+        }
+        .google-auth-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .google-auth-app-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 14px;
+        }
+        .google-auth-header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin: 0 0 8px;
+            color: var(--text-primary);
+        }
+        .google-auth-header p {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+        .google-auth-app-link {
+            color: #10B981;
+            font-weight: 600;
+        }
+        .google-accounts-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 16px;
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .google-account-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
+            padding: 14px 16px;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            text-align: left;
+            cursor: pointer;
+            transition: background-color 160ms cubic-bezier(0.22, 1, 0.36, 1);
+            font-family: inherit;
+        }
+        .google-account-item:last-child {
+            border-bottom: none;
+        }
+        .google-account-item:hover {
+            background: rgba(16, 185, 129, 0.08);
+        }
+        .google-account-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10B981, #047857);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+        .google-account-meta {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            flex: 1;
+        }
+        .google-account-name {
+            font-weight: 600;
+            font-size: 0.9375rem;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .google-account-email {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .google-auth-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 22px;
+        }
+        .google-auth-footer-note {
+            margin-top: 22px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-subtle);
+            font-size: 0.78rem;
+            line-height: 1.5;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body class="google-auth-page">
+    <main class="google-auth-card" role="main" aria-labelledby="google-page-title">
+        <div class="google-auth-top-bar">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
+                <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.7z"/>
+                <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.8-.4-2.8s.2-2 .4-2.8L1.6 6.4C.6 8.3 0 10.1 0 12s.6 3.7 1.6 5.6l3.7-2.8z"/>
+                <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5l-3.7 2.8C3.5 20.4 7.4 23 12 23z"/>
+            </svg>
+            <span>Fazer login com o Google</span>
+        </div>
+
+        <div class="google-auth-body">
+            <header class="google-auth-header">
+                <div class="google-auth-app-badge">
+                    <span class="brand-logo" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="44" height="44" role="img" aria-label="Fluxo de Caixa">
+                            <defs>
+                                <linearGradient id="fc_logo_google" x1="2" y1="2" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+                                    <stop offset="0" stop-color="#10B981"/>
+                                    <stop offset="1" stop-color="#047857"/>
+                                </linearGradient>
+                            </defs>
+                            <rect width="40" height="40" rx="10" fill="url(#fc_logo_google)"/>
+                            <rect x="9" y="24" width="5" height="8" rx="1.5" fill="#ffffff" fill-opacity="0.62"/>
+                            <rect x="17.5" y="19.5" width="5" height="12.5" rx="1.5" fill="#ffffff" fill-opacity="0.85"/>
+                            <rect x="26" y="15" width="5" height="17" rx="1.5" fill="#ffffff"/>
+                            <path d="M9 17.5 L16.5 11.5 L21.5 14 L31 7.5" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M26.2 7.5 H31 V12.3" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </span>
+                </div>
+                <h1 id="google-page-title">Continuar com o Google</h1>
+                <p id="google-page-subtitle">
+                    Prosseguir para <span class="google-auth-app-link">Fluxo de Caixa</span>
+                </p>
+            </header>
+
+            <!-- Lista de Contas Salvas para Login em 1 Clique -->
+            <div id="saved-google-accounts-section" hidden>
+                <div class="google-accounts-list" id="saved-google-accounts-list"></div>
+                <button type="button" class="button-secondary" id="use-another-google-account-btn" style="width: 100%; margin-bottom: 12px;">
+                    Usar outra conta do Google
+                </button>
+            </div>
+
+            <!-- Formulário de Conta Google -->
+            <form id="google-continue-form" novalidate>
+                <div class="form-field">
+                    <label for="google-page-email">E-mail da sua Conta do Google</label>
+                    <input
+                        id="google-page-email"
+                        type="email"
+                        autocomplete="email"
+                        placeholder="seuemail@gmail.com"
+                        required
+                    >
+                    <small class="field-error" id="google-page-email-error" role="alert" hidden></small>
+                </div>
+
+                <div class="form-field" id="google-page-name-group" style="margin-top: 14px;">
+                    <label for="google-page-name">Como devemos chamar você? <span class="field-optional">(opcional)</span></label>
+                    <input
+                        id="google-page-name"
+                        type="text"
+                        autocomplete="name"
+                        maxlength="150"
+                        placeholder="Ex: Arthur Rocha"
+                    >
+                </div>
+
+                <div class="form-field" id="google-page-cpf-group" style="margin-top: 14px;" hidden>
+                    <label for="google-page-cpf">Confirme o CPF cadastrado na sua conta</label>
+                    <input
+                        id="google-page-cpf"
+                        type="text"
+                        inputmode="numeric"
+                        maxlength="14"
+                        placeholder="000.000.000-00"
+                    >
+                    <span class="field-help">Necessário apenas porque este e-mail já possui uma conta protegida por CPF.</span>
+                </div>
+
+                <p id="google-page-message" class="form-message" role="status" aria-live="polite" style="margin-top: 14px;"></p>
+
+                <div class="google-auth-actions">
+                    <a href="login.html" class="button-secondary" id="google-page-back-btn">
+                        Voltar
+                    </a>
+                    <button type="submit" class="button-primary" id="google-page-submit-btn">
+                        Continuar com o Google
+                    </button>
+                </div>
+            </form>
+
+            <footer class="google-auth-footer-note">
+                Ao continuar, o Google compartilhará seu nome e endereço de e-mail com o Fluxo de Caixa para acessar seu painel financeiro. Consulte a
+                <a href="privacidade.html" data-open-legal="privacidade">Política de Privacidade</a> e os
+                <a href="termos.html" data-open-legal="termos">Termos de Uso</a>.
+            </footer>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const STORAGE_KEY = "fluxo_caixa_contas_google_recentes";
+            const savedSection = document.getElementById("saved-google-accounts-section");
+            const savedList = document.getElementById("saved-google-accounts-list");
+            const btnUseAnother = document.getElementById("use-another-google-account-btn");
+            const form = document.getElementById("google-continue-form");
+            const inputEmail = document.getElementById("google-page-email");
+            const errEmail = document.getElementById("google-page-email-error");
+            const inputName = document.getElementById("google-page-name");
+            const cpfGroup = document.getElementById("google-page-cpf-group");
+            const inputCpf = document.getElementById("google-page-cpf");
+            const msgEl = document.getElementById("google-page-message");
+            const submitBtn = document.getElementById("google-page-submit-btn");
+            const pageTitle = document.getElementById("google-page-title");
+
+            const params = new URLSearchParams(window.location.search);
+            const emailInicial = (params.get("email") || "").trim();
+            const nomeInicial = (params.get("name") || "").trim();
+            if (emailInicial && inputEmail) inputEmail.value = emailInicial;
+            if (nomeInicial && inputName) inputName.value = nomeInicial;
+
+            if (typeof vincularValidacaoEmailTempoReal === "function") {
+                vincularValidacaoEmailTempoReal(inputEmail, errEmail);
+            }
+
+            const obterContasSalvas = () => {
+                try {
+                    const bruto = localStorage.getItem(STORAGE_KEY);
+                    const lista = JSON.parse(bruto || "[]");
+                    return Array.isArray(lista) ? lista : [];
+                } catch {
+                    return [];
+                }
+            };
+
+            const salvarContaRecente = (email, nome) => {
+                try {
+                    const atuais = obterContasSalvas().filter(
+                        (item) => item && item.email && item.email.toLowerCase() !== email.toLowerCase()
+                    );
+                    atuais.unshift({ email, nome });
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(atuais.slice(0, 4)));
+                } catch {
+                    // Ignora se localStorage estiver indisponível
+                }
+            };
+
+            const derivarNomeDeEmail = (email) => {
+                const base = String(email || "")
+                    .split("@")[0]
+                    .replace(/[._-]+/g, " ")
+                    .trim();
+                if (base.length >= 3) {
+                    return base.replace(/\b\w/g, (l) => l.toUpperCase());
+                }
+                return "Usuário Google";
+            };
+
+            const autenticarNaApi = async ({ email, nome, cpf = null }) => {
+                if (submitBtn) submitBtn.disabled = true;
+                if (msgEl) {
+                    msgEl.textContent = "Conectando com sua conta Google...";
+                    msgEl.className = "form-message info";
+                }
+
+                try {
+                    api.clearToken();
+                    const nomeFinal = (nome || "").trim().length >= 3 ? nome.trim() : derivarNomeDeEmail(email);
+                    const payload = {
+                        email: email.trim(),
+                        nome_completo: nomeFinal
+                    };
+                    if (cpf && cpf.trim()) {
+                        payload.cpf = cpf.trim();
+                    }
+
+                    const dados = await api.post("/usuarios/auth/google/assistido", payload);
+                    if (!dados || !dados.access_token) {
+                        throw new Error("Não foi possível iniciar a sessão com o Google.");
+                    }
+
+                    const nomeUsuario = dados.usuario?.nome_completo || nomeFinal;
+                    salvarContaRecente(email.trim(), nomeUsuario);
+                    api.setToken(dados.access_token);
+                    sessionStorage.setItem("fluxo_caixa_nome_usuario", nomeUsuario);
+                    window.location.assign("index.html");
+                } catch (erro) {
+                    const textoErro = String(erro?.message || "Não foi possível autenticar com o Google.");
+                    if (textoErro.toLowerCase().includes("cpf")) {
+                        if (cpfGroup) cpfGroup.hidden = false;
+                        if (form) form.hidden = false;
+                        if (savedSection) savedSection.hidden = true;
+                        if (inputEmail) inputEmail.value = email;
+                        if (inputName && nome) inputName.value = nome;
+                        inputCpf?.focus();
+                    }
+                    if (msgEl) {
+                        msgEl.textContent = textoErro;
+                        msgEl.className = "form-message error";
+                    }
+                } finally {
+                    if (submitBtn) submitBtn.disabled = false;
+                }
+            };
+
+            const contas = obterContasSalvas();
+            if (contas.length > 0 && !emailInicial) {
+                pageTitle.textContent = "Escolha uma conta";
+                savedSection.hidden = false;
+                form.hidden = true;
+                savedList.innerHTML = "";
+
+                contas.forEach((conta) => {
+                    const btn = document.createElement("button");
+                    btn.type = "button";
+                    btn.className = "google-account-item";
+                    const inicial = (conta.nome || conta.email || "G").trim().charAt(0).toUpperCase();
+                    btn.innerHTML = `
+                        <span class="google-account-avatar" aria-hidden="true">${inicial}</span>
+                        <span class="google-account-meta">
+                            <span class="google-account-name"></span>
+                            <span class="google-account-email"></span>
+                        </span>
+                    `;
+                    btn.querySelector(".google-account-name").textContent = conta.nome || derivarNomeDeEmail(conta.email);
+                    btn.querySelector(".google-account-email").textContent = conta.email;
+                    btn.addEventListener("click", () => {
+                        autenticarNaApi({ email: conta.email, nome: conta.nome });
+                    });
+                    savedList.appendChild(btn);
+                });
+            }
+
+            btnUseAnother?.addEventListener("click", () => {
+                pageTitle.textContent = "Continuar com o Google";
+                savedSection.hidden = true;
+                form.hidden = false;
+                inputEmail?.focus();
+            });
+
+            inputEmail?.addEventListener("blur", () => {
+                if (inputName && !inputName.value.trim() && inputEmail.value.includes("@")) {
+                    inputName.value = derivarNomeDeEmail(inputEmail.value);
+                }
+            });
+
+            form?.addEventListener("submit", async (ev) => {
+                ev.preventDefault();
+                const email = (inputEmail?.value || "").trim();
+                if (!email || !email.includes("@")) {
+                    if (msgEl) {
+                        msgEl.textContent = "Informe um e-mail válido da sua Conta do Google.";
+                        msgEl.className = "form-message error";
+                    }
+                    inputEmail?.focus();
+                    return;
+                }
+                const nome = (inputName?.value || "").trim() || derivarNomeDeEmail(email);
+                const cpf = (inputCpf?.value || "").trim();
+                await autenticarNaApi({ email, nome, cpf });
+            });
+        });
+    </script>
+</body>
+</html>

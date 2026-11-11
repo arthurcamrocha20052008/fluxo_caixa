@@ -14,11 +14,12 @@ flowchart LR
         I["inicio.html (Landing Page)"]
         L["login.html"]
         C["cadastro.html"]
+        G["google-auth.html (Continuar com o Google)"]
         D["index.html (SPA Painel)"]
         T["termos.html / privacidade.html"]
     end
 
-    subgraph Controllers ["Módulos JS (?v=19)"]
+    subgraph Controllers ["Módulos JS (?v=21)"]
         LG["legal.js (LGPD Humana, Google OAuth, Telefone & Senha)"]
         LJ["login.js (Login, OAuth & OTP E-mail/SMS)"]
         CJ["cadastro.js (Cadastro Zero-CPF & Modal OTP)"]
@@ -27,7 +28,7 @@ flowchart LR
     end
 
     subgraph Targets ["Detecção Automática de Ambiente"]
-        PROD["HTTPS Produção<br/>https://fluxo-caixa-cuq1.onrender.com"]
+        PROD["HTTPS Produção<br/>https://fluxocaixa-production-95d3afc7.up.railway.app"]
         DEV["HTTP Local<br/>http://127.0.0.1:8000"]
     end
 

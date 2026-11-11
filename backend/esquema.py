@@ -434,7 +434,7 @@ class GoogleAuthRequest(InputModel):
 
 class GoogleAssistidoRequest(InputModel):
     email: EmailStr
-    nome_completo: str = Field(min_length=3, max_length=150)
+    nome_completo: str | None = Field(default=None, max_length=150)
     cpf: str | None = None
     telefone: str | None = Field(default=None, max_length=32)
 
@@ -445,8 +445,13 @@ class GoogleAssistidoRequest(InputModel):
 
     @field_validator("nome_completo")
     @classmethod
-    def validar_nome(cls, valor: str) -> str:
-        return UsuarioCreate.validar_nome(valor)
+    def validar_nome(cls, valor: str | None) -> str | None:
+        if valor is None or not str(valor).strip():
+            return None
+        limpo = str(valor).strip()
+        if len(limpo) < 3:
+            raise ValueError("O nome deve possuir no mínimo 3 caracteres.")
+        return limpo
 
     @field_validator("cpf")
     @classmethod
@@ -459,6 +464,25 @@ class GoogleAssistidoRequest(InputModel):
     @classmethod
     def validar_telefone(cls, valor: str | None) -> str | None:
         return validar_telefone_opcional(valor)
+
+    @model_validator(mode="after")
+    def preencher_nome_padrao_se_ausente(self):
+        if not self.nome_completo:
+            parte_local = (
+                str(self.email)
+                .split("@", 1)[0]
+                .replace(".", " ")
+                .replace("_", " ")
+                .replace("-", " ")
+                .strip()
+            )
+            derivado = (
+                parte_local.title()
+                if len(parte_local) >= 3
+                else f"Usuário {parte_local.title() or 'Google'}"
+            )
+            self.nome_completo = derivado[:150]
+        return self
 
 
 class CompletarCadastroOAuthRequest(InputModel):
@@ -592,7 +616,10 @@ class UsuarioResponse(BaseModel):
     ) -> str | None:
         if valor is None:
             return None
-        return descriptografar_telefone(valor)
+        try:
+            return descriptografar_telefone(valor)
+        except ValueError:
+            return None
 
     model_config = ConfigDict(
         from_attributes=True

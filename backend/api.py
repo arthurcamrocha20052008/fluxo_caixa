@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 import os
+import threading
 from typing import Any
 
 from fastapi import FastAPI, Request, status
@@ -27,7 +28,10 @@ validar_chave_cpf()
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    garantir_esquema_banco()
+    if os.getenv("APP_ENV", "").strip().lower() == "production":
+        threading.Thread(target=garantir_esquema_banco, daemon=True).start()
+    else:
+        garantir_esquema_banco()
     yield
 
 
@@ -163,6 +167,28 @@ async def tratar_excecao_http_ptbr(
     )
 
 
+@app.exception_handler(Exception)
+async def tratar_excecao_inesperada_ptbr(
+    request: Request,
+    _exc: Exception,
+) -> JSONResponse:
+    headers: dict[str, str] = {}
+    origem = request.headers.get("origin", "").strip()
+    try:
+        if origem and origem in _origens_cors():
+            headers["Access-Control-Allow-Origin"] = origem
+            headers["Vary"] = "Origin"
+    except Exception:
+        pass
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            "detail": "Erro interno ao processar a solicitação no servidor. Tente novamente em instantes."
+        },
+        headers=headers,
+    )
+
+
 def _validar_app_env() -> str:
     """Valida e retorna o valor de APP_ENV.
 
@@ -188,10 +214,9 @@ def _origens_cors() -> list[str]:
 
     if app_env == "production":
         if not origens_env:
-            return [
-                "https://fluxo-caixa-coral-two.vercel.app",
-                "https://fluxo-caixa-coral-dois.vercel.app",
-            ]
+            raise RuntimeError(
+                "CORS_ORIGINS deve ser definida em produção (APP_ENV=production)."
+            )
         origens = [origem.strip() for origem in origens_env.split(",") if origem.strip()]
         if "*" in origens:
             raise RuntimeError(

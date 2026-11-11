@@ -99,6 +99,8 @@ elif DATABASE_URL.startswith("postgresql"):
     if ".supabase.co" in DATABASE_URL or ".pooler.supabase.com" in DATABASE_URL:
         # Supabase exige SSL para conexões externas.
         engine_kwargs["connect_args"] = {"sslmode": "require"}
+elif DATABASE_URL.startswith("sqlite"):
+    engine_kwargs.update({"connect_args": {"check_same_thread": False}})
 
 engine = create_engine(DATABASE_URL, **engine_kwargs)
 
@@ -134,8 +136,65 @@ def garantir_esquema_banco() -> None:
         tabelas = set(insp.get_table_names())
         dialect_name = engine.dialect.name
         with engine.begin() as conn:
+            if "usuarios" not in tabelas:
+                import models  # noqa: F401
+                Base.metadata.create_all(bind=conn, checkfirst=True)
+                tabelas = set(inspect(conn).get_table_names())
+
+            if "categorias_movimentacao" in tabelas:
+                existentes = {
+                    row[0]
+                    for row in conn.execute(
+                        text("SELECT nome FROM categorias_movimentacao")
+                    )
+                }
+                for cat in (
+                    "alimentacao", "ajuste", "compras", "contas",
+                    "educacao", "freelance", "impostos", "investimento",
+                    "lazer", "moradia", "outros", "salario",
+                    "saude", "transporte", "transferencia", "vendas",
+                ):
+                    if cat not in existentes:
+                        conn.execute(
+                            text(
+                                "INSERT INTO categorias_movimentacao (nome) VALUES (:nome)"
+                            ),
+                            {"nome": cat},
+                        )
+
             if "usuarios" in tabelas:
                 cols_u = {c["name"] for c in insp.get_columns("usuarios")}
+                if "cpf" not in cols_u:
+                    conn.execute(
+                        text("ALTER TABLE usuarios ADD COLUMN cpf VARCHAR(255) NULL")
+                    )
+                if "cpf_indice" not in cols_u:
+                    conn.execute(
+                        text("ALTER TABLE usuarios ADD COLUMN cpf_indice VARCHAR(64) NULL")
+                    )
+                if "telefone" not in cols_u:
+                    conn.execute(
+                        text("ALTER TABLE usuarios ADD COLUMN telefone VARCHAR(255) NULL")
+                    )
+                if "codigo_verificacao_hash" not in cols_u:
+                    conn.execute(
+                        text(
+                            "ALTER TABLE usuarios ADD COLUMN codigo_verificacao_hash VARCHAR(64) NULL"
+                        )
+                    )
+                if "codigo_expira_em" not in cols_u:
+                    if dialect_name == "postgresql":
+                        conn.execute(
+                            text(
+                                "ALTER TABLE usuarios ADD COLUMN codigo_expira_em TIMESTAMP NULL"
+                            )
+                        )
+                    else:
+                        conn.execute(
+                            text(
+                                "ALTER TABLE usuarios ADD COLUMN codigo_expira_em DATETIME NULL"
+                            )
+                        )
                 if "email_verificado" not in cols_u:
                     if dialect_name == "postgresql":
                         conn.execute(

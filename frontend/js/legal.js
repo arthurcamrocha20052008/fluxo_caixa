@@ -1432,15 +1432,26 @@ async function inicializarBotaoGoogleOAuth({
                 }
             }
 
+            const emailDigitado = (
+                document.querySelector("#email")?.value ||
+                document.querySelector("#register-email")?.value ||
+                ""
+            ).trim();
+            const nomeDigitado = (
+                document.querySelector("#register-name")?.value || ""
+            ).trim();
+
+            const query = new URLSearchParams();
+            if (emailDigitado) query.set("email", emailDigitado);
+            if (nomeDigitado) query.set("name", nomeDigitado);
+            const sufixo = query.toString() ? `?${query.toString()}` : "";
+
             if (modoAssistidoDisponivel) {
-                abrirModalGoogleAssistido({ onAuthenticated: concluirSessaoGoogle });
+                window.location.assign(`google-auth.html${sufixo}`);
                 return;
             }
 
-            exibirMensagem(
-                "Configure a variável GOOGLE_CLIENT_ID no servidor para habilitar o Google OAuth 2.0.",
-                "info"
-            );
+            abrirModalGoogleAssistido({ onAuthenticated: concluirSessaoGoogle });
         });
     }
 }

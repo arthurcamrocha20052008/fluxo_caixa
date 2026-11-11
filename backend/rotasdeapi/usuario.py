@@ -472,6 +472,15 @@ def verificar_codigo(
     return _processar_verificacao_email(dados, request, db)
 
 
+def _descriptografar_telefone_seguro(telefone_cifrado: str | None) -> str | None:
+    if not telefone_cifrado:
+        return None
+    try:
+        return descriptografar_telefone(telefone_cifrado)
+    except ValueError:
+        return None
+
+
 def _processar_envio_codigo_verificacao(
     dados: ReenviarVerificacaoRequest,
     request: Request,
@@ -489,11 +498,7 @@ def _processar_envio_codigo_verificacao(
     )
 
     if usuario and not usuario.email_verificado:
-        telefone_armazenado = (
-            descriptografar_telefone(usuario.telefone)
-            if usuario.telefone
-            else None
-        )
+        telefone_armazenado = _descriptografar_telefone_seguro(usuario.telefone)
         telefone_efetivo = telefone_armazenado
 
         if dados.telefone:
@@ -620,6 +625,36 @@ def configuracao_google_oauth():
         "client_id": client_id,
         "habilitado": bool(client_id),
         "modo_assistido": modo_google_assistido_habilitado(),
+        "pagina_continuar": "google-auth.html",
+    }
+
+
+@router.get("/usuarios/auth/google/url")
+def obter_url_login_google(redirect_uri: str | None = None):
+    """Retorna a URL de direcionamento para a página Continuar com o Google."""
+    import urllib.parse
+
+    client_id = obter_google_client_id()
+    if client_id and redirect_uri:
+        params = urllib.parse.urlencode(
+            {
+                "client_id": client_id,
+                "redirect_uri": redirect_uri,
+                "response_type": "token id_token",
+                "scope": "openid email profile",
+                "prompt": "select_account",
+                "nonce": token_urlsafe(16),
+            }
+        )
+        return {
+            "url": f"https://accounts.google.com/o/oauth2/v2/auth?{params}",
+            "modo": "oauth2_google",
+            "client_id": client_id,
+        }
+    return {
+        "url": "google-auth.html",
+        "modo": "continuar_google",
+        "client_id": client_id,
     }
 
 
@@ -941,11 +976,7 @@ def esqueci_senha(
     )
 
     if usuario:
-        telefone_cadastrado = (
-            descriptografar_telefone(usuario.telefone)
-            if usuario.telefone
-            else None
-        )
+        telefone_cadastrado = _descriptografar_telefone_seguro(usuario.telefone)
 
         if dados.canal_verificacao in ("telefone", "sms", "whatsapp"):
             if not telefone_cadastrado:

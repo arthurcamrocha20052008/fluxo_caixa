@@ -48,10 +48,14 @@ function obterUrlBaseApi() {
     }
     const urlPersistida = localStorage.getItem("fluxo_caixa_api_url");
     if (urlPersistida) {
-        return urlPersistida.trim().replace(/\/+$/, "");
+        const limpa = urlPersistida.trim().replace(/\/+$/, "");
+        if (!limpa.includes("onrender.com") && !limpa.includes("SEU-DOMINIO")) {
+            return limpa;
+        }
+        localStorage.removeItem("fluxo_caixa_api_url");
     }
     if (window.location.protocol === "https:") {
-        return RAILWAY_API_URL || RENDER_API_URL;
+        return RAILWAY_API_URL;
     }
     return "http://127.0.0.1:8000";
 }
@@ -97,16 +101,38 @@ const api = {
                 ...options,
                 headers
             });
+            if (
+                response.status >= 502 &&
+                API_BASE_URL === RAILWAY_API_URL &&
+                RENDER_API_URL
+            ) {
+                response = await fetch(`${RENDER_API_URL}${path}`, {
+                    ...options,
+                    headers
+                });
+            }
         } catch (erro) {
-            console.error("Erro na comunicação com a API:", erro);
-            if (window.location.protocol === "https:" && API_BASE_URL.startsWith("http://")) {
+            if (API_BASE_URL === RAILWAY_API_URL && RENDER_API_URL) {
+                try {
+                    response = await fetch(`${RENDER_API_URL}${path}`, {
+                        ...options,
+                        headers
+                    });
+                } catch (erroFallback) {
+                    console.error("Erro na comunicação com a API:", erroFallback);
+                }
+            }
+            if (!response) {
+                console.error("Erro na comunicação com a API:", erro);
+                if (window.location.protocol === "https:" && API_BASE_URL.startsWith("http://")) {
+                    throw new Error(
+                        "Bloqueio de conteúdo misto (HTTPS para HTTP). Configure uma URL HTTPS para a API."
+                    );
+                }
                 throw new Error(
-                    "Bloqueio de conteúdo misto (HTTPS para HTTP). Configure uma URL HTTPS para a API."
+                    "Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente."
                 );
             }
-            throw new Error(
-                "Não foi possível conectar ao servidor. Se o serviço estiver iniciando, aguarde alguns segundos e tente novamente."
-            );
         }
 
         if (response.status === 401 && token) {
