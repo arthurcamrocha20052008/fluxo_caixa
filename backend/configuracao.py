@@ -5,9 +5,14 @@ from dotenv import load_dotenv
 
 
 def carregar_configuracao() -> None:
-    arquivo_env_raiz = Path(__file__).resolve().parent.parent / ".env"
+    raiz = Path(__file__).resolve().parent.parent
+    arquivo_env_raiz = raiz / ".env"
     if arquivo_env_raiz.is_file():
         load_dotenv(arquivo_env_raiz, override=True)
+
+    arquivo_env_example = raiz / ".env.example"
+    if arquivo_env_example.is_file():
+        load_dotenv(arquivo_env_example, override=False)
 
     local_app_data = os.getenv("LOCALAPPDATA")
     if local_app_data:

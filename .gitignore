@@ -9,10 +9,11 @@ __pycache__/
 .coverage.*
 htmlcov/
 
-# Local secrets and databases
+# Local secrets, environment templates and databases
 .env
 .env.*
-!.env.example
+.env.example
+*.env
 secrets.env
 *.sqlite
 *.sqlite3

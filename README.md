@@ -271,14 +271,7 @@ python -c "import secrets; print(secrets.token_urlsafe(48))"
 python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
 ```
 
-Preencha no seu arquivo `.env`:
-```ini
-APP_ENV=development
-DATABASE_URL=postgresql+psycopg2://usuario:senha@host:6543/postgres?sslmode=require
-JWT_SECRET_KEY=sua_chave_gerada_acima
-CPF_ENCRYPTION_KEY=sua_chave_fernet_gerada_acima
-CORS_ORIGINS=http://127.0.0.1:5500,http://127.0.0.1:5173
-```
+Defina no seu arquivo `.env` local (ignorado pelo `.gitignore`) as variáveis `APP_ENV`, `DATABASE_URL`, `JWT_SECRET_KEY`, `CPF_ENCRYPTION_KEY` e `CORS_ORIGINS`.
 
 ### 3. Aplicar as Migrações do Banco de Dados
 

@@ -8,9 +8,7 @@ Funcionalidades:
 
 Uso:
     python scripts/migrar_para_supabase.py
-    OU passando variáveis no ambiente ou arquivo .env:
-    SUPABASE_URL="postgresql+psycopg2://postgres.xxxx:yyyy@aws-0-sa-east-1.pooler.supabase.com:6543/postgres"
-    MYSQL_URL="mysql+pymysql://user:pass@host/db"
+    (Lê DATABASE_URL / SUPABASE_URL diretamente do arquivo .env ou .env.example local)
 """
 
 import os
@@ -64,8 +62,7 @@ def obter_url_supabase() -> str:
 
     if not url:
         print("\n=== CONFIGURAÇÃO DO SUPABASE ===")
-        print("Informe a Connection String do Supabase (URI):")
-        print("Exemplo: postgresql://postgres.xxxx:sua_senha@aws-0-sa-east-1.pooler.supabase.com:6543/postgres")
+        print("Defina a variável DATABASE_URL no seu arquivo .env ou informe abaixo:")
         url = input("URL Supabase: ").strip()
 
     if not url:
@@ -211,8 +208,7 @@ def main():
 
     print("\n" + "=" * 65)
     print(" Migração para o Supabase concluída com sucesso!")
-    print(" Atualize a variável DATABASE_URL no seu ambiente / Render:")
-    print(f" DATABASE_URL={url_supabase}")
+    print(" Certifique-se de que DATABASE_URL esteja configurada nas variáveis de ambiente.")
     print("=" * 65)
 
 

@@ -2,8 +2,7 @@
 
 Uso (apenas exemplos, não execute sem confirmação):
 
-    # Na raiz do repositório, com o ambiente virtual ativado:
-    $env:DATABASE_URL = "mysql+pymysql://USUARIO:SENHA@127.0.0.1:3306/fluxo_caixa_dev"
+    # Na raiz do repositório, com o ambiente virtual ativado e .env configurado:
     python scripts/remover_usuario_teste.py usuario@exemplo.com
 
 O script lê `DATABASE_URL` do ambiente (via .env ou variável exportada).

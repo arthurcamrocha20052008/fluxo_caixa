@@ -50,8 +50,7 @@ python -m pytest backend/tests/test_seguranca_oauth_lgpd.py -v
 ```
 
 ### 4. Executar Testes de Concorrência no MySQL (Opcional)
-Requer uma base MySQL de teste dedicada:
+Requer a variável `TEST_MYSQL_URL` definida no arquivo `.env` local:
 ```powershell
-$env:TEST_MYSQL_URL = "mysql+pymysql://USUARIO:SENHA@127.0.0.1:3306/fluxo_caixa_test"
 python -m pytest -m mysql -v
 ```
