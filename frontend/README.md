@@ -54,7 +54,7 @@ frontend/
 ├── assets/
 │   └── logo.svg             # Logotipo vetorial corporativo oficial (#10B981 -> #047857)
 ├── css/
-│   └── style.css            # Design System WCAG AA, física Emil Kowalski (spring/ease-out) e tabular-nums (?v=19)
+│   └── style.css            # Design System WCAG AA, física Emil Kowalski (spring/ease-out) e tabular-nums (?v=21)
 ├── js/
 │   ├── api.js               # Cliente Fetch centralizado, gestão JWT, tradução PT-BR de erros, temas e scroll-lock
 │   ├── legal.js             # Termos/LGPD em linguagem humana, Google OAuth 2.0, validação de e-mail, telefone e senha

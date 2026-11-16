@@ -144,7 +144,7 @@ fluxo_caixas/
 │   ├── assets/
 │   │   └── logo.svg                    # Logotipo corporativo oficial em SVG
 │   ├── css/
-│   │   └── style.css                   # Design system corporativo Dual-Theme + física Emil Kowalski (?v=19)
+│   │   └── style.css                   # Design system corporativo Dual-Theme + física Emil Kowalski (?v=21)
 │   ├── js/
 │   │   ├── api.js                      # Cliente HTTP enxuto com detecção de ambiente, temas e scroll-lock
 │   │   ├── legal.js                    # Termos/LGPD em linguagem clara, validações reativas e Google OAuth

@@ -14,12 +14,15 @@ from esquema import (
     CalculoFinanceiroCreate,
     CalculoFinanceiroResponse,
     ResumoPeriodoResponse,
+    SimulacaoInvestimentoRequest,
+    SimulacaoInvestimentoResponse,
 )
 from financeiro import (
     calcular_resumo_anual,
     calcular_resumo_mensal,
     calcular_resumo_periodo,
     salvar_calculo_financeiro,
+    simular_investimento,
 )
 from autenticacao import obter_usuario_logado
 
@@ -340,3 +343,29 @@ def excluir_calculo(
     return {
         "mensagem": "Cálculo financeiro excluído com sucesso."
     }
+
+
+# =========================================================
+# SIMULADOR DE INVESTIMENTOS (JUROS COMPOSTOS E TRIBUTAÇÃO)
+# =========================================================
+
+@router.post(
+    "/simulador",
+    response_model=SimulacaoInvestimentoResponse,
+    status_code=status.HTTP_200_OK,
+)
+def simular_projecao_investimento(
+    dados: SimulacaoInvestimentoRequest,
+):
+    return simular_investimento(
+        tipo_ativo=dados.tipo_ativo,
+        valor_inicial=dados.valor_inicial,
+        aporte_mensal=dados.aporte_mensal,
+        prazo_meses=dados.prazo_meses,
+        taxa_anual=dados.taxa_anual,
+        indexador=dados.indexador,
+        percentual_cdi=dados.percentual_cdi,
+        taxa_cdi_anual=dados.taxa_cdi_anual,
+        inflacao_ipca_anual=dados.inflacao_ipca_anual,
+        dividend_yield_anual=dados.dividend_yield_anual,
+    )

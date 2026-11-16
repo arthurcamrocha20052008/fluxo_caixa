@@ -89,7 +89,7 @@ A interface e a arquitetura de código operam sob 4 pilares de engenharia integr
    - Superfícies em camadas de grafite/ardósia escuro (`#0B0F19` -> `#111827`) com bordas translúcidas de `1px` (`rgba(255, 255, 255, 0.08)`), livre de gradientes neon clichês ou símbolos Unicode improvisados.
    - Botão **Continuar com Google** (`#google-oauth-btn`) desenhado como elemento principal de conversão com ícone vetorial oficial em 4 cores.
 4. **Ponytail Code Discipline (Zero Débito Técnico):**
-   - Eliminação de código duplicado entre módulos JS, remoção de atributos `style="..."` inline nas páginas HTML e atualização unificada de cache-busting (`?v=19`).
+   - Eliminação de código duplicado entre módulos JS, remoção de atributos `style="..."` inline nas páginas HTML e atualização unificada de cache-busting (`?v=21`).
 
 ---
 
@@ -218,7 +218,7 @@ fluxo_caixas/
 │
 ├── frontend/                           # Aplicação Web SPA & Landing Page (Vercel)
 │   ├── assets/logo.svg                 # Logotipo vetorial corporativo oficial em SVG
-│   ├── css/style.css                   # Design system financeiro responsivo + física Emil Kowalski (?v=19)
+│   ├── css/style.css                   # Design system financeiro responsivo + física Emil Kowalski (?v=21)
 │   ├── js/                             # Módulos JS (api.js, legal.js, dashboard.js, login.js, cadastro.js)
 │   ├── inicio.html                     # Landing Page de alta conversão com CTAs estratégicos
 │   ├── index.html                      # Painel financeiro principal autenticado (SPA 100% vetorial SVG)
@@ -367,6 +367,7 @@ flowchart LR
 | **Alertas** | `PUT` | `/alertas/preferencias` | Atualiza preferências de notificação | Bearer JWT |
 | **Cálculos** | `POST` | `/calculos-financeiros/` | Consolida e grava balanço contábil por período | Bearer JWT |
 | **Cálculos** | `GET` | `/calculos-financeiros/` | Histórico de consolidações contábeis | Bearer JWT |
+| **Cálculos** | `POST` | `/calculos-financeiros/simulador` | Simulador de investimentos (juros compostos, CDI/IPCA+, tabela regressiva de IR e isenção LCI/LCA/Poupança) | Pública / Bearer JWT |
 | **Metas** | `GET` | `/metas-financeiras/` | Lista metas de economia e percentual concluído | Bearer JWT |
 | **Metas** | `POST` | `/metas-financeiras/` | Cria nova meta financeira com alvo e data | Bearer JWT |
 | **Metas** | `PUT` | `/metas-financeiras/{id}` | Atualiza aportes e conclui automaticamente ao atingir alvo | Bearer JWT |

@@ -11,6 +11,7 @@ let movimentacoesFiltradasCache = [];
 let metasCarregadas = [];
 let calculosCarregados = [];
 let ultimoResumoRelatorioCache = null;
+let ultimaSimulacaoInvestimentoCache = null;
 let usuarioAtual = null;
 
 // Instâncias ativas do Chart.js para destruição segura antes de recriar
@@ -19,7 +20,8 @@ const graficosAtivos = {
     dashboardCategoria: null,
     categoriasDistribuicao: null,
     investimentosEvolucao: null,
-    relatoriosConsolidado: null
+    relatoriosConsolidado: null,
+    simuladorEvolucao: null
 };
 
 const NOMES_CATEGORIAS = {
@@ -374,6 +376,7 @@ document.addEventListener("DOMContentLoaded", () => {
     configurarConfiguracoes();
     inicializarSelectsArredondados();
     configurarBotaoSair();
+    inicializarSimuladorInvestimentos();
     carregarDashboard();
     inicializarOrcamentosAlertas();
 });
@@ -1517,9 +1520,7 @@ function atualizarContas(contas) {
 
         contas.forEach((conta) => {
             const linha = document.createElement("div");
-            linha.className = "account-summary";
-            linha.style.padding = "16px";
-            linha.style.marginBottom = "8px";
+            linha.className = "account-summary account-summary-manage";
 
             const info = document.createElement("div");
             const statusTexto = conta.ativa ? "Ativa" : "Inativa";
@@ -2842,6 +2843,9 @@ function configurarConfiguracoes() {
         if (ultimoResumoRelatorioCache) {
             renderizarGraficoRelatorioConsolidado(ultimoResumoRelatorioCache);
         }
+        if (ultimaSimulacaoInvestimentoCache) {
+            renderizarGraficoSimuladorInvestimentos(ultimaSimulacaoInvestimentoCache);
+        }
         mostrarToast(
             proximo === "dark" ? "Tema escuro ativado!" : "Tema claro ativado!",
             "info"
@@ -3460,4 +3464,404 @@ async function atualizarAlertas() {
             msg.hidden = false;
         }
     }
+}
+
+/* =========================================================
+   SIMULADOR DE INVESTIMENTOS (JUROS COMPOSTOS, IR E CHART.JS)
+========================================================= */
+
+const ATIVOS_SIMULADOR_RENDA_VARIAVEL = new Set([
+    "Ação",
+    "Fundos de Índice (ETFs)",
+    "Fundos Imobiliários (FIIs)",
+    "Subscrição"
+]);
+
+const ATIVOS_SIMULADOR_ISENTOS_IR = new Set([
+    "Poupança",
+    "LCI / LCA"
+]);
+
+function obterAliquotaIrSimuladorLocal(tipoAtivo, prazoMeses) {
+    if (ATIVOS_SIMULADOR_ISENTOS_IR.has(tipoAtivo)) {
+        return 0;
+    }
+    if (tipoAtivo === "Fundos Imobiliários (FIIs)") {
+        return 20.0;
+    }
+    if (ATIVOS_SIMULADOR_RENDA_VARIAVEL.has(tipoAtivo)) {
+        return 15.0;
+    }
+    if (prazoMeses <= 6) return 22.5;
+    if (prazoMeses <= 12) return 20.0;
+    if (prazoMeses <= 24) return 17.5;
+    return 15.0;
+}
+
+function calcularSimulacaoLocalFallback(payload) {
+    const tipoAtivo = payload.tipo_ativo || "CDB";
+    const indexador = payload.indexador || "Pré-fixado";
+    const c = Math.max(0, Number(payload.valor_inicial || 0));
+    const a = Math.max(0, Number(payload.aporte_mensal || 0));
+    const t = Math.max(1, Math.min(1200, Math.round(Number(payload.prazo_meses || 12))));
+    const taxaInformada = Math.max(0, Number(payload.taxa_anual || 0));
+    const dyAnual = Math.max(0, Number(payload.dividend_yield_anual || 0));
+
+    let taxaBaseAnual = taxaInformada;
+    if (indexador === "CDI") {
+        taxaBaseAnual = taxaInformada > 35 ? 10.65 * (taxaInformada / 100) : taxaInformada;
+    } else if (indexador === "IPCA") {
+        taxaBaseAnual = taxaInformada + 4.5;
+    }
+
+    const taxaEfetivaAnual = taxaBaseAnual + dyAnual;
+    const iAnual = taxaEfetivaAnual / 100.0;
+    // Conversão exata: i_mensal = (1 + i_anual)^(1/12) - 1
+    const iMensal = iAnual > 0 ? Math.pow(1 + iAnual, 1 / 12) - 1 : 0;
+
+    const isentoIr = ATIVOS_SIMULADOR_ISENTOS_IR.has(tipoAtivo);
+    const aliquotaIr = obterAliquotaIrSimuladorLocal(tipoAtivo, t);
+    const proporcaoTributavel =
+        !isentoIr && ATIVOS_SIMULADOR_RENDA_VARIAVEL.has(tipoAtivo) && dyAnual > 0 && taxaEfetivaAnual > 0
+            ? Math.max(0, Math.min(1, taxaBaseAnual / taxaEfetivaAnual))
+            : 1;
+
+    const evolucaoMensal = [];
+    for (let mes = 0; mes <= t; mes += 1) {
+        const investidoMes = Number((c + a * mes).toFixed(2));
+        let brutoMes = investidoMes;
+        if (mes > 0 && iMensal > 0) {
+            const fator = Math.pow(1 + iMensal, mes);
+            // Fórmula de Valor Futuro: M = C * (1 + i)^t + A * (((1 + i)^t - 1) / i)
+            brutoMes = Number((c * fator + a * ((fator - 1) / iMensal)).toFixed(2));
+        }
+        const rendimentoMes = Math.max(0, Number((brutoMes - investidoMes).toFixed(2)));
+        const aliqMes = obterAliquotaIrSimuladorLocal(tipoAtivo, Math.max(1, mes));
+        const impostoMes = isentoIr
+            ? 0
+            : Number((rendimentoMes * proporcaoTributavel * (aliqMes / 100)).toFixed(2));
+        const liquidoMes = Number((brutoMes - impostoMes).toFixed(2));
+
+        evolucaoMensal.push({
+            mes,
+            total_investido: investidoMes,
+            total_acumulado: brutoMes,
+            total_liquido: liquidoMes,
+            rendimento_acumulado: rendimentoMes
+        });
+    }
+
+    const ultimo = evolucaoMensal[evolucaoMensal.length - 1];
+    const valorTotalInvestido = ultimo.total_investido;
+    const valorTotalBruto = ultimo.total_acumulado;
+    const rendimentoBruto = Math.max(0, Number((valorTotalBruto - valorTotalInvestido).toFixed(2)));
+    const impostoDescontado = isentoIr
+        ? 0
+        : Number((rendimentoBruto * proporcaoTributavel * (aliquotaIr / 100)).toFixed(2));
+    const rendimentoLiquido = Math.max(0, Number((rendimentoBruto - impostoDescontado).toFixed(2)));
+    const valorLiquidoProjetado = Number((valorTotalBruto - impostoDescontado).toFixed(2));
+
+    return {
+        tipo_ativo: tipoAtivo,
+        indexador,
+        valor_inicial: c,
+        aporte_mensal: a,
+        prazo_meses: t,
+        taxa_anual_informada: taxaInformada,
+        taxa_efetiva_anual: Number(taxaEfetivaAnual.toFixed(2)),
+        taxa_mensal: iMensal,
+        taxa_mensal_equivalente: iMensal,
+        taxa_mensal_percentual: Number((iMensal * 100).toFixed(4)),
+        valor_total_investido: valorTotalInvestido,
+        total_investido: valorTotalInvestido,
+        valor_total_bruto: valorTotalBruto,
+        total_acumulado: valorTotalBruto,
+        rendimento_bruto: rendimentoBruto,
+        aliquota_ir: isentoIr ? 0 : aliquotaIr,
+        isento_ir: isentoIr,
+        imposto_descontado: impostoDescontado,
+        rendimento_liquido: rendimentoLiquido,
+        valor_liquido_projetado: valorLiquidoProjetado,
+        evolucao_mensal: evolucaoMensal
+    };
+}
+
+function atualizarCamposContextuaisSimulador() {
+    const selectAtivo = document.querySelector("#sim-tipo-ativo");
+    const selectIndexador = document.querySelector("#sim-indexador");
+    const labelTaxa = document.querySelector("#sim-taxa-label");
+    const helpTaxa = document.querySelector("#sim-taxa-help");
+    const inputTaxa = document.querySelector("#sim-taxa-anual");
+    const campoDy = document.querySelector("#sim-dy-field");
+
+    if (!selectAtivo || !selectIndexador) return;
+
+    const ativo = selectAtivo.value;
+    const indexador = selectIndexador.value;
+    const ehRendaVariavel = ATIVOS_SIMULADOR_RENDA_VARIAVEL.has(ativo);
+
+    if (campoDy) {
+        campoDy.hidden = !ehRendaVariavel;
+    }
+
+    if (ehRendaVariavel) {
+        if (labelTaxa) labelTaxa.textContent = "Valorização anual esperada da cota (%)";
+        if (helpTaxa) helpTaxa.textContent = "Somada ao Dividend Yield reinvestido para projetar o retorno composto.";
+    } else if (indexador === "CDI") {
+        if (labelTaxa) labelTaxa.textContent = "Rentabilidade (% do CDI ou taxa a.a.)";
+        if (helpTaxa) helpTaxa.textContent = "Ex.: 110 para 110% do CDI (base CDI projetada: 10,65% a.a.).";
+        if (inputTaxa && Number(inputTaxa.value) === 12) {
+            inputTaxa.value = "110.00";
+        }
+    } else if (indexador === "IPCA") {
+        if (labelTaxa) labelTaxa.textContent = "Taxa real acima do IPCA (% a.a.)";
+        if (helpTaxa) helpTaxa.textContent = "Soma automaticamente a inflação projetada (IPCA 4,50% a.a.) à taxa real.";
+        if (inputTaxa && Number(inputTaxa.value) > 35) {
+            inputTaxa.value = "6.50";
+        }
+    } else {
+        if (labelTaxa) labelTaxa.textContent = "Rentabilidade anual esperada (%)";
+        if (helpTaxa) helpTaxa.textContent = "Convertida via taxas equivalentes: i_mensal = (1 + i_anual)^(1/12) - 1.";
+        if (inputTaxa && Number(inputTaxa.value) > 35) {
+            inputTaxa.value = "12.00";
+        }
+    }
+}
+
+function renderizarGraficoSimuladorInvestimentos(resultado) {
+    ultimaSimulacaoInvestimentoCache = resultado || null;
+    destruirGrafico("simuladorEvolucao");
+
+    if (!resultado || typeof window.Chart === "undefined") return;
+
+    const canvas = document.querySelector("#chart-investment-simulator");
+    if (!canvas) return;
+
+    const serie = Array.isArray(resultado.evolucao_mensal) ? resultado.evolucao_mensal : [];
+    if (serie.length === 0) return;
+
+    // Amostragem limpa para prazos longos para manter o eixo X legível
+    const totalPontos = serie.length;
+    const passo = totalPontos > 60 ? Math.ceil((totalPontos - 1) / 24) : totalPontos > 25 ? 2 : 1;
+    const pontosExibidos = serie.filter(
+        (ponto, indice) => indice === 0 || indice === totalPontos - 1 || indice % passo === 0
+    );
+
+    const labels = pontosExibidos.map((p) => (p.mes === 0 ? "Início" : `Mês ${p.mes}`));
+    const dadosInvestido = pontosExibidos.map((p) => Number(p.total_investido || 0));
+    const dadosAcumulado = pontosExibidos.map((p) => Number(p.total_acumulado || 0));
+
+    const coresTema = obterCoresTemaGrafico();
+
+    graficosAtivos.simuladorEvolucao = new window.Chart(canvas, {
+        type: "line",
+        data: {
+            labels,
+            datasets: [
+                {
+                    label: "Total Acumulado",
+                    data: dadosAcumulado,
+                    borderColor: "#10b981",
+                    backgroundColor: "rgba(16, 185, 129, 0.14)",
+                    fill: true,
+                    tension: 0.3,
+                    borderWidth: 2.6,
+                    pointRadius: 2.5
+                },
+                {
+                    label: "Total Investido",
+                    data: dadosInvestido,
+                    borderColor: "#3b82f6",
+                    backgroundColor: "rgba(59, 130, 246, 0.06)",
+                    borderDash: [5, 4],
+                    fill: false,
+                    tension: 0.15,
+                    borderWidth: 2.2,
+                    pointRadius: 2
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: "index",
+                intersect: false
+            },
+            plugins: {
+                legend: {
+                    position: "bottom",
+                    labels: { color: coresTema.texto, boxWidth: 14 }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: coresTema.texto },
+                    grid: { color: coresTema.grade }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: coresTema.texto,
+                        callback: (v) => formatarMoeda(v)
+                    },
+                    grid: { color: coresTema.grade }
+                }
+            }
+        }
+    });
+}
+
+function exibirResultadoSimulador(resultado) {
+    if (!resultado) return;
+
+    const investido = Number(resultado.valor_total_investido ?? resultado.total_investido ?? 0);
+    const bruto = Number(resultado.valor_total_bruto ?? resultado.total_acumulado ?? 0);
+    const imposto = Number(resultado.imposto_descontado ?? 0);
+    const liquido = Number(resultado.valor_liquido_projetado ?? (bruto - imposto));
+    const rendimentoLiquido = Number(resultado.rendimento_liquido ?? (liquido - investido));
+    const taxaMensalPct = Number(resultado.taxa_mensal_percentual ?? (Number(resultado.taxa_mensal || 0) * 100));
+    const taxaEfetivaAnual = Number(resultado.taxa_efetiva_anual ?? resultado.taxa_anual_informada ?? 0);
+    const aliquotaIr = Number(resultado.aliquota_ir ?? 0);
+    const isento = Boolean(resultado.isento_ir) || aliquotaIr === 0;
+
+    definirTexto("#sim-result-invested", formatarMoeda(investido));
+    definirTexto(
+        "#sim-result-invested-desc",
+        `Inicial ${formatarMoeda(resultado.valor_inicial)} + ${resultado.prazo_meses}x de ${formatarMoeda(resultado.aporte_mensal)}`
+    );
+
+    definirTexto("#sim-result-gross", formatarMoeda(bruto));
+    definirTexto(
+        "#sim-result-rate-desc",
+        `Taxa efetiva: ${taxaEfetivaAnual.toFixed(2).replace(".", ",")}% a.a. (${taxaMensalPct.toFixed(3).replace(".", ",")}% a.m.)`
+    );
+
+    definirTexto("#sim-result-tax", isento ? "R$ 0,00 (Isento)" : `- ${formatarMoeda(imposto)}`);
+    definirTexto(
+        "#sim-result-tax-desc",
+        isento
+            ? `${resultado.tipo_ativo}: Isenção total de Imposto de Renda`
+            : `Alíquota regressiva de ${aliquotaIr.toFixed(1).replace(".", ",")}% sobre os juros`
+    );
+
+    definirTexto("#sim-result-net", formatarMoeda(liquido));
+    definirTexto(
+        "#sim-result-net-desc",
+        `Lucro líquido: + ${formatarMoeda(rendimentoLiquido)} em ${resultado.prazo_meses} meses`
+    );
+
+    definirTexto(
+        "#sim-chart-badge",
+        `${resultado.tipo_ativo} · ${resultado.indexador} · ${resultado.prazo_meses} meses`
+    );
+
+    renderizarGraficoSimuladorInvestimentos(resultado);
+}
+
+async function executarSimulacaoInvestimento(exibirNotificacao = false) {
+    const form = document.querySelector("#investment-simulator-form");
+    if (!form) return;
+
+    limparMensagem("#sim-message");
+    const btn = document.querySelector("#sim-submit-btn");
+
+    const tipoAtivo = document.querySelector("#sim-tipo-ativo")?.value || "CDB";
+    const indexador = document.querySelector("#sim-indexador")?.value || "Pré-fixado";
+    const valorInicial = Number(document.querySelector("#sim-valor-inicial")?.value || 0);
+    const aporteMensal = Number(document.querySelector("#sim-aporte-mensal")?.value || 0);
+    const prazoValor = Number(document.querySelector("#sim-prazo")?.value || 0);
+    const unidadePrazo = document.querySelector("#sim-unidade-prazo")?.value || "meses";
+    const taxaAnual = Number(document.querySelector("#sim-taxa-anual")?.value || 0);
+    const dyAnual = Number(document.querySelector("#sim-dy-anual")?.value || 0);
+
+    const prazoMeses = unidadePrazo === "anos" ? Math.round(prazoValor * 12) : Math.round(prazoValor);
+
+    if (valorInicial <= 0 && aporteMensal <= 0) {
+        definirMensagem(
+            "#sim-message",
+            "Informe um Valor Inicial ou um Aporte Mensal maior que zero para simular.",
+            "error"
+        );
+        return;
+    }
+
+    if (!Number.isFinite(prazoMeses) || prazoMeses < 1 || prazoMeses > 1200) {
+        definirMensagem(
+            "#sim-message",
+            "O prazo da simulação deve estar entre 1 e 1200 meses (até 100 anos).",
+            "error"
+        );
+        return;
+    }
+
+    if (taxaAnual < 0) {
+        definirMensagem("#sim-message", "A rentabilidade anual não pode ser negativa.", "error");
+        return;
+    }
+
+    const payload = {
+        tipo_ativo: tipoAtivo,
+        valor_inicial: valorInicial.toFixed(2),
+        aporte_mensal: aporteMensal.toFixed(2),
+        prazo_meses: prazoMeses,
+        taxa_anual: taxaAnual.toFixed(2),
+        indexador
+    };
+
+    if (ATIVOS_SIMULADOR_RENDA_VARIAVEL.has(tipoAtivo) && dyAnual > 0) {
+        payload.dividend_yield_anual = dyAnual.toFixed(2);
+    }
+
+    if (btn) btn.disabled = true;
+
+    try {
+        let resultado;
+        try {
+            resultado = await api.post("/calculos-financeiros/simulador", payload);
+        } catch {
+            resultado = calcularSimulacaoLocalFallback(payload);
+        }
+        exibirResultadoSimulador(resultado);
+        if (exibirNotificacao) {
+            mostrarToast(`Simulação de ${tipoAtivo} (${prazoMeses} meses) atualizada!`);
+        }
+    } catch (error) {
+        definirMensagem("#sim-message", error.message, "error");
+    } finally {
+        if (btn) btn.disabled = false;
+    }
+}
+
+function inicializarSimuladorInvestimentos() {
+    const form = document.querySelector("#investment-simulator-form");
+    if (!form) return;
+
+    const selectAtivo = document.querySelector("#sim-tipo-ativo");
+    const selectIndexador = document.querySelector("#sim-indexador");
+    const btnAbrirSimulador = document.querySelector("#open-simulator-btn");
+    const secaoSimulador = document.querySelector("#investment-simulator-section");
+
+    btnAbrirSimulador?.addEventListener("click", () => {
+        secaoSimulador?.scrollIntoView({ behavior: "smooth", block: "start" });
+        document.querySelector("#sim-valor-inicial")?.focus({ preventScroll: true });
+    });
+
+    selectAtivo?.addEventListener("change", () => {
+        atualizarCamposContextuaisSimulador();
+        executarSimulacaoInvestimento(false);
+    });
+
+    selectIndexador?.addEventListener("change", () => {
+        atualizarCamposContextuaisSimulador();
+        executarSimulacaoInvestimento(false);
+    });
+
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        await executarSimulacaoInvestimento(true);
+    });
+
+    atualizarCamposContextuaisSimulador();
+    executarSimulacaoInvestimento(false);
 }

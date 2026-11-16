@@ -176,7 +176,10 @@ def _normalizar_tipo_investimento(valor: str | None) -> str | None:
         "cdb": "CDB",
         "lci / lca": "LCI / LCA",
         "lci/lca": "LCI / LCA",
+        "lci": "LCI / LCA",
+        "lca": "LCI / LCA",
         "tesouro direto": "Tesouro Direto",
+        "tesouro": "Tesouro Direto",
         "fundos de investimento": "Fundos de Investimento",
         "fundos": "Fundos de Investimento",
         "acao": "Ação",
@@ -1189,3 +1192,144 @@ class AlertaResponse(BaseModel):
     categoria: Optional[str] = None
     data_referencia: Optional[date] = None
     valor: Optional[Decimal] = None
+
+
+# =========================================================
+# SIMULADOR DE INVESTIMENTOS (JUROS COMPOSTOS E TRIBUTAÇÃO)
+# =========================================================
+
+IndexadorSimulacaoInput = Literal[
+    "Pré-fixado",
+    "CDI",
+    "IPCA",
+]
+
+
+def _normalizar_indexador(valor: str | None) -> str | None:
+    if not valor or not isinstance(valor, str):
+        return valor
+    limpo = valor.strip().casefold()
+    mapa = {
+        "pre-fixado": "Pré-fixado",
+        "pré-fixado": "Pré-fixado",
+        "pre_fixado": "Pré-fixado",
+        "prefixado": "Pré-fixado",
+        "pre": "Pré-fixado",
+        "cdi": "CDI",
+        "pos-fixado": "CDI",
+        "pós-fixado": "CDI",
+        "ipca": "IPCA",
+        "ipca+": "IPCA",
+        "inflacao": "IPCA",
+        "inflação": "IPCA",
+    }
+    return mapa.get(limpo, valor.strip())
+
+
+class SimulacaoInvestimentoRequest(InputModel):
+    tipo_ativo: TipoInvestimentoInput
+    valor_inicial: Decimal = Field(
+        default=Decimal("0.00"),
+        ge=0,
+        max_digits=14,
+        decimal_places=2,
+        allow_inf_nan=False,
+    )
+    aporte_mensal: Decimal = Field(
+        default=Decimal("0.00"),
+        ge=0,
+        max_digits=14,
+        decimal_places=2,
+        allow_inf_nan=False,
+    )
+    prazo_meses: int = Field(ge=1, le=1200)
+    taxa_anual: Decimal = Field(
+        ge=0,
+        le=1000,
+        max_digits=10,
+        decimal_places=4,
+        allow_inf_nan=False,
+    )
+    indexador: IndexadorSimulacaoInput = "Pré-fixado"
+    percentual_cdi: Optional[Decimal] = Field(
+        default=None,
+        ge=0,
+        le=1000,
+        max_digits=10,
+        decimal_places=4,
+        allow_inf_nan=False,
+    )
+    taxa_cdi_anual: Optional[Decimal] = Field(
+        default=None,
+        ge=0,
+        le=100,
+        max_digits=10,
+        decimal_places=4,
+        allow_inf_nan=False,
+    )
+    inflacao_ipca_anual: Optional[Decimal] = Field(
+        default=None,
+        ge=0,
+        le=100,
+        max_digits=10,
+        decimal_places=4,
+        allow_inf_nan=False,
+    )
+    dividend_yield_anual: Optional[Decimal] = Field(
+        default=None,
+        ge=0,
+        le=100,
+        max_digits=10,
+        decimal_places=4,
+        allow_inf_nan=False,
+    )
+
+    @field_validator("tipo_ativo", mode="before")
+    @classmethod
+    def normalizar_ativo(cls, valor: str | None) -> str | None:
+        return _normalizar_tipo_investimento(valor)
+
+    @field_validator("indexador", mode="before")
+    @classmethod
+    def normalizar_indexador(cls, valor: str | None) -> str | None:
+        return _normalizar_indexador(valor)
+
+    @model_validator(mode="after")
+    def validar_valores_simulacao(self):
+        if self.valor_inicial == Decimal("0.00") and self.aporte_mensal == Decimal("0.00"):
+            raise ValueError(
+                "Informe um valor inicial ou um aporte mensal maior que zero para simular."
+            )
+        return self
+
+
+class PontoEvolucaoSimulacao(BaseModel):
+    mes: int
+    total_investido: Decimal
+    total_acumulado: Decimal
+    total_liquido: Decimal
+    rendimento_acumulado: Decimal
+
+
+class SimulacaoInvestimentoResponse(BaseModel):
+    tipo_ativo: str
+    indexador: str
+    valor_inicial: Decimal
+    aporte_mensal: Decimal
+    prazo_meses: int
+    taxa_anual_informada: Decimal
+    taxa_efetiva_anual: Decimal
+    taxa_mensal: float
+    taxa_mensal_equivalente: float
+    taxa_mensal_percentual: Decimal
+    valor_total_investido: Decimal
+    total_investido: Decimal
+    valor_total_bruto: Decimal
+    total_acumulado: Decimal
+    rendimento_bruto: Decimal
+    aliquota_ir: Decimal
+    isento_ir: bool
+    imposto_descontado: Decimal
+    rendimento_liquido: Decimal
+    valor_liquido_projetado: Decimal
+    evolucao_mensal: list[PontoEvolucaoSimulacao]

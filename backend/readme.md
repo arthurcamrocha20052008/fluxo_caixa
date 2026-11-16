@@ -34,7 +34,7 @@ Módulo central de regras de negócio, criptografia, persistência relacional e 
 | [`rotasdeapi/`](rotasdeapi/) | Controladores REST modulares (`usuario.py`, `conta_bancaria.py`, `fluxo_dinheiro.py`, `calculo_financeiro.py`, `meta_financeira.py`, `orcamentos_alertas.py`). |
 | [`servicos/`](servicos/) | Serviços auxiliares da aplicação, incluindo envio de e-mails transacionais via SMTP ([`servicos/email.py`](servicos/email.py)) e validação de ID Token Google OAuth 2.0 ([`servicos/google_oauth.py`](servicos/google_oauth.py)). |
 | [`seguranca/`](seguranca/) | Hashing de senhas com `pwdlib` (Argon2id) e rotinas criptográficas defensivas. |
-| [`tests/`](tests/) | Suíte completa com **110 testes automatizados** passando em SQLite em memória isolado e fixtures especializadas. |
+| [`tests/`](tests/) | Suíte completa com **140 testes automatizados** passando em SQLite em memória isolado e fixtures especializadas. |
 
 ---
 

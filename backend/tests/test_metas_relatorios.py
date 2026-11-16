@@ -972,3 +972,210 @@ def test_resumo_periodo_customizado_e_exportacao_csv(
     csv_b = client.get("/fluxo-dinheiro/exportar-csv", headers=token_b)
     assert csv_b.status_code == 200
     assert "Salário parcial" not in csv_b.text
+
+
+def test_simulador_investimentos_precisao_taxas_equivalentes_e_juros_compostos(
+    client: TestClient,
+) -> None:
+    from financeiro import converter_taxa_anual_para_mensal
+
+    # 1. Conversão exata de taxa anual (12% a.a.) para taxa mensal equivalente: (1 + 0.12)^(1/12) - 1
+    i_mensal_esperada = (1.0 + 0.12) ** (1.0 / 12.0) - 1.0
+    assert abs(converter_taxa_anual_para_mensal(12.0) - i_mensal_esperada) < 1e-12
+
+    # 2. Simulação Pré-fixada sem aportes (C = 1000, A = 0, t = 12 meses, 12% a.a.):
+    # Como (1 + i_mensal)^12 == 1.12, o Valor Total Bruto em 12 meses deve ser exatamente R$ 1.120,00!
+    resp_sem_aportes = client.post(
+        "/calculos-financeiros/simulador",
+        json={
+            "tipo_ativo": "CDB",
+            "valor_inicial": "1000.00",
+            "aporte_mensal": "0.00",
+            "prazo_meses": 12,
+            "taxa_anual": "12.00",
+            "indexador": "Pré-fixado",
+        },
+    )
+    assert resp_sem_aportes.status_code == 200, resp_sem_aportes.text
+    dados_12m = resp_sem_aportes.json()
+    assert Decimal(dados_12m["valor_total_investido"]) == Decimal("1000.00")
+    assert Decimal(dados_12m["valor_total_bruto"]) == Decimal("1120.00")
+    assert Decimal(dados_12m["rendimento_bruto"]) == Decimal("120.00")
+    # Em 12 meses (181 a 360 dias), a alíquota regressiva do CDB é 20% -> IR = 24,00 e líquido = 1096,00
+    assert Decimal(dados_12m["aliquota_ir"]) == Decimal("20.00")
+    assert Decimal(dados_12m["imposto_descontado"]) == Decimal("24.00")
+    assert Decimal(dados_12m["valor_liquido_projetado"]) == Decimal("1096.00")
+    assert len(dados_12m["evolucao_mensal"]) == 13  # Mês 0 até Mês 12
+
+    # 3. Simulação com Aportes Mensais: M = C * (1 + i)^t + A * (((1 + i)^t - 1) / i)
+    c = 2000.0
+    a = 500.0
+    t = 24
+    fator = (1.0 + i_mensal_esperada) ** t
+    bruto_esperado = Decimal(
+        str(c * fator + a * ((fator - 1.0) / i_mensal_esperada))
+    ).quantize(Decimal("0.01"))
+
+    resp_com_aportes = client.post(
+        "/calculos-financeiros/simulador",
+        json={
+            "tipo_ativo": "Tesouro Direto",
+            "valor_inicial": "2000.00",
+            "aporte_mensal": "500.00",
+            "prazo_meses": 24,
+            "taxa_anual": "12.00",
+            "indexador": "Pré-fixado",
+        },
+    )
+    assert resp_com_aportes.status_code == 200, resp_com_aportes.text
+    dados_24m = resp_com_aportes.json()
+    assert Decimal(dados_24m["valor_total_investido"]) == Decimal("14000.00")
+    assert Decimal(dados_24m["valor_total_bruto"]) == bruto_esperado
+    assert Decimal(dados_24m["aliquota_ir"]) == Decimal("17.50")
+
+
+@pytest.mark.parametrize(
+    ("prazo_meses", "aliquota_esperada"),
+    [
+        (6, Decimal("22.50")),
+        (12, Decimal("20.00")),
+        (24, Decimal("17.50")),
+        (36, Decimal("15.00")),
+    ],
+)
+def test_simulador_tabela_regressiva_ir_cdb_e_tesouro(
+    client: TestClient,
+    prazo_meses: int,
+    aliquota_esperada: Decimal,
+) -> None:
+    resp = client.post(
+        "/calculos-financeiros/simulador",
+        json={
+            "tipo_ativo": "CDB",
+            "valor_inicial": "5000.00",
+            "aporte_mensal": "200.00",
+            "prazo_meses": prazo_meses,
+            "taxa_anual": "11.50",
+            "indexador": "Pré-fixado",
+        },
+    )
+    assert resp.status_code == 200, resp.text
+    corpo = resp.json()
+    assert corpo["isento_ir"] is False
+    assert Decimal(corpo["aliquota_ir"]) == aliquota_esperada
+    assert Decimal(corpo["imposto_descontado"]) > Decimal("0.00")
+    assert (
+        Decimal(corpo["valor_total_bruto"]) - Decimal(corpo["imposto_descontado"])
+        == Decimal(corpo["valor_liquido_projetado"])
+    )
+
+
+@pytest.mark.parametrize("ativo_isento", ["LCI / LCA", "Poupança"])
+def test_simulador_isencao_total_ir_lci_lca_e_poupanca(
+    client: TestClient,
+    ativo_isento: str,
+) -> None:
+    resp = client.post(
+        "/calculos-financeiros/simulador",
+        json={
+            "tipo_ativo": ativo_isento,
+            "valor_inicial": "3000.00",
+            "aporte_mensal": "300.00",
+            "prazo_meses": 18,
+            "taxa_anual": "10.00",
+            "indexador": "Pré-fixado",
+        },
+    )
+    assert resp.status_code == 200, resp.text
+    corpo = resp.json()
+    assert corpo["isento_ir"] is True
+    assert Decimal(corpo["aliquota_ir"]) == Decimal("0.00")
+    assert Decimal(corpo["imposto_descontado"]) == Decimal("0.00")
+    assert Decimal(corpo["valor_liquido_projetado"]) == Decimal(corpo["valor_total_bruto"])
+
+
+def test_simulador_indexadores_cdi_ipca_e_renda_variavel_fiis(
+    client: TestClient,
+) -> None:
+    # 1. Pós-fixado CDI (110% do CDI sobre base de 10.65% a.a. = 11.715% -> 11.72% a.a.)
+    r_cdi = client.post(
+        "/calculos-financeiros/simulador",
+        json={
+            "tipo_ativo": "CDB",
+            "valor_inicial": "1000.00",
+            "aporte_mensal": "100.00",
+            "prazo_meses": 12,
+            "taxa_anual": "110.00",
+            "indexador": "CDI",
+        },
+    )
+    assert r_cdi.status_code == 200, r_cdi.text
+    assert Decimal(r_cdi.json()["taxa_efetiva_anual"]) == Decimal("11.72")
+
+    # 2. IPCA+ (soma inflação projetada 4.50% à taxa real 6.00% = 10.50% a.a.)
+    r_ipca = client.post(
+        "/calculos-financeiros/simulador",
+        json={
+            "tipo_ativo": "Tesouro Direto",
+            "valor_inicial": "1000.00",
+            "aporte_mensal": "100.00",
+            "prazo_meses": 24,
+            "taxa_anual": "6.00",
+            "indexador": "IPCA",
+        },
+    )
+    assert r_ipca.status_code == 200, r_ipca.text
+    assert Decimal(r_ipca.json()["taxa_efetiva_anual"]) == Decimal("10.50")
+
+    # 3. FIIs com Ganho de Capital (6% a.a.) + Reinvestimento de Dividend Yield (8% a.a.) = 14% a.a.
+    r_fii = client.post(
+        "/calculos-financeiros/simulador",
+        json={
+            "tipo_ativo": "Fundos Imobiliários (FIIs)",
+            "valor_inicial": "5000.00",
+            "aporte_mensal": "500.00",
+            "prazo_meses": 36,
+            "taxa_anual": "6.00",
+            "dividend_yield_anual": "8.00",
+            "indexador": "Pré-fixado",
+        },
+    )
+    assert r_fii.status_code == 200, r_fii.text
+    dados_fii = r_fii.json()
+    assert Decimal(dados_fii["taxa_efetiva_anual"]) == Decimal("14.00")
+    assert Decimal(dados_fii["valor_total_bruto"]) > Decimal(dados_fii["valor_total_investido"])
+
+
+def test_interface_frontend_simulador_de_investimentos() -> None:
+    from pathlib import Path
+
+    raiz_frontend = Path(__file__).resolve().parents[2] / "frontend"
+    html_index = (raiz_frontend / "index.html").read_text(encoding="utf-8")
+    js_dashboard = (raiz_frontend / "js" / "dashboard.js").read_text(encoding="utf-8")
+    css_style = (raiz_frontend / "css" / "style.css").read_text(encoding="utf-8")
+
+    for seletor in (
+        'id="investment-simulator-section"',
+        'id="investment-simulator-form"',
+        'id="sim-tipo-ativo"',
+        'id="sim-indexador"',
+        'id="sim-valor-inicial"',
+        'id="sim-aporte-mensal"',
+        'id="sim-prazo"',
+        'id="sim-taxa-anual"',
+        'id="sim-submit-btn"',
+        'id="sim-result-gross"',
+        'id="sim-result-tax"',
+        'id="sim-result-net"',
+        'id="chart-investment-simulator"',
+        "Valor Total Bruto",
+        "Imposto Descontado",
+        "Valor Líquido Projetado",
+    ):
+        assert seletor in html_index
+
+    assert "/calculos-financeiros/simulador" in js_dashboard
+    assert "Total Investido" in js_dashboard
+    assert "Total Acumulado" in js_dashboard
+    assert ".btn-simular" in css_style
+    assert "#059669" in css_style.lower()

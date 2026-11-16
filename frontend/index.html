@@ -693,6 +693,13 @@
                                 <span class="period-label">Investimentos</span>
                                 <button
                                     type="button"
+                                    class="button-secondary btn-abrir-simulador"
+                                    id="open-simulator-btn"
+                                >
+                                    <svg class="button-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>Simulador de investimentos
+                                </button>
+                                <button
+                                    type="button"
                                     class="button-primary btn-abrir-novo-investimento"
                                     id="new-investment-btn"
                                 >
@@ -739,6 +746,197 @@
                         </div>
                     </article>
                 </section>
+
+                <!-- Simulador de Investimentos (Juros Compostos, Indexadores e Tributação) -->
+                <article class="panel simulator-panel panel-top-spaced" id="investment-simulator-section" aria-labelledby="simulator-section-title">
+                    <div class="panel-header">
+                        <div>
+                            <h3 id="simulator-section-title">Simulador de Investimentos</h3>
+                            <p>Projete a evolução do seu patrimônio no tempo com aportes mensais, juros compostos e cálculo automático de Imposto de Renda.</p>
+                        </div>
+                        <span class="period-label">Juros Compostos</span>
+                    </div>
+
+                    <form class="simulator-form" id="investment-simulator-form" novalidate>
+                        <div class="simulator-form-grid">
+                            <div class="form-field">
+                                <label for="sim-tipo-ativo">Tipo de investimento</label>
+                                <select id="sim-tipo-ativo" name="tipo_ativo" required>
+                                    <option value="CDB">CDB</option>
+                                    <option value="LCI / LCA">LCI / LCA (Isento de IR)</option>
+                                    <option value="Tesouro Direto">Tesouro Direto</option>
+                                    <option value="Poupança">Poupança (Isenta de IR)</option>
+                                    <option value="Fundos de Investimento">Fundos de Investimento</option>
+                                    <option value="Fundos Imobiliários (FIIs)">Fundos Imobiliários (FIIs)</option>
+                                    <option value="Ação">Ação</option>
+                                    <option value="Fundos de Índice (ETFs)">Fundos de Índice (ETFs)</option>
+                                    <option value="Subscrição">Subscrição</option>
+                                </select>
+                            </div>
+
+                            <div class="form-field">
+                                <label for="sim-indexador">Indexador</label>
+                                <select id="sim-indexador" name="indexador" required>
+                                    <option value="Pré-fixado">Pré-fixado (% a.a.)</option>
+                                    <option value="CDI">Pós-fixado (CDI)</option>
+                                    <option value="IPCA">IPCA+ (Inflação + Taxa Real)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-field">
+                                <label for="sim-valor-inicial">Valor inicial (R$)</label>
+                                <input
+                                    id="sim-valor-inicial"
+                                    name="valor_inicial"
+                                    type="number"
+                                    min="0"
+                                    max="9999999999.99"
+                                    step="0.01"
+                                    inputmode="decimal"
+                                    value="1000.00"
+                                    placeholder="Ex: 1.000,00"
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-field">
+                                <label for="sim-aporte-mensal">Aporte mensal (R$)</label>
+                                <input
+                                    id="sim-aporte-mensal"
+                                    name="aporte_mensal"
+                                    type="number"
+                                    min="0"
+                                    max="9999999999.99"
+                                    step="0.01"
+                                    inputmode="decimal"
+                                    value="500.00"
+                                    placeholder="Ex: 500,00"
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-field">
+                                <label for="sim-prazo">Prazo da aplicação</label>
+                                <div class="simulator-period-group">
+                                    <input
+                                        id="sim-prazo"
+                                        name="prazo_valor"
+                                        type="number"
+                                        min="1"
+                                        max="1200"
+                                        step="1"
+                                        inputmode="numeric"
+                                        value="24"
+                                        placeholder="Ex: 24"
+                                        required
+                                    >
+                                    <select id="sim-unidade-prazo" name="unidade_prazo" aria-label="Unidade do prazo">
+                                        <option value="meses">Meses</option>
+                                        <option value="anos">Anos</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-field">
+                                <label for="sim-taxa-anual" id="sim-taxa-label">Rentabilidade anual esperada (%)</label>
+                                <input
+                                    id="sim-taxa-anual"
+                                    name="taxa_anual"
+                                    type="number"
+                                    min="0"
+                                    max="1000"
+                                    step="0.01"
+                                    inputmode="decimal"
+                                    value="12.00"
+                                    placeholder="Ex: 12,00"
+                                    required
+                                >
+                                <span class="field-help" id="sim-taxa-help">Convertida automaticamente para taxa mensal equivalente.</span>
+                            </div>
+
+                            <div class="form-field" id="sim-dy-field" hidden>
+                                <label for="sim-dy-anual">Dividend Yield anual reinvestido (%)</label>
+                                <input
+                                    id="sim-dy-anual"
+                                    name="dividend_yield_anual"
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    step="0.01"
+                                    inputmode="decimal"
+                                    value="8.00"
+                                    placeholder="Ex: 8,00"
+                                >
+                                <span class="field-help">Dividendos mensais isentos reinvestidos no patrimônio.</span>
+                            </div>
+
+                            <div class="simulator-actions">
+                                <button type="submit" class="button-primary btn-simular" id="sim-submit-btn">
+                                    Simular
+                                </button>
+                            </div>
+                        </div>
+                        <p class="form-message" id="sim-message" role="status" aria-live="polite"></p>
+                    </form>
+
+                    <!-- Cards de Destaque do Resultado da Simulação -->
+                    <div class="summary-grid simulator-results-grid" id="sim-results-cards" aria-live="polite">
+                        <article class="summary-card simulator-result-card">
+                            <div class="card-heading">
+                                <span>Total Investido</span>
+                                <span class="card-icon balance-icon" aria-hidden="true">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                                </span>
+                            </div>
+                            <p class="card-value" id="sim-result-invested">R$ 13.000,00</p>
+                            <p class="card-description" id="sim-result-invested-desc">Capital inicial + aportes do próprio bolso</p>
+                        </article>
+
+                        <article class="summary-card simulator-result-card">
+                            <div class="card-heading">
+                                <span>Valor Total Bruto</span>
+                                <span class="card-icon result-icon" aria-hidden="true">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                                </span>
+                            </div>
+                            <p class="card-value value-positive" id="sim-result-gross">—</p>
+                            <p class="card-description" id="sim-result-rate-desc">Taxa mensal equivalente: —</p>
+                        </article>
+
+                        <article class="summary-card simulator-result-card">
+                            <div class="card-heading">
+                                <span>Imposto Descontado</span>
+                                <span class="card-icon expense-icon" aria-hidden="true">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                                </span>
+                            </div>
+                            <p class="card-value" id="sim-result-tax">—</p>
+                            <p class="card-description" id="sim-result-tax-desc">Tabela regressiva de IR no resgate</p>
+                        </article>
+
+                        <article class="summary-card simulator-result-card simulator-highlight-net">
+                            <div class="card-heading">
+                                <span>Valor Líquido Projetado</span>
+                                <span class="card-icon income-icon" aria-hidden="true">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                </span>
+                            </div>
+                            <p class="card-value value-positive" id="sim-result-net">—</p>
+                            <p class="card-description" id="sim-result-net-desc">Rendimento líquido: —</p>
+                        </article>
+                    </div>
+
+                    <!-- Gráfico de Linhas: Total Investido vs Total Acumulado (Chart.js) -->
+                    <div class="chart-box simulator-chart-box">
+                        <div class="simulator-chart-header">
+                            <h4 class="chart-subtitle">Evolução Patrimonial Projetada (Total Investido vs Total Acumulado)</h4>
+                            <span class="period-label" id="sim-chart-badge">Projeção Mês a Mês</span>
+                        </div>
+                        <div class="chart-canvas-wrapper chart-canvas-tall" id="simulator-chart-container">
+                            <canvas id="chart-investment-simulator" aria-label="Gráfico de linha de evolução patrimonial do simulador de investimentos" role="img"></canvas>
+                        </div>
+                    </div>
+                </article>
 
                 <article class="panel transactions-panel panel-top-spaced">
                     <div class="panel-header">

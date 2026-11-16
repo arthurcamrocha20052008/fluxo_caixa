@@ -7,7 +7,7 @@ Esta pasta reúne a bateria completa de testes automatizados do **Sistema de Flu
 ## 📊 Resumo da Cobertura
 
 - **Runner:** `pytest`
-- **Testes Padrão (Isolados em Memória):** **110 testes passando (100%)**
+- **Testes Padrão (Isolados em Memória):** **140 testes passando (100%)**
 - **Testes de Concorrência Real (MySQL Opt-in):** **5 testes adicionais** (`@pytest.mark.mysql`)
 - **Banco de Teste Padrão:** SQLite em memória (`sqlite:///:memory:`) recriado de forma limpa a cada teste via fixtures em [`conftest.py`](conftest.py).
 
@@ -17,6 +17,7 @@ Esta pasta reúne a bateria completa de testes automatizados do **Sistema de Flu
 
 | Arquivo | Domínio Coberto | Cenários Validados |
 |---|---|---|
+| [`test_autenticacao_multicanal_oauth.py`](test_autenticacao_multicanal_oauth.py) | Autenticação Multi-Canal & Google OAuth | Normalização E.164, bloqueio de domínios com erro de digitação, contingência OTP E-mail/SMS, troca de canal, Resend/Brevo/SMTP/Twilio e fluxo Google OAuth/Assistido. |
 | [`test_cors.py`](test_cors.py) | Segurança CORS & Ambiente | Preflight `OPTIONS`, origens locais e da Vercel, bloqueio de origens externas, obrigatoriedade de `APP_ENV` e proibição de `*` em produção. |
 | [`test_cadastro_usuario.py`](test_cadastro_usuario.py) | Cadastro & Validações | Cálculo dos dígitos verificadores do CPF, rejeição de dígitos Unicode maliciosos, complexidade de senha, perfil e integridade da SPA. |
 | [`test_seguranca_oauth_lgpd.py`](test_seguranca_oauth_lgpd.py) | OAuth 2.0, OTP Anti-Bot, LGPD & Design System | Google OAuth 2.0, verificação OTP de 6 dígitos, aceite LGPD, Design System WCAG AA (Claro/Escuro), hierarquia de botões, autofill e Sidebar unificada. |
@@ -24,7 +25,7 @@ Esta pasta reúne a bateria completa de testes automatizados do **Sistema de Flu
 | [`test_financeiro.py`](test_financeiro.py) | Motor Contábil | Precisão `Decimal`, proibição de saldo negativo em poupança/investimento, transferências atômicas entre contas e ajustes assinados. |
 | [`test_fluxo_integracao.py`](test_fluxo_integracao.py) | Fluxo E2E Completo | Jornada completa: cadastro → login JWT → criação de contas → lançamentos → transferências → exclusão reversa. |
 | [`test_limites_requisicoes.py`](test_limites_requisicoes.py) | Rate Limiting | Bloqueio `HTTP 429` após 5 tentativas inválidas de login, limite de criação de contas por IP e expiração da janela de bloqueio. |
-| [`test_metas_relatorios.py`](test_metas_relatorios.py) | Metas & Balanços | Consolidação de períodos (`diario`, `semanal`, `mensal`, `anual`) e conclusão automática de metas financeiras. |
+| [`test_metas_relatorios.py`](test_metas_relatorios.py) | Metas, Balanços & Simulador | Consolidação de períodos (`diario`, `semanal`, `mensal`, `anual`), conclusão automática de metas e precisão matemática do Simulador de Investimentos (`POST /calculos-financeiros/simulador`). |
 | [`test_orcamentos_alertas.py`](test_orcamentos_alertas.py) | Orçamentos & Alertas | Tetos mensais por categoria, cálculo percentual consumido, avisos de vencimento em 7 dias e preferências de alertas. |
 | [`test_mysql_concorrencia.py`](test_mysql_concorrencia.py) | Concorrência MySQL | Testes multi-thread com `SELECT ... FOR UPDATE` para validar ausência de *race conditions* em saques e transferências simultâneas. |
 
@@ -32,7 +33,7 @@ Esta pasta reúne a bateria completa de testes automatizados do **Sistema de Flu
 
 ## 🚀 Como Executar
 
-### 1. Suíte Padrão Completa (110 testes)
+### 1. Suíte Padrão Completa (140 testes)
 Na raiz do projeto:
 
 ```powershell
