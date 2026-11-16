@@ -454,6 +454,8 @@ def test_estrutura_frontend_landing_lgpd_oauth_e_temas() -> None:
     assert "cadastro.html" in inicio_html
     assert "login.html" in inicio_html
     assert "LGPD" in inicio_html
+    assert 'id="hero-cta-register"' in login_html
+    assert "body.google-auth-page" in style_css
 
     # Conformidade Legal (Termos de Serviço + Política de Privacidade LGPD)
     assert "Lei nº 13.709/2018" in legal_js

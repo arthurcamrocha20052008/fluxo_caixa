@@ -228,7 +228,8 @@ function aplicarTemaPreferido(tema) {
     const paginaSempreEscura = Boolean(
         document.body &&
             (document.body.classList.contains("login-page") ||
-                document.body.classList.contains("landing-page"))
+                document.body.classList.contains("landing-page") ||
+                document.body.classList.contains("google-auth-page"))
     );
 
     if (paginaSempreEscura) {

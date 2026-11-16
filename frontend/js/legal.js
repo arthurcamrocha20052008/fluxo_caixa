@@ -28,10 +28,10 @@ const CONTEUDO_TERMOS_SERVICO = `
         ativos. As decisões financeiras continuam sendo 100% suas.
     </p>
 
-    <h3>3. Cadastro simples, sem CPF</h3>
+    <h3>3. Cadastro seguro, validação de titularidade e prevenção anti-bot</h3>
     <ul>
-        <li>Para criar sua conta, pedimos apenas o essencial: <strong>Nome, E-mail, Telefone e Senha</strong> (ou login direto com sua conta Google).</li>
-        <li><strong>Nós não coletamos seu CPF.</strong> Acreditamos em minimização real de dados: você não precisa expor documentos civis para organizar seu fluxo de caixa.</li>
+        <li>Para criar sua conta, solicitamos <strong>Nome, CPF, E-mail, Telefone e Senha</strong> (ou login direto com sua conta Google).</li>
+        <li><strong>Proteção Criptográfica de CPF e Telefone:</strong> Seus dados sensíveis são validados matematicamente (Módulo 11) e imediatamente cifrados em repouso com <strong>Fernet (AES-128-CBC + HMAC-SHA256)</strong> e índice cego (<em>Blind Index</em>), nunca sendo expostos em texto aberto.</li>
         <li>Para garantir que a conta pertence a você e bloquear automações (<em>bots</em>), enviamos um código numérico de 6 dígitos (OTP) para o seu <strong>E-mail</strong> ou <strong>SMS</strong> com validade de 15 minutos.</li>
     </ul>
 
@@ -69,25 +69,25 @@ const CONTEUDO_TERMOS_SERVICO = `
 const CONTEUDO_POLITICA_PRIVACIDADE = `
 <article class="legal-prose">
     <h1>Política de Privacidade e Proteção de Dados (LGPD)</h1>
-    <span class="legal-meta">Lei nº 13.709/2018 (LGPD) · Arquitetura Zero-CPF · Atualização: Novembro de 2026</span>
+    <span class="legal-meta">Lei nº 13.709/2018 (LGPD) · Criptografia Fernet AES-128 · Atualização: Novembro de 2026</span>
 
     <p>
         Privacidade não é um documento burocrático — é arquitetura de software. Esta página explica exatamente quais
-        dados coletamos, como os criptografamos e por que decidimos <strong>não pedir seu CPF</strong> nem dados bancários sensíveis.
+        dados coletamos, como os criptografamos em repouso e como garantimos seus direitos sob a <strong>LGPD</strong>.
     </p>
 
     <h3>1. Resumo direto: o que coletamos (e o que nunca pedimos)</h3>
     <ul>
-        <li><strong>Nome, E-mail e Telefone:</strong> usados exclusivamente para identificar seu perfil, enviar códigos de verificação de 6 dígitos (2FA/OTP via E-mail ou SMS) e recuperar seu acesso.</li>
+        <li><strong>Nome, CPF, E-mail e Telefone:</strong> usados exclusivamente para identificar a titularidade da sua conta, enviar códigos de verificação de 6 dígitos (2FA/OTP anti-bot via E-mail ou SMS) e recuperar seu acesso com segurança.</li>
         <li><strong>Senha ou Login Google:</strong> sua senha é processada com hash <strong>Argon2id</strong> irreversível. No login com Google, recebemos apenas seu nome, e-mail verificado e identificador único OAuth (<code>sub</code>).</li>
         <li><strong>Lançamentos Financeiros:</strong> saldos, receitas, despesas, metas e investimentos que você registra para gerar seus próprios gráficos e relatórios.</li>
-        <li><strong>O que NUNCA coletamos:</strong> não pedimos <strong>CPF</strong>, senhas de banco, números de cartão de crédito, chaves Pix nem acesso direto ao seu internet banking.</li>
+        <li><strong>O que NUNCA coletamos:</strong> não pedimos senhas de banco, números de cartão de crédito, chaves Pix nem acesso direto ao seu internet banking.</li>
     </ul>
 
     <h3>2. Como protegemos seus dados na prática</h3>
     <p>Aplicamos criptografia de ponta e isolamento multiusuário em todas as camadas:</p>
     <ul>
-        <li><strong>Telefone Criptografado em Repouso:</strong> seu número de telefone nunca fica salvo em texto aberto no banco. Ele é criptografado com <strong>Fernet (AES-128-CBC + HMAC-SHA256)</strong> antes de ser gravado.</li>
+        <li><strong>CPF e Telefone Criptografados em Repouso:</strong> seu CPF e seu número de telefone nunca ficam salvos em texto aberto no banco. Eles são criptografados com <strong>Fernet (AES-128-CBC + HMAC-SHA256)</strong> e verificados por índice cego (<em>Blind Index HMAC-SHA256</em>) antes de serem gravados.</li>
         <li><strong>Senhas Blindadas com Argon2id:</strong> usamos o algoritmo padrão-ouro da criptografia moderna contra ataques de GPU/força bruta.</li>
         <li><strong>Tokens OTP Temporários:</strong> cada código de 6 dígitos enviado por E-mail ou SMS expira em 15 minutos, tem apenas seu hash SHA-256 salvo durante a validação e é descartado logo após o uso.</li>
         <li><strong>Isolamento Total por Usuário:</strong> todas as consultas ao banco exigem seu token JWT assinado e filtram estritamente pelo seu ID de usuário. Ninguém mais vê seus números.</li>
@@ -238,6 +238,7 @@ function vincularValidacaoCpfTempoReal(inputCpf, elementoFeedback = null, elemen
         }
 
         const resultado = validarCpfMatematico(inputCpf.value);
+        const sequenciaRepetidaParcial = digitos.length >= 4 && /^(\d)\1+$/.test(digitos);
         if (resultado.valido) {
             inputCpf.classList.add("input-valid");
             inputCpf.classList.remove("input-invalid");
@@ -248,7 +249,7 @@ function vincularValidacaoCpfTempoReal(inputCpf, elementoFeedback = null, elemen
                 elementoFeedback.textContent = "✓ CPF matematicamente válido.";
                 elementoFeedback.className = "field-feedback is-valid";
             }
-        } else if (!resultado.incompleto || exibirIncompleto) {
+        } else if (!resultado.incompleto || exibirIncompleto || sequenciaRepetidaParcial) {
             inputCpf.classList.add("input-invalid");
             inputCpf.classList.remove("input-valid");
             inputCpf.setAttribute("aria-invalid", "true");

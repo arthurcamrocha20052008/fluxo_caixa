@@ -89,7 +89,8 @@ body.light-theme {
 html[data-theme="dark"],
 body.dark-theme,
 body.login-page,
-body.landing-page {
+body.landing-page,
+body.google-auth-page {
     color-scheme: dark;
 
     --color-primary: #10b981;
@@ -101,10 +102,10 @@ body.landing-page {
     --color-blue-dark: #1d4ed8;
     --color-blue-light: rgba(59, 130, 246, 0.16);
 
-    /* Superfícies do Tema Escuro */
+    /* Superfícies do Tema Escuro (#0F172A, #1E293B, #334155) */
     --bg-main: #0b0f19;
     --bg-app: #0f172a;
-    --bg-card: #111827;
+    --bg-card: #1e293b;
     --bg-surface: #1e293b;
     --bg-input: #0f172a;
     --border-subtle: #334155;
@@ -112,8 +113,8 @@ body.landing-page {
 
     --color-background: #0f172a;
     --color-surface: #1e293b;
-    --color-surface-subtle: #111827;
-    --color-surface-hover: #273549;
+    --color-surface-subtle: #0f172a;
+    --color-surface-hover: #334155;
     --color-input-bg: #0f172a;
     --color-input-focus-bg: #1e293b;
     --color-input-border: #334155;
@@ -5353,13 +5354,161 @@ td.align-right,
     }
 }
 
-@media (max-width: 640px) {
-    .simulator-form-grid,
-    .simulator-period-group {
-        grid-template-columns: 1fr;
+    @media (max-width: 640px) {
+        .simulator-form-grid,
+        .simulator-period-group {
+            grid-template-columns: 1fr;
+        }
+
+        .btn-simular {
+            width: 100%;
+        }
     }
 
-    .btn-simular {
-        width: 100%;
-    }
+/* =========================================================
+   9. BLINDAGEM DO TEMA ESCURO CONTRA FUNDOS BRANCOS E CTA HERO
+========================================================= */
+
+.hero-cta-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.hero-cta-btn {
+    min-height: 46px;
+    padding: 0 22px;
+    border-radius: 10px;
+    background: #059669 !important;
+    border: 1px solid #10b981 !important;
+    color: #ffffff !important;
+    font-weight: 700;
+    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.28);
+}
+
+.hero-cta-btn:hover:not(:disabled) {
+    background: #047857 !important;
+    border-color: #34d399 !important;
+    color: #ffffff !important;
+}
+
+.hero-secondary-btn {
+    min-height: 46px;
+    padding: 0 18px;
+    border-radius: 10px;
+    background: #1e293b !important;
+    border: 1px solid #334155 !important;
+    color: #f1f5f9 !important;
+    font-weight: 600;
+}
+
+.hero-secondary-btn:hover:not(:disabled) {
+    background: #334155 !important;
+    border-color: #475569 !important;
+    color: #ffffff !important;
+}
+
+html[data-theme="dark"] .btn-google-oauth,
+body.dark-theme .btn-google-oauth,
+body.login-page .btn-google-oauth,
+body.landing-page .btn-google-oauth,
+body.google-auth-page .btn-google-oauth {
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #f8fafc;
+    border-radius: 10px;
+}
+
+html[data-theme="dark"] .btn-google-oauth .btn-google-label,
+body.dark-theme .btn-google-oauth .btn-google-label,
+body.login-page .btn-google-oauth .btn-google-label,
+body.landing-page .btn-google-oauth .btn-google-label,
+body.google-auth-page .btn-google-oauth .btn-google-label {
+    color: #f8fafc;
+}
+
+html[data-theme="dark"] .btn-google-oauth .btn-google-arrow,
+body.dark-theme .btn-google-oauth .btn-google-arrow,
+body.login-page .btn-google-oauth .btn-google-arrow,
+body.landing-page .btn-google-oauth .btn-google-arrow,
+body.google-auth-page .btn-google-oauth .btn-google-arrow {
+    color: #94a3b8;
+}
+
+html[data-theme="dark"] .btn-google-oauth:hover:not(:disabled),
+body.dark-theme .btn-google-oauth:hover:not(:disabled),
+body.login-page .btn-google-oauth:hover:not(:disabled),
+body.landing-page .btn-google-oauth:hover:not(:disabled),
+body.google-auth-page .btn-google-oauth:hover:not(:disabled) {
+    background: #334155;
+    border-color: #10b981;
+    color: #ffffff;
+}
+
+html[data-theme="dark"] .btn-google-oauth:hover:not(:disabled) .btn-google-arrow,
+body.dark-theme .btn-google-oauth:hover:not(:disabled) .btn-google-arrow,
+body.login-page .btn-google-oauth:hover:not(:disabled) .btn-google-arrow,
+body.landing-page .btn-google-oauth:hover:not(:disabled) .btn-google-arrow,
+body.google-auth-page .btn-google-oauth:hover:not(:disabled) .btn-google-arrow {
+    color: #ffffff;
+}
+
+html[data-theme="dark"] .form-dialog,
+body.dark-theme .form-dialog,
+body.login-page .form-dialog,
+body.landing-page .form-dialog,
+body.google-auth-page .form-dialog,
+html[data-theme="dark"] .summary-card,
+body.dark-theme .summary-card,
+html[data-theme="dark"] .panel,
+body.dark-theme .panel,
+html[data-theme="dark"] .alerts-panel,
+body.dark-theme .alerts-panel,
+html[data-theme="dark"] .budget-panel,
+body.dark-theme .budget-panel,
+html[data-theme="dark"] .category-card,
+body.dark-theme .category-card,
+html[data-theme="dark"] .custom-select-menu,
+body.dark-theme .custom-select-menu,
+body.login-page .custom-select-menu {
+    background-color: #1e293b;
+    border-color: #334155;
+    color: #f1f5f9;
+}
+
+html[data-theme="dark"] .goal-card,
+body.dark-theme .goal-card,
+html[data-theme="dark"] .budget-card,
+body.dark-theme .budget-card,
+html[data-theme="dark"] .account-summary,
+body.dark-theme .account-summary,
+html[data-theme="dark"] .chart-box,
+body.dark-theme .chart-box,
+html[data-theme="dark"] .filter-bar,
+body.dark-theme .filter-bar,
+html[data-theme="dark"] .simulator-form,
+body.dark-theme .simulator-form,
+html[data-theme="dark"] .simulator-chart-box,
+body.dark-theme .simulator-chart-box,
+html[data-theme="dark"] .custom-select-trigger,
+body.dark-theme .custom-select-trigger,
+body.login-page .custom-select-trigger {
+    background-color: #0f172a;
+    border-color: #334155;
+    color: #f1f5f9;
+}
+
+html[data-theme="dark"] select,
+html[data-theme="dark"] select option,
+body.dark-theme select,
+body.dark-theme select option,
+body.login-page select,
+body.login-page select option,
+body.google-auth-page select,
+body.google-auth-page select option {
+    background-color: #0f172a;
+    border-color: #334155;
+    color: #f1f5f9;
 }

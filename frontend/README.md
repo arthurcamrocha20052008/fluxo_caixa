@@ -19,7 +19,7 @@ flowchart LR
         T["termos.html / privacidade.html"]
     end
 
-    subgraph Controllers ["Módulos JS (?v=21)"]
+    subgraph Controllers ["Módulos JS (?v=22)"]
         LG["legal.js (LGPD Humana, Google OAuth, Telefone & Senha)"]
         LJ["login.js (Login, OAuth & OTP E-mail/SMS)"]
         CJ["cadastro.js (Cadastro Zero-CPF & Modal OTP)"]
@@ -54,7 +54,7 @@ frontend/
 ├── assets/
 │   └── logo.svg             # Logotipo vetorial corporativo oficial (#10B981 -> #047857)
 ├── css/
-│   └── style.css            # Design System WCAG AA, física Emil Kowalski (spring/ease-out) e tabular-nums (?v=21)
+│   └── style.css            # Design System WCAG AA, física Emil Kowalski (spring/ease-out) e tabular-nums (?v=22)
 ├── js/
 │   ├── api.js               # Cliente Fetch centralizado, gestão JWT, tradução PT-BR de erros, temas e scroll-lock
 │   ├── legal.js             # Termos/LGPD em linguagem humana, Google OAuth 2.0, validação de e-mail, telefone e senha
