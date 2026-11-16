@@ -19,6 +19,11 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 * **Links de Rastreabilidade nos READMEs:** Referência cruzada direta entre o [README Principal](./README.md), [Backend README](./backend/readme.md) e [Frontend README](./frontend/readme.md).
 
 ### 🎨 Corrigido & Polimento Editorial de Interface
+* **Auditoria Corporativa Completa (Tarefas 1 a 4 — WCAG AA & Regras Financeiras):**
+  * **Tarefa 1 (Login Split Screen & Cadastro com Validações Reativas):** Ilustração vetorial de evolução patrimonial no painel esquerdo do Login (`login.html`), validação matemática de CPF em tempo real (`#cpf-error`), checklist visual interativo dos 5 critérios de senha forte (`cadastro.html` / `cadastro.js`), verificação multi-canal OTP (E-mail e SMS), botão oficial Google OAuth e links de Termos de Serviço e LGPD.
+  * **Tarefa 2 (Layout, Filtros, Scroll Lock e Zero Emojis):** Grid das barras de filtros de relatórios e movimentações blindado contra sobreposição (`min-width: 0`), Scroll Lock global em modais (`HTMLDialogElement`), substituição de 100% dos emojis por ícones SVG e alinhamento em grade de 3 colunas nas Configurações (`#view-configuracoes`).
+  * **Tarefa 3 (Módulo de Investimentos e Movimentações):** Suporte unificado ao tipo "Investimento" com todos os ativos (Poupança, CDB, LCI/LCA, Tesouro Direto, Fundos, Ação, ETFs, FIIs e Subscrição), subdivisão de Entradas (Ganhos Fixos/Variáveis) e Saídas (Conta Fixa/Variável com agendamento inteligente por dia do mês) e consolidação automática nos indicadores e relatórios.
+  * **Tarefa 4 (Contraste WCAG AA e Suíte Automatizada Pytest):** Validação de contraste nos temas Claro e Escuro e aprovação integral da suíte de testes (`pytest`) em memória sem sobrescrita acidental do `.env`.
 * **Remoção de Jargões Técnicos ("Segurança, OAuth2, Fernet"):** Substituição de explicações técnicas sobre como o site foi construído na Landing Page (`inicio.html`), Login (`login.html`), Cadastro (`cadastro.html`) e README principal por explicações claras sobre o que o sistema faz na prática (controle de contas, receitas/despesas, metas de gastos por categoria, investimentos, alertas de vencimento e relatórios CSV).
 * **Microcopy de Ações Claras:** Refinamento dos botões de ação e filtros em todo o painel financeiro.
 

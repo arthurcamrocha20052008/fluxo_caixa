@@ -8,7 +8,7 @@ def carregar_configuracao() -> None:
     raiz = Path(__file__).resolve().parent.parent
     arquivo_env_raiz = raiz / ".env"
     if arquivo_env_raiz.is_file():
-        load_dotenv(arquivo_env_raiz, override=True)
+        load_dotenv(arquivo_env_raiz, override=False)
 
     arquivo_env_example = raiz / ".env.example"
     if arquivo_env_example.is_file():

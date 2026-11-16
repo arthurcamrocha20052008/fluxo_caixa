@@ -44,6 +44,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!form) return;
 
     const nameInput = document.querySelector("#register-name");
+    const cpfInput = document.querySelector("#register-cpf");
+    const cpfFeedback = document.querySelector("#cpf-feedback");
+    const cpfError = document.querySelector("#cpf-error");
     const emailInput = document.querySelector("#register-email");
     const emailError = document.querySelector("#email-error");
     const phoneInput = document.querySelector("#register-phone");
@@ -142,6 +145,10 @@ document.addEventListener("DOMContentLoaded", () => {
         radio.addEventListener("change", atualizarInterfaceSeletorCanal);
     });
     atualizarInterfaceSeletorCanal();
+
+    if (typeof vincularValidacaoCpfTempoReal === "function" && cpfInput) {
+        vincularValidacaoCpfTempoReal(cpfInput, cpfFeedback, cpfError);
+    }
 
     if (typeof vincularValidacaoEmailTempoReal === "function") {
         vincularValidacaoEmailTempoReal(emailInput, emailError);
@@ -456,6 +463,31 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        const cpfBruto = (cpfInput?.value || "").trim();
+        const cpfNormalizado = cpfBruto.replace(/\D/g, "");
+        if (cpfBruto) {
+            const validacaoCpf =
+                typeof validarCpfMatematico === "function"
+                    ? validarCpfMatematico(cpfBruto)
+                    : { valido: cpfNormalizado.length === 11, mensagem: "CPF inválido. Verifique os números digitados." };
+            if (!validacaoCpf.valido) {
+                const msgCpf = validacaoCpf.mensagem || "CPF inválido. Verifique os números digitados.";
+                if (cpfInput) {
+                    cpfInput.classList.add("input-invalid");
+                    cpfInput.classList.remove("input-valid");
+                    cpfInput.setAttribute("aria-invalid", "true");
+                }
+                if (cpfError) {
+                    cpfError.textContent = msgCpf;
+                    cpfError.hidden = false;
+                }
+                message.textContent = msgCpf;
+                message.classList.add("error");
+                cpfInput?.focus();
+                return;
+            }
+        }
+
         // 1. Validação estrita de formato e domínio de e-mail
         const email = emailInput.value.trim();
         const erroDominio =
@@ -562,7 +594,7 @@ document.addEventListener("DOMContentLoaded", () => {
         message.classList.add("info");
 
         try {
-            const respostaCadastro = await api.post("/usuarios/", {
+            const payloadCadastro = {
                 nome_completo: nome,
                 email,
                 telefone: telefoneTexto,
@@ -570,7 +602,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 canal_verificacao: canalEscolhido,
                 aceite_termos: true,
                 aceite_privacidade: true
-            });
+            };
+            if (cpfNormalizado) {
+                payloadCadastro.cpf = cpfNormalizado;
+            }
+            const respostaCadastro = await api.post("/usuarios/", payloadCadastro);
 
             message.textContent = porSms
                 ? "Conta criada! Digite o código de 6 dígitos enviado por SMS."

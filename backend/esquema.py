@@ -323,7 +323,7 @@ class UsuarioCreate(InputModel):
     def validar_consentimento_lgpd(self):
         if not self.aceite_termos or not self.aceite_privacidade:
             raise ValueError(
-                "É obrigatório aceitar os Termos de Uso e a Política de Privacidade (LGPD)."
+                "É obrigatório aceitar os Termos de Serviço e a Política de Privacidade (LGPD)."
             )
         if self.canal_verificacao in ("telefone", "sms", "whatsapp") and not self.telefone:
             raise ValueError(

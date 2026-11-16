@@ -5033,6 +5033,47 @@ td.align-right,
     }
 }
 
+/* Ilustração Vetorial de Evolução Patrimonial no Split Screen do Login */
+.hero-growth-chart-card {
+    margin: 20px 0 22px;
+    padding: 16px 18px 12px;
+    background: rgba(15, 23, 42, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+}
+
+.hero-chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.hero-chart-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.hero-chart-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #34d399;
+    background: rgba(16, 185, 129, 0.14);
+    border: 1px solid rgba(16, 185, 129, 0.28);
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-variant-numeric: tabular-nums;
+}
+
+.hero-growth-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
 /* 7. Guard rail estrito para prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {
     *,

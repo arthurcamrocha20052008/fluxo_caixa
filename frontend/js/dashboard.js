@@ -1557,12 +1557,22 @@ function atualizarContas(contas) {
         .filter((c) => c.tipo_conta === "investimento")
         .reduce((acc, c) => acc + Number(c.valor_conta_atual), 0);
     const totalAportesAtivos = todasMovimentacoesCache
-        .filter((m) => m.categoria === "investimento" && m.tipo === "saida")
+        .filter(
+            (m) =>
+                m.tipo === "investimento" ||
+                (m.categoria === "investimento" && m.tipo === "saida") ||
+                Boolean(m.tipo_investimento)
+        )
         .reduce((acc, m) => acc + Math.abs(Number(m.valor || 0)), 0);
     const totalInvestimentos = totalContasInvestimento + totalAportesAtivos;
-    const totalPoupanca = contas
-        .filter((c) => c.tipo_conta === "poupanca")
-        .reduce((acc, c) => acc + Number(c.valor_conta_atual), 0);
+    const totalAportesPoupanca = todasMovimentacoesCache
+        .filter((m) => m.tipo_investimento === "Poupança")
+        .reduce((acc, m) => acc + Math.abs(Number(m.valor || 0)), 0);
+    const totalPoupanca =
+        contas
+            .filter((c) => c.tipo_conta === "poupanca")
+            .reduce((acc, c) => acc + Number(c.valor_conta_atual), 0) +
+        totalAportesPoupanca;
 
     definirTexto("#investments-total", formatarMoeda(totalInvestimentos));
     definirTexto("#topbar-total-invested", formatarMoeda(totalInvestimentos));
@@ -2295,6 +2305,7 @@ function renderizarGraficoRelatorioConsolidado(resumo) {
         resumo &&
         (Number(resumo.total_entradas) > 0 ||
             Number(resumo.total_saidas) > 0 ||
+            Number(resumo.total_investimentos) > 0 ||
             Number(resumo.saldo_inicial) !== 0 ||
             Number(resumo.saldo_final) !== 0);
 
@@ -2455,7 +2466,7 @@ function calcularResumoLocal(dataInicio, dataFim, contaId = "") {
         if (m.data_movimentacao >= dataInicio) {
             const v = Number(m.valor || 0);
             if (m.tipo === "entrada") variacaoAposInicio += v;
-            else if (m.tipo === "saida") variacaoAposInicio -= v;
+            else if (m.tipo === "saida" || m.tipo === "investimento") variacaoAposInicio -= v;
             else if (m.tipo === "transferencia") {
                 if (m.transferencia_direcao === "destino") variacaoAposInicio += v;
                 else if (m.transferencia_direcao === "origem") variacaoAposInicio -= v;
@@ -2470,6 +2481,7 @@ function calcularResumoLocal(dataInicio, dataFim, contaId = "") {
     let totalEntradas = 0;
     let totalSaidas = 0;
     let totalInvestimentos = 0;
+    let totalAportesInvestimento = 0;
     let totalTransfRecebidas = 0;
     let totalTransfEnviadas = 0;
     let totalAjustes = 0;
@@ -2478,7 +2490,10 @@ function calcularResumoLocal(dataInicio, dataFim, contaId = "") {
         if (m.data_movimentacao >= dataInicio && m.data_movimentacao <= dataFim) {
             const v = Number(m.valor || 0);
             if (m.tipo === "entrada") totalEntradas += v;
-            else if (m.tipo === "saida") {
+            else if (m.tipo === "investimento") {
+                totalInvestimentos += v;
+                totalAportesInvestimento += v;
+            } else if (m.tipo === "saida") {
                 totalSaidas += v;
                 if (m.categoria === "investimento") totalInvestimentos += v;
             } else if (m.tipo === "transferencia") {
@@ -2493,7 +2508,8 @@ function calcularResumoLocal(dataInicio, dataFim, contaId = "") {
     const saldoFinal =
         saldoInicial +
         totalEntradas -
-        totalSaidas +
+        totalSaidas -
+        totalAportesInvestimento +
         totalTransfRecebidas -
         totalTransfEnviadas +
         totalAjustes;

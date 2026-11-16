@@ -316,3 +316,30 @@ if (typeof HTMLDialogElement !== "undefined" && !HTMLDialogElement.prototype.__s
         });
     });
 }
+
+// ====================================================================
+// UTILITÁRIOS COMPARTILHADOS DE VALIDAÇÃO (FALLBACKS PARA LEGAL.JS)
+// ====================================================================
+if (typeof window !== "undefined") {
+    const _delegar = (nome, fallbackFn) => {
+        if (typeof window[nome] !== "function") {
+            window[nome] = (...args) =>
+                window.FluxoLegal && typeof window.FluxoLegal[nome] === "function"
+                    ? window.FluxoLegal[nome](...args)
+                    : fallbackFn(...args);
+        }
+    };
+
+    _delegar("formatarMascaraTelefone", (v) => String(v || ""));
+    _delegar("validarTelefoneBrasileiro", () => ({ valido: true, incompleto: false, e164: "", mensagem: "" }));
+    _delegar("vincularValidacaoTelefoneTempoReal", () => null);
+    _delegar("detectarErroDominioEmail", () => null);
+    _delegar("validarEmailFormato", (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(v || "").trim()));
+    _delegar("vincularValidacaoEmailTempoReal", () => null);
+    _delegar("validarCpfMatematico", () => ({ valido: true, incompleto: false, cpfLimpo: "", mensagem: "" }));
+    _delegar("vincularValidacaoCpfTempoReal", () => null);
+    _delegar("vincularChecklistSenha", () => null);
+    _delegar("obterMensagemErroSenha", () => "");
+    _delegar("mascararEmailCliente", (v) => String(v || ""));
+    _delegar("mascararTelefoneCliente", (v) => String(v || ""));
+}

@@ -41,6 +41,7 @@ from servicos.google_oauth import (
     modo_google_assistido_habilitado,
     obter_google_client_id,
     usuario_possui_cadastro_incompleto_oauth,
+    usuario_possui_cpf_titular,
     verificar_access_token_google,
     verificar_token_google,
 )
@@ -302,7 +303,7 @@ def criar_usuario(
     if usuario_existente:
         raise HTTPException(
             status_code=400,
-            detail="Este endereço de e-mail já está cadastrado."
+            detail="E-mail ou CPF já cadastrado."
         )
 
     # =========================================================
@@ -799,6 +800,19 @@ def autenticar_com_google_assistido(
 
     novo_usuario = False
     if usuario is not None:
+        if usuario_possui_cpf_titular(usuario) and usuario.cpf_indice != oauth_indice:
+            if not dados.cpf:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Esta conta já está protegida por CPF. Informe o CPF do titular para confirmar o vínculo com o Google.",
+                )
+            cpf_hash_informado = indice_cpf(dados.cpf)
+            if not hmac.compare_digest(usuario.cpf_indice, cpf_hash_informado):
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="O CPF informado não corresponde ao titular desta conta.",
+                )
+
         alterou = False
         if not usuario.email_verificado:
             usuario.email_verificado = True
