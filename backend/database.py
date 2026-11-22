@@ -246,6 +246,75 @@ def garantir_esquema_banco() -> None:
                     conn.execute(
                         text("ALTER TABLE fluxo_dinheiro ADD COLUMN tipo_investimento VARCHAR(60) NULL")
                     )
+                if "efetivada" not in cols_f:
+                    if dialect_name == "postgresql":
+                        conn.execute(
+                            text(
+                                "ALTER TABLE fluxo_dinheiro ADD COLUMN efetivada BOOLEAN NOT NULL DEFAULT TRUE"
+                            )
+                        )
+                    else:
+                        conn.execute(
+                            text(
+                                "ALTER TABLE fluxo_dinheiro ADD COLUMN efetivada BOOLEAN NOT NULL DEFAULT 1"
+                            )
+                        )
+                try:
+                    from datetime import date as dt_date
+                    from decimal import Decimal as dt_Decimal
+                    hoje_str = dt_date.today().isoformat()
+                    cond_efetivada = "efetivada IS TRUE" if dialect_name == "postgresql" else "(efetivada = 1 OR efetivada IS TRUE)"
+                    movs_futuros = conn.execute(
+                        text(
+                            f"""
+                            SELECT id, conta_bancaria_id, tipo, valor, transferencia_direcao
+                            FROM fluxo_dinheiro
+                            WHERE data_movimentacao > :hoje AND {cond_efetivada}
+                            """
+                        ),
+                        {"hoje": hoje_str},
+                    ).fetchall()
+
+                    for r in movs_futuros:
+                        m_id = r[0]
+                        c_id = r[1]
+                        tp = r[2]
+                        vl = dt_Decimal(str(r[3]))
+                        tr_dir = r[4]
+
+                        if tp in ("saida", "investimento") or tr_dir == "origem":
+                            conn.execute(
+                                text(
+                                    "UPDATE contas_bancarias SET valor_conta_atual = valor_conta_atual + :vl WHERE id = :c_id"
+                                ),
+                                {"vl": vl, "c_id": c_id},
+                            )
+                        elif tp == "entrada" or tr_dir == "destino":
+                            conn.execute(
+                                text(
+                                    "UPDATE contas_bancarias SET valor_conta_atual = valor_conta_atual - :vl WHERE id = :c_id"
+                                ),
+                                {"vl": vl, "c_id": c_id},
+                            )
+                        elif tp == "ajuste":
+                            conn.execute(
+                                text(
+                                    "UPDATE contas_bancarias SET valor_conta_atual = valor_conta_atual - :vl WHERE id = :c_id"
+                                ),
+                                {"vl": vl, "c_id": c_id},
+                            )
+
+                        conn.execute(
+                            text(
+                                "UPDATE fluxo_dinheiro SET efetivada = :f WHERE id = :m_id"
+                            ),
+                            {
+                                "f": False if dialect_name == "postgresql" else 0,
+                                "m_id": m_id,
+                            },
+                        )
+                except Exception:
+                    pass
                 if dialect_name == "postgresql":
                     # PostgreSQL não suporta MODIFY COLUMN ENUM diretamente via ALTER TABLE simples.
                     # A coluna tipo já deve estar correta via modelos/Alembic.

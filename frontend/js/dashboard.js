@@ -606,6 +606,7 @@ function popularSelectOpcoesMovimentacao(selectEl, listaOpcoes) {
 function atualizarAjudaDiaRepeticao() {
     const input = document.querySelector("#movement-repeat-day");
     const help = document.querySelector("#movement-repeat-day-help");
+    const inputData = document.querySelector("#movement-date");
     const tipo = document.querySelector("#movement-type")?.value || "entrada";
     if (!input || !help) return;
     const dia = parseInt(input.value, 10);
@@ -622,13 +623,22 @@ function atualizarAjudaDiaRepeticao() {
     ];
     if (dia < diaAtual) {
         const prox = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1);
+        const ultimoDiaProx = new Date(prox.getFullYear(), prox.getMonth() + 1, 0).getDate();
+        const diaEfetivo = Math.min(dia, ultimoDiaProx);
+        const dataCalculada = new Date(prox.getFullYear(), prox.getMonth(), diaEfetivo);
+        if (inputData) inputData.value = formatarIso(dataCalculada);
         const mesNome = meses[prox.getMonth()];
         const ano = prox.getFullYear();
-        help.textContent = `Como o dia ${dia} já passou no mês atual (hoje é dia ${diaAtual}), a recorrência iniciará no próximo mês em ${dia} de ${mesNome} de ${ano}.`;
-    } else {
+        help.textContent = `Como o dia ${dia} já passou neste mês (hoje é dia ${diaAtual}), a cobrança iniciará no próximo mês em ${diaEfetivo} de ${mesNome} de ${ano}. O saldo da sua conta será mantido intacto hoje e a saída só será debitada na data exata!`;
+    } else if (dia > diaAtual) {
+        const dataCalculada = new Date(hoje.getFullYear(), hoje.getMonth(), dia);
+        if (inputData) inputData.value = formatarIso(dataCalculada);
         const mesNome = meses[hoje.getMonth()];
         const ano = hoje.getFullYear();
-        help.textContent = `Como o dia ${dia} é hoje ou posterior (hoje é dia ${diaAtual}), a movimentação será processada neste mês em ${dia} de ${mesNome} de ${ano} e repetirá nos meses seguintes.`;
+        help.textContent = `Como o dia ${dia} é no futuro (hoje é dia ${diaAtual}), a movimentação será agendada para ${dia} de ${mesNome} de ${ano}. O seu saldo atual não diminuirá agora e a saída ficará visível em seus Alertas.`;
+    } else {
+        if (inputData) inputData.value = formatarIso(hoje);
+        help.textContent = `Como o dia ${dia} é exatamente hoje, a movimentação será processada no seu saldo agora e repetirá mensalmente nos próximos meses.`;
     }
 }
 
@@ -1017,6 +1027,11 @@ async function salvarMovimentacao(event) {
         observacao: observacao || null
     };
 
+    const dataInformada = (dados.get("data_movimentacao") || "").toString().trim();
+    if (dataInformada) {
+        payload.data_movimentacao = dataInformada;
+    }
+
     if (ehInvestimento) {
         payload.tipo_investimento = (dados.get("tipo_investimento") || "").toString().trim();
         payload.categoria = "investimento";
@@ -1060,8 +1075,19 @@ async function salvarMovimentacao(event) {
         });
         atualizarCamposTipoMovimentacao();
         document.querySelector("#movement-dialog").close();
-        mostrarToast(ehInvestimento ? `Investimento em ${payload.tipo_investimento} registrado com sucesso!` : "Movimentação registrada com sucesso!");
+        const hojeIso = formatarIso(new Date());
+        const ehDataFutura = Boolean(payload.data_movimentacao && payload.data_movimentacao > hojeIso);
+        if (ehDataFutura) {
+            if (payload.tipo === "entrada") {
+                mostrarToast("Ganho agendado para o futuro registrado! O saldo atual da conta foi mantido e o ganho previsto colocado em seus Alertas.");
+            } else {
+                mostrarToast("Gasto agendado para o futuro registrado! O saldo atual da conta foi mantido e o futuro pagamento colocado em seus Alertas.");
+            }
+        } else {
+            mostrarToast(ehInvestimento ? `Investimento em ${payload.tipo_investimento} registrado com sucesso!` : "Movimentação registrada com sucesso!");
+        }
         await carregarDashboard();
+        await atualizarAlertas();
     } catch (error) {
         definirMensagem("#movement-message", error.message, "error");
         mostrarToast(error.message, "error");
@@ -1755,6 +1781,16 @@ function renderizarTabelaCompacta(seletorTabela, lista) {
                 `badge-type badge-${movimento.tipo}`
             )
         );
+        const ehAgendada = movimento.efetivada === false || movimento.data_movimentacao > formatarIso(new Date());
+        if (ehAgendada) {
+            celulaTipo.append(
+                criarElemento(
+                    "span",
+                    "Agendada",
+                    "badge-type badge-agendada"
+                )
+            );
+        }
 
         const classeValor =
             movimento.tipo === "entrada"
@@ -1803,6 +1839,16 @@ function renderizarTabelaDetalhada(seletorTabela, lista) {
                 `badge-type badge-${movimento.tipo}`
             )
         );
+        const ehAgendada = movimento.efetivada === false || movimento.data_movimentacao > formatarIso(new Date());
+        if (ehAgendada) {
+            celulaTipo.append(
+                criarElemento(
+                    "span",
+                    "Agendada",
+                    "badge-type badge-agendada"
+                )
+            );
+        }
 
         const classeValor =
             movimento.tipo === "entrada"
@@ -3402,7 +3448,12 @@ async function atualizarAlertas() {
         const fragmento = document.createDocumentFragment();
         dados.forEach((a) => {
             const card = document.createElement("li");
-            const tipoClasse = a.chave.startsWith("orcamento:") ? "type-orcamento" : "type-vencimento";
+            let tipoClasse = "type-vencimento";
+            if (a.tipo === "orcamento" || a.chave.startsWith("orcamento:")) {
+                tipoClasse = "type-orcamento";
+            } else if (a.tipo === "entrada" || a.chave.startsWith("movimento-entrada:")) {
+                tipoClasse = "type-entrada";
+            }
             card.className = `alert-card ${tipoClasse} ${a.lido ? "is-read" : ""}`.trim();
 
             const body = document.createElement("div");
@@ -3414,6 +3465,8 @@ async function atualizarAlertas() {
 
             if (tipoClasse === "type-orcamento") {
                 iconWrap.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+            } else if (tipoClasse === "type-entrada") {
+                iconWrap.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>`;
             } else {
                 iconWrap.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`;
             }

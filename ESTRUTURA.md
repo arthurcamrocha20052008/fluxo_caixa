@@ -1,8 +1,8 @@
 # 🏛️ Arquitetura e Estrutura do Projeto
 
 > 🌐 **Aplicação Web (Vercel):** [https://fluxo-caixa-coral-two.vercel.app](https://fluxo-caixa-coral-two.vercel.app)  
-> ⚡ **API REST (Render):** [https://fluxo-caixa-cuq1.onrender.com](https://fluxo-caixa-cuq1.onrender.com)  
-> 📖 **Swagger OpenAPI:** [https://fluxo-caixa-cuq1.onrender.com/docs](https://fluxo-caixa-cuq1.onrender.com/docs)  
+> ⚡ **API REST (Railway):** [https://fluxocaixa-production-95d3afc7.up.railway.app](https://fluxocaixa-production-95d3afc7.up.railway.app)  
+> 📖 **Swagger OpenAPI:** [https://fluxocaixa-production-95d3afc7.up.railway.app/docs](https://fluxocaixa-production-95d3afc7.up.railway.app/docs)  
 > 🗄️ **Banco de Dados:** [Supabase PostgreSQL](https://supabase.com) (Pooler AWS porta 6543) / Compatível com MySQL 8
 
 Este documento detalha o mapa arquitetural completo do **Sistema de Fluxo de Caixa**, explicando a topologia de nuvem, os 4 motores de engenharia de design e código, a separação de responsabilidades em camadas (SoC), a arquitetura de privacidade **Zero-CPF** sob a LGPD e o fluxo de dados ponta a ponta.
@@ -26,7 +26,7 @@ flowchart TD
         UI --> API_CLIENT
     end
 
-    subgraph ServerLayer ["⚡ Camada de Aplicação (Backend REST - Render / FastAPI)"]
+    subgraph ServerLayer ["⚡ Camada de Aplicação (Backend REST - Railway / FastAPI)"]
         CORS["Middleware CORS Estrito (Allowlist de Produção)"]
         RATE["Rate Limiter Anti-Brute Force (IP + E-mail)"]
         AUTH["OAuth2 Password Bearer + Google OAuth 2.0 + JWT (HS256)"]

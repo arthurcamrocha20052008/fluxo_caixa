@@ -67,5 +67,5 @@ Como a cifragem Fernet utiliza um vetor de inicialização (IV) aleatório a cad
 
 ## 🔒 5. Transporte TLS/SSL em Nuvem
 
-- **Frontend ↔ Backend:** Tráfego 100% HTTPS entre Vercel e Render, com política CORS restrita ao domínio de produção.
+- **Frontend ↔ Backend:** Tráfego 100% HTTPS entre Vercel e Railway, com política CORS restrita ao domínio de produção.
 - **Backend ↔ Banco de Dados:** Conexão MySQL com o TiDB Cloud Serverless protegida por TLS usando `ssl.create_default_context()` nativo no SQLAlchemy.

@@ -297,17 +297,17 @@ def obter_alertas(
                     "lido": chave in lidos,
                 })
 
-    # 2. Alertas de vencimentos nos próximos 7 dias
+    # 2. Alertas de pagamentos futuros, vencimentos e receitas programadas (próximos 60 dias ou pendentes)
     if prefs["vencimento"]:
-        limite_futuro = hoje + timedelta(days=7)
+        limite_futuro = hoje + timedelta(days=60)
         movimentos = (
             db.query(FluxoDinheiro)
             .join(ContaBancaria, ContaBancaria.id == FluxoDinheiro.conta_bancaria_id)
             .filter(
                 ContaBancaria.usuario_id == usuario.id,
-                FluxoDinheiro.tipo.in_(["saida", "investimento"]),
+                FluxoDinheiro.tipo.in_(["saida", "investimento", "entrada"]),
                 FluxoDinheiro.transferencia_id.is_(None),
-                FluxoDinheiro.data_movimentacao >= hoje,
+                (FluxoDinheiro.data_movimentacao >= hoje) | (FluxoDinheiro.efetivada.is_(False)),
                 FluxoDinheiro.data_movimentacao <= limite_futuro,
             )
             .order_by(FluxoDinheiro.data_movimentacao, FluxoDinheiro.id)
@@ -315,19 +315,80 @@ def obter_alertas(
         )
         for m in movimentos:
             chave = f"movimento:{m.id}:{m.data_movimentacao.isoformat()}"
-            alertas.append({
-                "chave": chave,
-                "tipo": "vencimento",
-                "titulo": "Saída Próxima (7 dias)",
-                "categoria": m.categoria,
-                "data_referencia": m.data_movimentacao,
-                "valor": m.valor,
-                "mensagem": (
-                    f"Saída cadastrada para {m.data_movimentacao.strftime('%d/%m/%Y')}: "
-                    f"{m.descricao} (R$ {m.valor})."
-                ),
-                "lido": chave in lidos,
-            })
+            dias_restantes = (m.data_movimentacao - hoje).days
+            eh_entrada = (m.tipo == "entrada")
+            rotulo_cat = ROTULOS_CATEGORIAS_PT.get(m.categoria, m.categoria)
+
+            if eh_entrada:
+                if dias_restantes < 0:
+                    rotulo_tempo = "pendente de efetivação"
+                    titulo = "Ganho Pendente"
+                elif dias_restantes == 0:
+                    rotulo_tempo = "previsto para hoje"
+                    titulo = "Ganho Previsto Hoje"
+                elif dias_restantes == 1:
+                    rotulo_tempo = "previsto para amanhã"
+                    titulo = "Ganho Previsto Amanhã"
+                else:
+                    rotulo_tempo = f"previsto em {dias_restantes} dias"
+                    titulo = "Ganho Previsto Agendado"
+
+                detalhe_credito = (
+                    " · Saldo mantido original (será creditado na data exata)"
+                    if m.data_movimentacao > hoje
+                    else ""
+                )
+
+                mensagem = (
+                    f"Ganho previsto para {m.data_movimentacao.strftime('%d/%m/%Y')}: "
+                    f"{rotulo_cat} ({m.descricao}) — R$ {Decimal(str(m.valor)):.2f}{detalhe_credito}."
+                )
+
+                alertas.append({
+                    "chave": chave,
+                    "tipo": "entrada",
+                    "titulo": titulo,
+                    "categoria": m.categoria,
+                    "data_referencia": m.data_movimentacao,
+                    "valor": m.valor,
+                    "mensagem": mensagem,
+                    "lido": chave in lidos,
+                })
+            else:
+                if dias_restantes < 0:
+                    rotulo_tempo = "pendente de efetivação"
+                    titulo = "Pagamento Pendente"
+                elif dias_restantes == 0:
+                    rotulo_tempo = "vence hoje"
+                    titulo = "Vencimento Hoje"
+                elif dias_restantes == 1:
+                    rotulo_tempo = "vence amanhã"
+                    titulo = "Vencimento Amanhã"
+                else:
+                    rotulo_tempo = f"vence em {dias_restantes} dias"
+                    titulo = "Pagamento Futuro Agendado"
+
+                detalhe_debito = (
+                    " · Saldo mantido original (será debitado na data exata)"
+                    if m.data_movimentacao > hoje
+                    else ""
+                )
+
+                mensagem = (
+                    f"Gasto previsto para {m.data_movimentacao.strftime('%d/%m/%Y')}: "
+                    f"{rotulo_cat} ({m.descricao}) — R$ {Decimal(str(m.valor)):.2f}{detalhe_debito}."
+                )
+
+                alertas.append({
+                    "chave": chave,
+                    "tipo": "vencimento",
+                    "titulo": titulo,
+                    "categoria": m.categoria,
+                    "data_referencia": m.data_movimentacao,
+                    "valor": m.valor,
+                    "mensagem": mensagem,
+                    "lido": chave in lidos,
+                })
 
     return alertas
 

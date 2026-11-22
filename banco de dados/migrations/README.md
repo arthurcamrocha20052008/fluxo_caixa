@@ -1,6 +1,6 @@
 # 🔄 Migrações de Banco de Dados — Alembic
 
-Esta pasta contém a infraestrutura oficial de migrações do **Alembic**, responsável por versionar e evoluir o esquema do banco de dados do **Sistema de Fluxo de Caixa** tanto localmente quanto no deploy automatizado em nuvem (Render + Supabase PostgreSQL / TiDB Cloud).
+Esta pasta contém a infraestrutura oficial de migrações do **Alembic**, responsável por versionar e evoluir o esquema do banco de dados do **Sistema de Fluxo de Caixa** tanto localmente quanto no deploy automatizado em nuvem (Railway + Supabase PostgreSQL / TiDB Cloud).
 
 ---
 
@@ -43,9 +43,9 @@ python -m alembic -c "banco de dados/alembic.ini" revision -m "descricao_da_muda
 
 ---
 
-## ☁️ Execução Automática no Render (CI/CD)
+## ☁️ Execução Automática no Railway (CI/CD)
 
-No ambiente de produção do **Render**, o **Start Command** executa automaticamente `upgrade head` antes de iniciar o servidor Uvicorn:
+No ambiente de produção do **Railway**, o comando de inicialização executa automaticamente `upgrade head` antes de subir o servidor ASGI (orquestrado via [`main.py`](../../main.py) / [`railway.json`](../../railway.json)):
 
 ```bash
 python -m alembic -c "banco de dados/alembic.ini" upgrade head && uvicorn main:app --host 0.0.0.0 --port $PORT

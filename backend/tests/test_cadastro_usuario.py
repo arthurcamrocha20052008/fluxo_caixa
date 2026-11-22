@@ -566,9 +566,13 @@ def test_movimentacao_simplificada_conta_fixa_variavel_e_transferencia_externa(
     assert r_externa.json()["dia_repeticao"] is None
     assert "Transferência para fora" in r_externa.json()["descricao"]
 
-    # Saldo esperado: 1000 + 500 + 300 - 200 - 150 = 1450.00
+    # Lancamentos futuros (entrada dia 5 e saida dia 10) ficam agendados para o proximo mes
+    # e nao alteram o saldo atual imediatamente.
+    # Saldo esperado hoje: 1000 + 300 (freela hoje) - 150 (transferencia externa hoje) = 1150.00
     r_saldo = client.get(f"/contas-bancarias/{conta_1['id']}", headers=headers)
-    assert Decimal(r_saldo.json()["valor_conta_atual"]) == Decimal("1450.00")
+    assert Decimal(r_saldo.json()["valor_conta_atual"]) == Decimal("1150.00")
+    assert r_entrada.json()["efetivada"] is False
+    assert r_saida_fixa.json()["efetivada"] is False
 
 
 def test_criar_conta_bancaria_envia_email_confirmacao(

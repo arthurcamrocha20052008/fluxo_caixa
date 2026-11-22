@@ -562,7 +562,12 @@ def test_movimentacao_com_data_futura_afeta_saldo_e_relatorio_futuro_e_rejeitado
         headers=token,
     )
     assert saldo.status_code == 200
-    assert saldo.json()["valor_conta_atual"] == "1010.00"
+    # Lancamento futuro mantem saldo original
+    assert saldo.json()["valor_conta_atual"] == "1000.00"
+
+    alertas = client.get("/alertas", headers=token)
+    assert alertas.status_code == 200
+    assert any(a.get("tipo") == "entrada" and "futuro" in a["mensagem"].lower() for a in alertas.json())
 
     relatorio_futuro = client.post(
         "/calculos-financeiros/",

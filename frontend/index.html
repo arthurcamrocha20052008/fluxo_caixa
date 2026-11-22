@@ -18,11 +18,11 @@
         }
     </script>
 
-    <link rel="stylesheet" href="css/style.css?v=23">
+    <link rel="stylesheet" href="css/style.css?v=24">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>
-    <script src="js/api.js?v=23" defer></script>
-    <script src="js/legal.js?v=23" defer></script>
-    <script src="js/dashboard.js?v=23" defer></script>
+    <script src="js/api.js?v=24" defer></script>
+    <script src="js/legal.js?v=24" defer></script>
+    <script src="js/dashboard.js?v=24" defer></script>
 </head>
 
 <body>
@@ -1518,6 +1518,17 @@
                             placeholder="Ex.: 5 (de 1 a 31)"
                         >
                         <span class="field-help" id="movement-repeat-day-help">Dia do mês (1 a 31) em que este valor fixo se repetirá automaticamente.</span>
+                    </div>
+
+                    <div class="form-field" id="movement-date-field">
+                        <label for="movement-date">Data da movimentação / cobrança</label>
+                        <input
+                            id="movement-date"
+                            name="data_movimentacao"
+                            type="date"
+                            required
+                        >
+                        <span class="field-help" id="movement-date-help">Para cobranças ou saídas com data futura, o saldo atual permanecerá inalterado até o dia programado.</span>
                     </div>
 
                     <div class="form-field" id="movement-category-field">

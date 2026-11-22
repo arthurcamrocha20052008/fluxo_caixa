@@ -12,6 +12,7 @@ from esquema import (
 )
 from autenticacao import obter_usuario_logado
 from servicos.email import enviar_email_confirmacao_nova_conta_bancaria
+from rotasdeapi.fluxo_dinheiro import sincronizar_movimentacoes_efetivadas
 
 
 router = APIRouter(
@@ -73,6 +74,7 @@ def listar_contas(
     usuario_logado: Usuario = Depends(obter_usuario_logado)
 ):
 
+    sincronizar_movimentacoes_efetivadas(db, usuario_logado.id)
     return (
         db.query(ContaBancaria)
         .filter(
@@ -99,6 +101,7 @@ def buscar_conta(
     usuario_logado: Usuario = Depends(obter_usuario_logado)
 ):
 
+    sincronizar_movimentacoes_efetivadas(db, usuario_logado.id)
     conta = (
         db.query(ContaBancaria)
         .filter(
@@ -132,6 +135,7 @@ def atualizar_conta(
     usuario_logado: Usuario = Depends(obter_usuario_logado)
 ):
 
+    sincronizar_movimentacoes_efetivadas(db, usuario_logado.id)
     conta = (
         db.query(ContaBancaria)
         .filter(
@@ -183,6 +187,7 @@ def excluir_conta(
     usuario_logado: Usuario = Depends(obter_usuario_logado)
 ):
 
+    sincronizar_movimentacoes_efetivadas(db, usuario_logado.id)
     conta = (
         db.query(ContaBancaria)
         .filter(

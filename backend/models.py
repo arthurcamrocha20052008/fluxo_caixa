@@ -302,6 +302,12 @@ class FluxoDinheiro(Base):
         nullable=True,
     )
 
+    efetivada = Column(
+        Boolean,
+        nullable=False,
+        default=True,
+    )
+
 
 # =========================================================
 # 4. CÁLCULOS FINANCEIROS

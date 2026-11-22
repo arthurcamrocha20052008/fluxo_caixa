@@ -37,7 +37,7 @@
 - [Stack Tecnológica Completa](#-stack-tecnológica-completa)
 - [Estrutura do Projeto](#-estrutura-do-projeto)
 - [Execução Local Passo a Passo](#-execução-local-passo-a-passo)
-- [Deploy em Nuvem (Vercel + Render + Supabase)](#-deploy-em-nuvem-vercel--render--supabase)
+- [Deploy em Nuvem (Vercel + Railway + Supabase)](#-deploy-em-nuvem-vercel--railway--supabase)
 - [Catálogo de Endpoints da API](#-catálogo-de-endpoints-da-api)
 - [Segurança & Privacidade LGPD (Zero-CPF)](#-segurança--privacidade-lgpd-zero-cpf)
 - [Qualidade & Testes Automatizados](#-qualidade--testes-automatizados)
@@ -60,7 +60,7 @@
 | **Healthcheck Operacional** | Railway Monitor | [https://fluxocaixa-production-95d3afc7.up.railway.app/health](https://fluxocaixa-production-95d3afc7.up.railway.app/health) | Diagnóstico de integridade da API |
 
 > [!NOTE]
-> No plano gratuito do Render, caso a API permaneça inativa por alguns minutos, a primeira requisição (*cold start*) pode levar cerca de **30 a 50 segundos** para despertar o contêiner. Após a inicialização, todas as respostas são servidas em milissegundos.
+> A API está hospedada no Railway com monitoramento contínuo via healthcheck (`/health`). Todas as respostas são servidas em milissegundos com alta disponibilidade.
 
 ---
 
@@ -107,7 +107,7 @@ flowchart TD
         SPA --> HTTP_CLIENT
     end
 
-    subgraph ApplicationLayer ["⚡ Camada de Aplicação (Render / FastAPI)"]
+    subgraph ApplicationLayer ["⚡ Camada de Aplicação (Railway / FastAPI)"]
         CORS_FILTER["Middleware CORS Estrito por Ambiente"]
         RATE_LIMIT["Rate Limiter Anti-Brute Force (IP + E-mail)"]
         SECURITY_MOD["OAuth2 JWT + Hashing Argon2id (pwdlib)"]
@@ -168,7 +168,7 @@ flowchart TD
 |---|---|---|
 | **Frontend Hosting** | Vercel Edge Network | Hospedagem estática global com HTTPS, cache otimizado e rewrites via `vercel.json` |
 | **Frontend Core** | HTML5, CSS3, JavaScript (ES6+), Chart.js | SPA responsiva sem frameworks pesados, gráficos analíticos e exportação CSV |
-| **Backend Hosting** | Render Web Service | Contêiner Python gerenciado com deploy contínuo integrado ao GitHub |
+| **Backend Hosting** | Railway Cloud | Contêiner gerenciado com deploy contínuo integrado ao GitHub via Nixpacks |
 | **API Framework** | FastAPI + Uvicorn | Framework assíncrono moderno com validação via Pydantic v2 e OpenAPI 3.1 |
 | **ORM & Migrações** | SQLAlchemy 2.x + Alembic | Mapeamento declarativo relacional, transações ACID e 16 revisões versionadas |
 | **Banco em Nuvem** | Supabase PostgreSQL / TiDB Cloud | PostgreSQL 15+ com Pooler PgBouncer porta 6543 e MySQL 8 Serverless com TLS |
@@ -304,23 +304,24 @@ Acesse em seu navegador: [**http://127.0.0.1:5173/login.html**](http://127.0.0.1
 
 ---
 
-## ☁️ Deploy em Nuvem (Vercel + Render + Supabase)
+## ☁️ Deploy em Nuvem (Vercel + Railway + Supabase)
 
 O fluxo de CI/CD está configurado para publicação automática a partir de commits na branch `main`:
 
 ```mermaid
 flowchart LR
     GIT["GitHub (branch main)"] -->|Deploy Automático| VERCEL["Frontend (Vercel)"]
-    GIT -->|Deploy Automático| RENDER["Backend (Render)"]
-    RENDER -->|Pooler AWS 6543| SUPABASE[("Banco de Dados (Supabase PostgreSQL)")]
+    GIT -->|Deploy Automático| RAILWAY["Backend (Railway)"]
+    RAILWAY -->|Pooler AWS 6543| SUPABASE[("Banco de Dados (Supabase PostgreSQL)")]
 ```
 
 1. **Banco de Dados (Supabase PostgreSQL):**
    - Criação das tabelas e índices via migrações Alembic ou script [`scripts/supabase_schema_completo.sql`](scripts/supabase_schema_completo.sql).
    - Conexão configurada pelo connection pooler PgBouncer na porta `6543` com SSL obrigatório.
-2. **Backend (Render Web Service):**
-   - **Build Command:** `pip install -r requirements.txt`
-   - **Start Command:** `python -m alembic -c "banco de dados/alembic.ini" upgrade head && uvicorn main:app --host 0.0.0.0 --port $PORT`
+2. **Backend (Railway Cloud):**
+   - **Builder:** Nixpacks configurado via [`railway.json`](railway.json) e [`nixpacks.toml`](nixpacks.toml).
+   - **Start Command:** `python main.py` (definido em [`Procfile`](Procfile) e [`railway.json`](railway.json)), aplicando as migrações Alembic e iniciando o servidor ASGI Uvicorn.
+   - **Healthcheck:** Rota `/health` com timeout de 120s configurado em [`railway.json`](railway.json).
    - **Environment Variables:** `APP_ENV=production`, `CORS_ORIGINS=https://fluxo-caixa-coral-two.vercel.app`, `DATABASE_URL`, `JWT_SECRET_KEY`, `CPF_ENCRYPTION_KEY`.
    - **Opcionais (autenticação):** `GOOGLE_CLIENT_ID`, `EMAIL_API_KEY` / `EMAIL_FROM` (Resend ou Brevo), `SMTP_SERVER` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASSWORD`, `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` / `TWILIO_FROM_NUMBER`, `SMS_PROVIDER_URL` / `SMS_API_KEY`. Veja o [`.env.example`](.env.example).
 3. **Frontend (Vercel):**

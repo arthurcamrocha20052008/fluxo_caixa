@@ -2622,6 +2622,14 @@ html:not([data-theme="dark"]) body:not(.dark-theme) .category-stat {
     color: #5b21b6;
 }
 
+.badge-agendada {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px dashed #94a3b8;
+    margin-left: 6px;
+    font-size: 10px;
+}
+
 body.dark-theme .badge-entrada {
     background: rgba(16, 185, 129, 0.18);
     color: #34d399;
@@ -2645,6 +2653,12 @@ body.dark-theme .badge-ajuste {
 body.dark-theme .badge-investimento {
     background: rgba(139, 92, 246, 0.22);
     color: #c4b5fd;
+}
+
+body.dark-theme .badge-agendada {
+    background: rgba(148, 163, 184, 0.15);
+    color: #cbd5e1;
+    border: 1px dashed rgba(203, 213, 225, 0.35);
 }
 
 .transaction-investimento {
@@ -3555,6 +3569,10 @@ body.dark-theme .card-value.value-expense {
     border-left-color: #0284c7;
 }
 
+.alert-card.type-entrada {
+    border-left-color: var(--color-income, #10b981);
+}
+
 .alert-card.is-read {
     opacity: 0.65;
     border-left-color: var(--color-text-secondary);
@@ -3585,6 +3603,11 @@ body.dark-theme .card-value.value-expense {
 .alert-card.type-vencimento .alert-card-icon {
     background: rgba(2, 132, 199, 0.12);
     color: #0284c7;
+}
+
+.alert-card.type-entrada .alert-card-icon {
+    background: rgba(16, 185, 129, 0.12);
+    color: var(--color-income, #10b981);
 }
 
 .alert-card.is-read .alert-card-icon {

@@ -731,6 +731,7 @@ class FluxoDinheiroCreate(InputModel):
     natureza_conta: Optional[NaturezaContaInput] = None
     dia_repeticao: Optional[int] = Field(default=None, ge=1, le=31)
     tipo_investimento: Optional[TipoInvestimentoInput] = None
+    efetivada: Optional[bool] = None
 
     @field_validator("tipo_investimento", mode="before")
     @classmethod
@@ -888,6 +889,7 @@ class FluxoDinheiroUpdate(InputModel):
     natureza_conta: Optional[NaturezaContaInput] = None
     dia_repeticao: Optional[int] = Field(default=None, ge=1, le=31)
     tipo_investimento: Optional[TipoInvestimentoInput] = None
+    efetivada: Optional[bool] = None
 
     @field_validator("categoria", mode="before")
     @classmethod
@@ -937,6 +939,7 @@ class FluxoDinheiroResponse(BaseModel):
     natureza_conta: Optional[Literal["fixa", "variavel"]] = None
     dia_repeticao: Optional[int] = None
     tipo_investimento: Optional[str] = None
+    efetivada: bool = True
 
     model_config = ConfigDict(
         from_attributes=True
@@ -1187,7 +1190,7 @@ class AlertaResponse(BaseModel):
     chave: str
     mensagem: str
     lido: bool
-    tipo: Optional[Literal["orcamento", "vencimento"]] = None
+    tipo: Optional[Literal["orcamento", "vencimento", "entrada"]] = None
     titulo: Optional[str] = None
     categoria: Optional[str] = None
     data_referencia: Optional[date] = None

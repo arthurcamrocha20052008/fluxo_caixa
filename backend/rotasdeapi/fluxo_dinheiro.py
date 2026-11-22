@@ -84,6 +84,87 @@ def _variacao(tipo: str, valor: Decimal) -> Decimal:
     return valor if tipo == "entrada" else -valor
 
 
+def sincronizar_movimentacoes_efetivadas(
+    db: Session,
+    usuario_id: int | None = None,
+) -> None:
+    """Sincroniza lançamentos agendados e garante a integridade matemática do saldo:
+    1. Movimentações com data futura que foram indevidamente debitadas/creditadas: estorna o saldo e marca efetivada = False.
+    2. Movimentações com data <= hoje que estavam agendadas (efetivada == False): debita/credita e marca efetivada = True.
+    """
+    hoje = date.today()
+
+    # 1. Movimentos futuros que estavam marcados como efetivados (estorno corretivo)
+    q_desfazer = (
+        db.query(FluxoDinheiro)
+        .join(ContaBancaria, ContaBancaria.id == FluxoDinheiro.conta_bancaria_id)
+        .filter(
+            FluxoDinheiro.data_movimentacao > hoje,
+            FluxoDinheiro.efetivada.is_(True),
+        )
+    )
+    if usuario_id is not None:
+        q_desfazer = q_desfazer.filter(ContaBancaria.usuario_id == usuario_id)
+
+    movs_desfazer = q_desfazer.all()
+    if movs_desfazer:
+        c_ids = {m.conta_bancaria_id for m in movs_desfazer}
+        contas_map = {
+            c.id: c
+            for c in db.query(ContaBancaria)
+            .filter(ContaBancaria.id.in_(c_ids))
+            .with_for_update()
+            .all()
+        }
+        for m in movs_desfazer:
+            conta = contas_map.get(m.conta_bancaria_id)
+            if conta:
+                vl = Decimal(str(m.valor))
+                if m.tipo in ("saida", "investimento") or m.transferencia_direcao == "origem":
+                    conta.valor_conta_atual = Decimal(str(conta.valor_conta_atual)) + vl
+                elif m.tipo == "entrada" or m.transferencia_direcao == "destino":
+                    conta.valor_conta_atual = Decimal(str(conta.valor_conta_atual)) - vl
+                elif m.tipo == "ajuste":
+                    conta.valor_conta_atual = Decimal(str(conta.valor_conta_atual)) - vl
+            m.efetivada = False
+        db.commit()
+
+    # 2. Movimentos agendados cuja data chegou (data_movimentacao <= hoje e efetivada == False)
+    q_efetivar = (
+        db.query(FluxoDinheiro)
+        .join(ContaBancaria, ContaBancaria.id == FluxoDinheiro.conta_bancaria_id)
+        .filter(
+            FluxoDinheiro.data_movimentacao <= hoje,
+            FluxoDinheiro.efetivada.is_(False),
+        )
+    )
+    if usuario_id is not None:
+        q_efetivar = q_efetivar.filter(ContaBancaria.usuario_id == usuario_id)
+
+    movs_efetivar = q_efetivar.all()
+    if movs_efetivar:
+        c_ids = {m.conta_bancaria_id for m in movs_efetivar}
+        contas_map = {
+            c.id: c
+            for c in db.query(ContaBancaria)
+            .filter(ContaBancaria.id.in_(c_ids))
+            .with_for_update()
+            .all()
+        }
+        for m in movs_efetivar:
+            conta = contas_map.get(m.conta_bancaria_id)
+            if conta:
+                vl = Decimal(str(m.valor))
+                if m.tipo in ("saida", "investimento") or m.transferencia_direcao == "origem":
+                    conta.valor_conta_atual = Decimal(str(conta.valor_conta_atual)) - vl
+                elif m.tipo == "entrada" or m.transferencia_direcao == "destino":
+                    conta.valor_conta_atual = Decimal(str(conta.valor_conta_atual)) + vl
+                elif m.tipo == "ajuste":
+                    conta.valor_conta_atual = Decimal(str(conta.valor_conta_atual)) + vl
+            m.efetivada = True
+        db.commit()
+
+
 @router.post(
     "/",
     response_model=FluxoDinheiroResponse,
@@ -105,14 +186,19 @@ def criar_movimentacao(
     contas = _obter_contas_bloqueadas(db, conta_ids, usuario_logado.id)
     valor = Decimal(dados.valor)
 
+    hoje = date.today()
+    eh_futura = dados.data_movimentacao > hoje
+    efetivada = not eh_futura
+
     if dados.tipo == "transferencia":
         id_transferencia = str(uuid4())
         origem_id = dados.conta_bancaria_id
         destino_id = dados.conta_destino_id
-        _validar_e_aplicar_saldos(
-            contas,
-            {origem_id: -valor, destino_id: valor},
-        )
+        if not eh_futura:
+            _validar_e_aplicar_saldos(
+                contas,
+                {origem_id: -valor, destino_id: valor},
+            )
         origem = FluxoDinheiro(
             conta_bancaria_id=origem_id,
             conta_destino_id=destino_id,
@@ -127,6 +213,7 @@ def criar_movimentacao(
             natureza_conta=dados.natureza_conta,
             dia_repeticao=dados.dia_repeticao,
             tipo_investimento=dados.tipo_investimento,
+            efetivada=efetivada,
         )
         destino = FluxoDinheiro(
             conta_bancaria_id=destino_id,
@@ -142,6 +229,7 @@ def criar_movimentacao(
             natureza_conta=dados.natureza_conta,
             dia_repeticao=dados.dia_repeticao,
             tipo_investimento=dados.tipo_investimento,
+            efetivada=efetivada,
         )
         db.add_all([origem, destino])
         db.commit()
@@ -160,8 +248,9 @@ def criar_movimentacao(
             or f"Aporte em {dados.tipo_investimento or 'Investimento'}"
         )
     conta = contas[dados.conta_bancaria_id]
-    variacao = _variacao(tipo_persistido, valor)
-    _validar_e_aplicar_saldos(contas, {conta.id: variacao})
+    if not eh_futura:
+        variacao = _variacao(tipo_persistido, valor)
+        _validar_e_aplicar_saldos(contas, {conta.id: variacao})
     movimentacao = FluxoDinheiro(
         conta_bancaria_id=conta.id,
         descricao=descricao_persistida,
@@ -173,6 +262,7 @@ def criar_movimentacao(
         natureza_conta=dados.natureza_conta,
         dia_repeticao=dados.dia_repeticao,
         tipo_investimento=dados.tipo_investimento,
+        efetivada=efetivada,
     )
     db.add(movimentacao)
     db.commit()
@@ -268,6 +358,7 @@ def listar_movimentacoes(
     db: Session = Depends(get_db),
     usuario_logado: Usuario = Depends(obter_usuario_logado),
 ):
+    sincronizar_movimentacoes_efetivadas(db, usuario_logado.id)
     consulta = _construir_consulta_movimentacoes(
         db=db,
         usuario_id=usuario_logado.id,
@@ -404,18 +495,26 @@ def atualizar_movimentacao(
             ),
         )
 
+    hoje = date.today()
+    era_efetivada = bool(getattr(movimentacao, "efetivada", True))
+    sera_efetivada = dados.data_movimentacao <= hoje
+
     conta_ids = {movimentacao.conta_bancaria_id, dados.conta_bancaria_id}
     contas = _obter_contas_bloqueadas(db, conta_ids, usuario_logado.id)
     variacoes: dict[int, Decimal] = {}
-    variacoes[movimentacao.conta_bancaria_id] = -_variacao(
-        movimentacao.tipo,
-        Decimal(str(movimentacao.valor)),
-    )
-    variacoes[dados.conta_bancaria_id] = (
-        variacoes.get(dados.conta_bancaria_id, Decimal("0.00"))
-        + _variacao(dados.tipo, Decimal(dados.valor))
-    )
-    _validar_e_aplicar_saldos(contas, variacoes)
+
+    if era_efetivada:
+        variacoes[movimentacao.conta_bancaria_id] = -_variacao(
+            movimentacao.tipo,
+            Decimal(str(movimentacao.valor)),
+        )
+    if sera_efetivada:
+        variacoes[dados.conta_bancaria_id] = (
+            variacoes.get(dados.conta_bancaria_id, Decimal("0.00"))
+            + _variacao(dados.tipo, Decimal(dados.valor))
+        )
+    if any(v != Decimal("0.00") for v in variacoes.values()):
+        _validar_e_aplicar_saldos(contas, variacoes)
 
     movimentacao.conta_bancaria_id = dados.conta_bancaria_id
     movimentacao.descricao = dados.descricao
@@ -424,6 +523,7 @@ def atualizar_movimentacao(
     movimentacao.categoria = dados.categoria
     movimentacao.data_movimentacao = dados.data_movimentacao
     movimentacao.observacao = dados.observacao
+    movimentacao.efetivada = sera_efetivada
     if dados.natureza_conta is not None:
         movimentacao.natureza_conta = dados.natureza_conta
         movimentacao.dia_repeticao = dados.dia_repeticao
@@ -445,6 +545,7 @@ def excluir_movimentacao(
         movimentacao_id,
         usuario_logado.id,
     )
+    era_efetivada = bool(getattr(movimentacao, "efetivada", True))
     if movimentacao.tipo == "transferencia":
         if not movimentacao.transferencia_id:
             raise HTTPException(
@@ -472,37 +573,40 @@ def excluir_movimentacao(
                 detail="O registro da transferência está inconsistente.",
             )
 
-        conta_ids = {item.conta_bancaria_id for item in par}
-        contas = _obter_contas_bloqueadas(db, conta_ids, usuario_logado.id)
-        variacoes: dict[int, Decimal] = {}
-        for item in par:
-            sinal = (
-                Decimal("1.00")
-                if item.transferencia_direcao == "origem"
-                else Decimal("-1.00")
-            )
-            variacoes[item.conta_bancaria_id] = (
-                variacoes.get(item.conta_bancaria_id, Decimal("0.00"))
-                + sinal * Decimal(str(item.valor))
-            )
-        _validar_e_aplicar_saldos(contas, variacoes)
+        if era_efetivada:
+            conta_ids = {item.conta_bancaria_id for item in par}
+            contas = _obter_contas_bloqueadas(db, conta_ids, usuario_logado.id)
+            variacoes: dict[int, Decimal] = {}
+            for item in par:
+                sinal = (
+                    Decimal("1.00")
+                    if item.transferencia_direcao == "origem"
+                    else Decimal("-1.00")
+                )
+                variacoes[item.conta_bancaria_id] = (
+                    variacoes.get(item.conta_bancaria_id, Decimal("0.00"))
+                    + sinal * Decimal(str(item.valor))
+                )
+            if any(v != Decimal("0.00") for v in variacoes.values()):
+                _validar_e_aplicar_saldos(contas, variacoes)
         for item in par:
             db.delete(item)
     else:
-        contas = _obter_contas_bloqueadas(
-            db,
-            {movimentacao.conta_bancaria_id},
-            usuario_logado.id,
-        )
-        _validar_e_aplicar_saldos(
-            contas,
-            {
-                movimentacao.conta_bancaria_id: -_variacao(
-                    movimentacao.tipo,
-                    Decimal(str(movimentacao.valor)),
-                )
-            },
-        )
+        if era_efetivada:
+            contas = _obter_contas_bloqueadas(
+                db,
+                {movimentacao.conta_bancaria_id},
+                usuario_logado.id,
+            )
+            _validar_e_aplicar_saldos(
+                contas,
+                {
+                    movimentacao.conta_bancaria_id: -_variacao(
+                        movimentacao.tipo,
+                        Decimal(str(movimentacao.valor)),
+                    )
+                },
+            )
         db.delete(movimentacao)
 
     db.commit()
