@@ -376,15 +376,127 @@ document.addEventListener("DOMContentLoaded", () => {
     configurarConfiguracoes();
     inicializarSelectsArredondados();
     configurarBotaoSair();
+    inicializarModoPrivacidade();
     inicializarSimuladorInvestimentos();
     carregarDashboard();
     inicializarOrcamentosAlertas();
 });
 
+/* =========================================================
+   MODAL GLOBAL DE CONFIRMAÇÃO REUTILIZÁVEL
+========================================================= */
+function confirmarAcao({
+    titulo = "Confirmar ação",
+    mensagem = "Tem certeza que deseja continuar?",
+    textoConfirmar = "Confirmar",
+    textoCancelar = "Cancelar",
+    tipo = "danger"
+} = {}) {
+    return new Promise((resolve) => {
+        const dialog = document.querySelector("#app-confirm-dialog");
+        if (!(dialog instanceof HTMLDialogElement)) {
+            resolve(window.confirm(mensagem));
+            return;
+        }
+
+        const elTitulo = dialog.querySelector("#confirm-dialog-title");
+        const elMensagem = dialog.querySelector("#confirm-dialog-message");
+        const btnConfirmar = dialog.querySelector("#confirm-dialog-confirm-btn");
+        const btnCancelar = dialog.querySelector("#confirm-dialog-cancel-btn");
+        const btnFechar = dialog.querySelector("#confirm-dialog-close-btn");
+        const icone = dialog.querySelector("#confirm-dialog-icon");
+
+        if (elTitulo) elTitulo.textContent = titulo;
+        if (elMensagem) elMensagem.textContent = mensagem;
+
+        if (btnConfirmar) {
+            btnConfirmar.textContent = textoConfirmar;
+            btnConfirmar.className = tipo === "danger" ? "button-danger" : "button-primary";
+        }
+        if (btnCancelar) btnCancelar.textContent = textoCancelar;
+        if (icone) {
+            icone.classList.toggle("icon-primary", tipo !== "danger");
+        }
+
+        let finalizado = false;
+        const encerrar = (resposta) => {
+            if (finalizado) return;
+            finalizado = true;
+            limpar();
+            if (dialog.open) dialog.close();
+            aplicarScrollLock(false);
+            resolve(resposta);
+        };
+
+        const onConfirmar = () => encerrar(true);
+        const onCancelar = () => encerrar(false);
+        const onBackdrop = (ev) => {
+            if (ev.target === dialog) encerrar(false);
+        };
+        const onEscape = (ev) => {
+            if (ev.key === "Escape") {
+                ev.preventDefault();
+                encerrar(false);
+            }
+        };
+
+        const limpar = () => {
+            btnConfirmar?.removeEventListener("click", onConfirmar);
+            btnCancelar?.removeEventListener("click", onCancelar);
+            btnFechar?.removeEventListener("click", onCancelar);
+            dialog.removeEventListener("click", onBackdrop);
+            dialog.removeEventListener("keydown", onEscape);
+        };
+
+        btnConfirmar?.addEventListener("click", onConfirmar);
+        btnCancelar?.addEventListener("click", onCancelar);
+        btnFechar?.addEventListener("click", onCancelar);
+        dialog.addEventListener("click", onBackdrop);
+        dialog.addEventListener("keydown", onEscape);
+
+        aplicarScrollLock(true);
+        dialog.showModal();
+        btnConfirmar?.focus();
+    });
+}
+
+/* =========================================================
+   MODO PRIVACIDADE (OCULTAR VALORES FINANCEIROS)
+========================================================= */
+function inicializarModoPrivacidade() {
+    const btnPrivacidade = document.querySelector("#toggle-privacy-mode");
+    const CHAVE_STORAGE = "fluxo_caixa_privacidade";
+    const salvo = localStorage.getItem(CHAVE_STORAGE) === "true";
+
+    const aplicarVisual = (ativo) => {
+        document.body.classList.toggle("privacy-mode", ativo);
+        if (btnPrivacidade) {
+            btnPrivacidade.setAttribute("aria-pressed", String(ativo));
+            btnPrivacidade.title = ativo ? "Mostrar valores financeiros" : "Ocultar valores financeiros";
+            const iconOpen = btnPrivacidade.querySelector(".privacy-icon-open");
+            const iconClosed = btnPrivacidade.querySelector(".privacy-icon-closed");
+            if (iconOpen && iconClosed) {
+                iconOpen.style.display = ativo ? "none" : "block";
+                iconClosed.style.display = ativo ? "block" : "none";
+            }
+        }
+    };
+
+    aplicarVisual(salvo);
+
+    btnPrivacidade?.addEventListener("click", () => {
+        const proximo = !document.body.classList.contains("privacy-mode");
+        localStorage.setItem(CHAVE_STORAGE, String(proximo));
+        aplicarVisual(proximo);
+        mostrarToast(
+            proximo ? "Modo privacidade ativado: valores ocultos." : "Modo privacidade desativado: valores visíveis.",
+            "info"
+        );
+    });
+}
+
 function configurarBotaoSair() {
     const botao = document.querySelector("#logout");
-    const dialogoSair = document.querySelector("#logout-confirm-dialog");
-    const botaoConfirmarSair = document.querySelector("#logout-confirm-btn");
     if (!botao) return;
 
     const executarLogout = () => {
@@ -393,15 +505,17 @@ function configurarBotaoSair() {
         window.location.replace("login.html");
     };
 
-    botao.addEventListener("click", () => {
-        if (dialogoSair instanceof HTMLDialogElement) {
-            dialogoSair.showModal();
-        } else if (window.confirm("Deseja realmente sair da sua conta?")) {
+    botao.addEventListener("click", async () => {
+        const confirmado = await confirmarAcao({
+            titulo: "Sair da conta",
+            mensagem: "Deseja realmente encerrar sua sessão no Fluxo de Caixa?",
+            textoConfirmar: "Sim, sair",
+            tipo: "danger"
+        });
+        if (confirmado) {
             executarLogout();
         }
     });
-
-    botaoConfirmarSair?.addEventListener("click", executarLogout);
 }
 
 function atualizarData() {
@@ -963,7 +1077,13 @@ async function salvarConta(event) {
 }
 
 async function excluirConta(conta) {
-    if (!window.confirm(`Deseja realmente excluir a conta "${conta.nome_banco}"?`)) {
+    const confirmado = await confirmarAcao({
+        titulo: "Excluir conta bancária",
+        mensagem: `Deseja realmente excluir a conta "${conta.nome_banco}"? Todas as movimentações associadas a ela poderão ser afetadas.`,
+        textoConfirmar: "Sim, excluir",
+        tipo: "danger"
+    });
+    if (!confirmado) {
         return;
     }
 
@@ -1131,7 +1251,13 @@ async function salvarInvestimento(event) {
 }
 
 async function excluirMovimentacao(movimento) {
-    if (!window.confirm(`Excluir a movimentação "${movimento.descricao}"?`)) {
+    const confirmado = await confirmarAcao({
+        titulo: "Excluir movimentação",
+        mensagem: `Deseja realmente excluir a movimentação "${movimento.descricao}"?`,
+        textoConfirmar: "Sim, excluir",
+        tipo: "danger"
+    });
+    if (!confirmado) {
         return;
     }
 
@@ -1187,7 +1313,13 @@ async function salvarMeta(event) {
 }
 
 async function excluirMeta(meta) {
-    if (!window.confirm(`Deseja excluir a meta "${meta.nome}"?`)) {
+    const confirmado = await confirmarAcao({
+        titulo: "Excluir meta financeira",
+        mensagem: `Deseja realmente excluir a meta "${meta.nome}"?`,
+        textoConfirmar: "Sim, excluir",
+        tipo: "danger"
+    });
+    if (!confirmado) {
         return;
     }
 
@@ -1204,7 +1336,13 @@ async function excluirMeta(meta) {
 }
 
 async function excluirCalculoSalvo(calculo) {
-    if (!window.confirm("Deseja excluir este cálculo consolidado do histórico?")) {
+    const confirmado = await confirmarAcao({
+        titulo: "Excluir cálculo consolidado",
+        mensagem: "Deseja realmente excluir este cálculo consolidado do histórico?",
+        textoConfirmar: "Sim, excluir",
+        tipo: "danger"
+    });
+    if (!confirmado) {
         return;
     }
 
@@ -2904,17 +3042,30 @@ function configurarConfiguracoes() {
     const btnAbrirExclusao = document.querySelector("#open-delete-account-dialog");
     const dialogoExclusao = document.querySelector("#delete-account-dialog");
     const formExclusao = document.querySelector("#delete-account-form");
+    const inputConfirmacaoExclusao = document.querySelector("#delete-account-confirmation");
+    const btnSubmitExclusao = document.querySelector("#delete-account-submit-btn");
+
+    inputConfirmacaoExclusao?.addEventListener("input", () => {
+        const digitado = (inputConfirmacaoExclusao.value || "").trim().toLowerCase();
+        if (btnSubmitExclusao) {
+            btnSubmitExclusao.disabled = (digitado !== "excluir minha conta");
+        }
+    });
 
     btnAbrirExclusao?.addEventListener("click", () => {
         formExclusao?.reset();
+        if (btnSubmitExclusao) btnSubmitExclusao.disabled = true;
         limparMensagem("#delete-account-message");
         if (dialogoExclusao instanceof HTMLDialogElement) {
             aplicarScrollLock(true);
             dialogoExclusao.showModal();
+            setTimeout(() => inputConfirmacaoExclusao?.focus(), 50);
         }
     });
 
     dialogoExclusao?.addEventListener("close", () => {
+        formExclusao?.reset();
+        if (btnSubmitExclusao) btnSubmitExclusao.disabled = true;
         limparMensagem("#delete-account-message");
         aplicarScrollLock(false);
     });
@@ -3028,17 +3179,17 @@ async function confirmarExclusaoConta(event) {
     event.preventDefault();
     limparMensagem("#delete-account-message");
 
-    const inputSenha = document.querySelector("#delete-account-password");
+    const inputConfirmacao = document.querySelector("#delete-account-confirmation");
     const btnExcluir = document.querySelector("#delete-account-submit-btn");
-    const senhaAtual = inputSenha?.value || "";
+    const texto = (inputConfirmacao?.value || "").trim().toLowerCase();
 
-    if (!senhaAtual) {
+    if (texto !== "excluir minha conta") {
         definirMensagem(
             "#delete-account-message",
-            "Digite sua senha atual para confirmar a exclusão da conta.",
+            'Digite exatamente "excluir minha conta" para confirmar a exclusão.',
             "error"
         );
-        inputSenha?.focus();
+        inputConfirmacao?.focus();
         return;
     }
 
@@ -3053,13 +3204,14 @@ async function confirmarExclusaoConta(event) {
     );
 
     try {
-        await api.delete("/usuarios/me", { senha_atual: senhaAtual });
+        await api.delete("/usuarios/me", { confirmacao: "excluir minha conta" });
         api.clearToken();
         localStorage.removeItem("fluxo_caixa_tema");
+        localStorage.removeItem("fluxo_caixa_privacidade");
+        sessionStorage.removeItem("fluxo_caixa_nome_usuario");
         window.location.replace("login.html");
     } catch (error) {
         definirMensagem("#delete-account-message", error.message, "error");
-    } finally {
         if (btnExcluir) {
             btnExcluir.disabled = false;
             btnExcluir.classList.remove("is-loading");
@@ -3390,7 +3542,13 @@ async function atualizarOrcamentos() {
             btnExcluir.className = "button-small button-danger";
             btnExcluir.textContent = "Excluir";
             btnExcluir.addEventListener("click", async () => {
-                if (!window.confirm(`Deseja excluir o orçamento de ${formatarCategoria(o.categoria)}?`)) return;
+                const confirmado = await confirmarAcao({
+                    titulo: "Excluir orçamento",
+                    mensagem: `Deseja realmente excluir o orçamento de ${formatarCategoria(o.categoria)}?`,
+                    textoConfirmar: "Sim, excluir",
+                    tipo: "danger"
+                });
+                if (!confirmado) return;
                 try {
                     await api.delete(`/orcamentos/${o.id}`);
                     mostrarToast("Orçamento excluído com sucesso!");

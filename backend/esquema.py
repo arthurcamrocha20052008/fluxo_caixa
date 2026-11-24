@@ -595,7 +595,14 @@ class UsuarioUpdateMe(InputModel):
 
 
 class ExcluirContaRequest(InputModel):
-    senha_atual: str = Field(min_length=1, max_length=100)
+    confirmacao: Optional[str] = Field(default=None, max_length=100)
+    senha_atual: Optional[str] = Field(default=None, max_length=100)
+
+    @model_validator(mode="after")
+    def validar_exclusao(self):
+        if not self.confirmacao and not self.senha_atual:
+            raise ValueError("Informe a confirmação ou a senha atual para prosseguir.")
+        return self
 
 
 class UsuarioResponse(BaseModel):

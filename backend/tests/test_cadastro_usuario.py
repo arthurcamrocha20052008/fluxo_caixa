@@ -366,6 +366,35 @@ def test_atualizar_dados_cadastrais_e_zona_de_perigo_usuarios_me(
     assert r_del_ok.status_code == 200, r_del_ok.text
     assert db.query(Usuario).filter_by(email=novo_email).first() is None
 
+def test_excluir_minha_conta_com_frase_chave(client: TestClient, db: Session) -> None:
+    from uuid import uuid4
+    from models import Usuario
+    uid = uuid4().hex[:8]
+    email = f"del-frase-{uid}@teste.com"
+    senha = "SenhaForte123!"
+    cad = client.post(
+        "/usuarios/",
+        json={
+            "nome_completo": "Usuario Exclusao Frase",
+            "email": email,
+            "senha": senha,
+        },
+    )
+    assert cad.status_code == 201
+    login = client.post("/login", data={"username": email, "password": senha})
+    token = login.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # Frase incorreta falha
+    r_err = client.request("DELETE", "/usuarios/me", headers=headers, json={"confirmacao": "frase errada"})
+    assert r_err.status_code == 400
+
+    # Frase correta exclui com sucesso sem necessidade de senha
+    r_ok = client.request("DELETE", "/usuarios/me", headers=headers, json={"confirmacao": "excluir minha conta"})
+    assert r_ok.status_code == 200
+    assert db.query(Usuario).filter_by(email=email).first() is None
+
+
 
 def test_saudacao_dinamica_dashboard_frontend() -> None:
     from pathlib import Path

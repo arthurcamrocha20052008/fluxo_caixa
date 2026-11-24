@@ -18,11 +18,11 @@
         }
     </script>
 
-    <link rel="stylesheet" href="css/style.css?v=24">
+    <link rel="stylesheet" href="css/style.css?v=25">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>
-    <script src="js/api.js?v=24" defer></script>
-    <script src="js/legal.js?v=24" defer></script>
-    <script src="js/dashboard.js?v=24" defer></script>
+    <script src="js/api.js?v=25" defer></script>
+    <script src="js/legal.js?v=25" defer></script>
+    <script src="js/dashboard.js?v=25" defer></script>
 </head>
 
 <body>
@@ -157,6 +157,25 @@
                     <span class="date-label" id="current-date">
                         Carregando data...
                     </span>
+
+                    <button
+                        type="button"
+                        class="button-privacy"
+                        id="toggle-privacy-mode"
+                        aria-label="Ocultar valores financeiros"
+                        title="Ocultar ou mostrar valores financeiros"
+                        aria-pressed="false"
+                    >
+                        <svg class="privacy-icon privacy-icon-open" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                        <svg class="privacy-icon privacy-icon-closed" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: none;">
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                            <line x1="1" y1="1" x2="23" y2="23"></line>
+                        </svg>
+                        <span class="privacy-label">Privacidade</span>
+                    </button>
 
                     <button
                         type="button"
@@ -1809,7 +1828,7 @@
                 <div class="dialog-header">
                     <div>
                         <h2 id="delete-account-title" class="danger-zone-title">Excluir conta permanentemente</h2>
-                        <p>Esta ação é irreversível. Digite sua senha atual para confirmar a exclusão definitiva de todos os seus dados.</p>
+                        <p>Esta ação é irreversível. Digite "excluir minha conta" para confirmar a exclusão definitiva de todos os seus dados.</p>
                     </div>
                     <button
                         type="button"
@@ -1822,33 +1841,18 @@
                 </div>
 
                 <div class="form-field">
-                    <label for="delete-account-password">Confirme sua senha atual</label>
-                    <div class="password-input-wrapper">
-                        <input
-                            id="delete-account-password"
-                            name="senha_atual"
-                            type="password"
-                            autocomplete="current-password"
-                            required
-                        >
-                        <button
-                            type="button"
-                            class="password-toggle-btn"
-                            data-toggle-password="delete-account-password"
-                            aria-label="Mostrar senha"
-                            aria-pressed="false"
-                            title="Mostrar ou ocultar senha"
-                        >
-                            <svg class="icon-eye icon-eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                <circle cx="12" cy="12" r="3"></circle>
-                            </svg>
-                            <svg class="icon-eye icon-eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                                <line x1="1" y1="1" x2="23" y2="23"></line>
-                            </svg>
-                        </button>
-                    </div>
+                    <label for="delete-account-confirmation">Confirmação de segurança</label>
+                    <input
+                        id="delete-account-confirmation"
+                        name="confirmacao"
+                        type="text"
+                        class="input-rounded"
+                        placeholder="excluir minha conta"
+                        autocomplete="off"
+                        spellcheck="false"
+                        required
+                    >
+                    <small class="field-help">Digite exatamente <strong>excluir minha conta</strong> para liberar o botão de exclusão.</small>
                 </div>
 
                 <p class="form-message" id="delete-account-message" role="status" aria-live="polite"></p>
@@ -1861,11 +1865,57 @@
                     >
                         Cancelar
                     </button>
-                    <button type="submit" class="button-danger" id="delete-account-submit-btn">
+                    <button type="submit" class="button-danger" id="delete-account-submit-btn" disabled>
                         Sim, excluir minha conta
                     </button>
                 </div>
             </form>
+        </dialog>
+
+        <!-- Modal Global: Confirmação Customizada -->
+        <dialog class="form-dialog confirm-dialog" id="app-confirm-dialog" aria-labelledby="confirm-dialog-title" aria-describedby="confirm-dialog-message">
+            <div class="dialog-form">
+                <div class="dialog-header">
+                    <div class="confirm-dialog-title-wrap">
+                        <div class="confirm-dialog-icon" id="confirm-dialog-icon" aria-hidden="true">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 id="confirm-dialog-title">Confirmar ação</h2>
+                            <p id="confirm-dialog-message">Tem certeza que deseja continuar?</p>
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        class="dialog-close"
+                        id="confirm-dialog-close-btn"
+                        aria-label="Fechar"
+                    >
+                        ×
+                    </button>
+                </div>
+
+                <div class="dialog-actions">
+                    <button
+                        type="button"
+                        class="button-secondary"
+                        id="confirm-dialog-cancel-btn"
+                    >
+                        Cancelar
+                    </button>
+                    <button
+                        type="button"
+                        class="button-danger"
+                        id="confirm-dialog-confirm-btn"
+                    >
+                        Confirmar
+                    </button>
+                </div>
+            </div>
         </dialog>
 
         <!-- Modal: Confirmação para Sair da Conta -->

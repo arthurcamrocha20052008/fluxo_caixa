@@ -1247,10 +1247,22 @@ def excluir_minha_conta(
     db: Session = Depends(get_db),
     usuario: Usuario = Depends(obter_usuario_logado),
 ):
-    if not verificar_senha(dados.senha_atual, usuario.senha_hash):
+    if dados.confirmacao is not None:
+        if dados.confirmacao.strip().casefold() != "excluir minha conta":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Digite 'excluir minha conta' para confirmar a exclusão.",
+            )
+    elif dados.senha_atual:
+        if not verificar_senha(dados.senha_atual, usuario.senha_hash):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A senha atual informada está incorreta.",
+            )
+    else:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="A senha atual informada está incorreta.",
+            detail="Informe a confirmação necessária para excluir sua conta.",
         )
 
     db.delete(usuario)

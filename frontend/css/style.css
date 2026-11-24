@@ -5535,3 +5535,137 @@ body.google-auth-page select option {
     border-color: #334155;
     color: #f1f5f9;
 }
+
+/* =========================================================
+   MODO PRIVACIDADE (OCULTAÇÃO DE VALORES FINANCEIROS)
+========================================================= */
+.button-privacy {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    background: var(--color-surface, #ffffff);
+    color: var(--color-text, #0f172a);
+    border: 1px solid var(--color-border, #e2e8f0);
+    transition: all 0.15s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.button-privacy:hover {
+    background: var(--color-surface-hover, #f1f5f9);
+    border-color: var(--color-border-hover, #cbd5e1);
+}
+
+.button-privacy[aria-pressed="true"] {
+    background: rgba(14, 165, 233, 0.1);
+    border-color: #0ea5e9;
+    color: #0284c7;
+}
+
+body.dark-theme .button-privacy {
+    background: #1e293b;
+    color: #f1f5f9;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .button-privacy:hover {
+    background: #334155;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+body.dark-theme .button-privacy[aria-pressed="true"] {
+    background: rgba(14, 165, 233, 0.18);
+    border-color: #38bdf8;
+    color: #38bdf8;
+}
+
+body.privacy-mode .card-value,
+body.privacy-mode .topbar-metric-pill strong,
+body.privacy-mode .invested-inline-badge strong,
+body.privacy-mode #dashboard-invested-indicator,
+body.privacy-mode td.align-right,
+body.privacy-mode .category-stat,
+body.privacy-mode .budget-card-values,
+body.privacy-mode .budget-card-metrics strong,
+body.privacy-mode .goal-amount,
+body.privacy-mode .account-card-balance,
+body.privacy-mode .account-balance,
+body.privacy-mode .simulador-kpi-value,
+body.privacy-mode .simulador-card-value,
+body.privacy-mode .stat-value,
+body.privacy-mode .metric-value,
+body.privacy-mode .statement-amount,
+body.privacy-mode [data-privacy-amount] {
+    filter: blur(7px) !important;
+    user-select: none !important;
+    pointer-events: none;
+    transition: filter 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* =========================================================
+   MODAL GLOBAL DE CONFIRMAÇÃO CUSTOMIZADO
+========================================================= */
+.confirm-dialog {
+    max-width: 440px !important;
+    width: 90% !important;
+    border-radius: 12px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border: 1px solid var(--color-border, #334155) !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.2) !important;
+}
+
+.confirm-dialog-title-wrap {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.confirm-dialog-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: rgba(220, 38, 38, 0.12);
+    color: var(--color-expense, #ef4444);
+}
+
+.confirm-dialog-icon.icon-primary {
+    background: rgba(14, 165, 233, 0.12);
+    color: #0284c7;
+}
+
+.confirm-dialog .dialog-header {
+    border-bottom: 1px solid var(--color-border, #334155);
+    padding: 16px 20px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.confirm-dialog .dialog-header h2 {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+}
+
+.confirm-dialog .dialog-header p {
+    font-size: 13px;
+    color: var(--color-text-secondary, #94a3b8);
+    margin: 0;
+    line-height: 1.45;
+}
+
+.confirm-dialog .dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 20px;
+    background: var(--color-surface, #1e293b);
+}
